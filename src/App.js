@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 
 import FolderView from "./components/folderview.jsx";
+import IntroText from "./Intro.jsx";
 
 //import "./App.css";
 
@@ -63,7 +64,12 @@ function App() {
       <Container>
         <Box sx={{ my: 2 }}>
           {/* MAIN CONTENT */}
-          <FolderView folders={startFolder.folders} />
+          {startFolder.folders.length > 0 ? (
+            <FolderView folders={startFolder.folders} />
+          ) : (
+            <IntroText></IntroText>
+          )}
+
           {/* MAIN CONTENT */}
         </Box>
       </Container>
