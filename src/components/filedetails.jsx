@@ -16,6 +16,7 @@ import React from "react";
 function formatType(t) {
   if (t === "snafmt") return "SNA";
   if (t === "z80fmt") return "Z80";
+  if (t === "tapfmt") return "TAP";
   return "?";
 }
 

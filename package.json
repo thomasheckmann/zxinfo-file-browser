@@ -4,9 +4,13 @@
   "description": "ZX Spectrum emulator files organizer powered by the web",
   "author": "thomas.kolbeck@gmail.com",
   "main": "public/electron.js",
+  "private": true,
   "build": {
     "appId": "zxinfo.filemanager.app"
   },
+  "workspaces": [
+    "src/*"
+  ],
   "homepage": "./",
   "dependencies": {
     "@emotion/react": "^11.10.4",

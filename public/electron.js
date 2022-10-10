@@ -17,6 +17,7 @@ const Jimp = require("jimp");
 const { GifFrame, GifUtil, GifCodec } = require("gifwrap");
 const snafmt = require("./main/utilities/sna_format");
 const z80fmt = require("./main/utilities/z80_format");
+const tapfmt = require("./main/utilities/tap_format");
 const log = require("electron-log");
 
 log.transports.console.level = "debug";
@@ -39,7 +40,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
     height: 800,
-    title: 'ZXInfo - file manager',
+    title: "ZXInfo - file manager",
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
@@ -73,7 +74,7 @@ app.whenReady().then(() => {
   });
 });
 
-const supportedExts = [".sna", ".z80"];
+const supportedExts = [".sna", ".z80", ".tap"];
 
 /**
  *
@@ -123,9 +124,13 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
 
     var result = [];
 
+    let totalFiles = 0;
     files.forEach((value, key) => {
       result.push(key);
+      totalFiles += value;
     });
+
+    mylog.debug(`Total files found: ${totalFiles}`);
     return result;
   }
 });
@@ -154,6 +159,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
     }
   });
 
+  mylog.debug(`total files: ${filesInDir}`);
   return result.sort();
 });
 
@@ -358,6 +364,9 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".z80") {
     result.type = "z80fmt";
     obj = z80fmt.readZ80(filename);
+  } else if (extension === ".tap") {
+    result.type = "tapfmt";
+    obj = tapfmt.readTAP(filename);
   } else {
     obj = { version: null, type: null, error: "Unknown file format" };
     result.type = null;
@@ -386,6 +395,8 @@ ipcMain.handle("load-file", async (event, arg) => {
         result.scr = res;
       }
     });
+  } else {
+    result.scr = "https://zxinfo.dk/media/images/placeholder.png";
   }
 
   return result;

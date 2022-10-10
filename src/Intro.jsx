@@ -77,8 +77,9 @@ class IntroText extends React.Component {
                 <li>Browse by ....</li>
               </ul>
               <Typography variant="body1">
-                Start scanning now ...
+                Start scanning now ... 
                 <Button variant="contained">Open Folder</Button>
+
               </Typography>
             </Box>
           </Grid>

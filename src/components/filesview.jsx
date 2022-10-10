@@ -10,12 +10,13 @@ import FileDetails from "./filedetails.jsx";
 class FilesView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { data: [] };
+    this.state = { data: [], isLoading: true };
   }
 
   componentDidMount() {
     window.electronAPI.scanFolder(this.props.foldername).then((res) => {
       this.setState({ data: res });
+      this.setState({ isLoading: false });
     });
   }
 
