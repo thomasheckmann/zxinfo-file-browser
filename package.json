@@ -1,0 +1,69 @@
+{
+  "name": "zxinfo-file-manager",
+  "version": "1.0.0",
+  "description": "ZX Spectrum emulator files organizer powered by the web",
+  "author": "thomas.kolbeck@gmail.com",
+  "main": "public/electron.js",
+  "build": {
+    "appId": "zxinfo.filemanager.app"
+  },
+  "homepage": "./",
+  "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/icons-material": "^5.10.6",
+    "@mui/material": "^5.10.6",
+    "@mui/styled-engine-sc": "^5.10.6",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.1.2",
+    "cross-env": "^7.0.3",
+    "crypto": "^1.0.1",
+    "electron-is-dev": "^2.0.0",
+    "electron-log": "^4.4.8",
+    "fs": "^0.0.1-security",
+    "gifwrap": "^0.10.1",
+    "jimp": "^0.16.2",
+    "path": "^0.12.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-render-if-visible": "^2.1.1",
+    "react-scripts": "5.0.1",
+    "styled-components": "^5.3.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "react-test": "react-scripts test",
+    "react-eject": "react-scripts eject",
+    "electron-build": "electron-builder",
+    "build": "npm run react-build && npm run electron-build",
+    "start": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://localhost:3000 && electron .'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^7.4.0",
+    "electron": "^20.2.0",
+    "electron-builder": "^23.3.3",
+    "wait-on": "^6.0.1"
+  }
+}
