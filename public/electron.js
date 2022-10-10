@@ -37,8 +37,9 @@ function createWindow() {
 
   mylog.debug("creating window");
   const win = new BrowserWindow({
-    width: 1280,
-    height: 768,
+    width: 1400,
+    height: 800,
+    title: 'ZXInfo - file manager',
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution

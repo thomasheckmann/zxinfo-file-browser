@@ -60,7 +60,6 @@ function App() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Toolbar />
       <Container>
         <Box sx={{ my: 2 }}>
           {/* MAIN CONTENT */}

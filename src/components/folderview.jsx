@@ -1,5 +1,5 @@
 import React from "react";
-import { Drawer } from "@mui/material";
+import { Drawer, Toolbar } from "@mui/material";
 
 import FilesView from "./filesview.jsx";
 
@@ -23,6 +23,7 @@ class FolderView extends React.Component {
 
     return (
       <React.Fragment>
+        <Toolbar />
         <Drawer
           anchor="right"
           open={this.state.drawer}
