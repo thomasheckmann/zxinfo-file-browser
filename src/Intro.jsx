@@ -3,7 +3,7 @@ class IntroText extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <b>NO FILES</b> start scanning files by clicking the "Open Folder" icon... and watch!
+        Welcome, <b>NO FILES</b> start scanning files by clicking the "Open Folder" icon... and watch!
       </React.Fragment>
     );
   }
