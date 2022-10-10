@@ -15,8 +15,8 @@ const crypto = require("crypto");
 const axios = require("axios");
 const Jimp = require("jimp");
 const { GifFrame, GifUtil, GifCodec } = require("gifwrap");
-const snafmt = require("../src/background/utilities/sna_format");
-const z80fmt = require("../src/background/utilities/z80_format");
+const snafmt = require("./main/utilities/sna_format");
+const z80fmt = require("./main/utilities/z80_format");
 const log = require("electron-log");
 
 log.transports.console.level = "debug";
