@@ -23,7 +23,6 @@ class FolderView extends React.Component {
 
     return (
       <React.Fragment>
-        <Toolbar />
         <Drawer
           anchor="right"
           open={this.state.drawer}

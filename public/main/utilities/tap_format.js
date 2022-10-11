@@ -65,7 +65,7 @@ function createHeader(data) {
         break;
       default:
         dataBlock.type = null;
-        dataBlock.error = "Invalid: " + headerBlock[0];
+        dataBlock.error = "Invalid headertype (0, 1, 2, 3): " + headerBlock[0];
         break;
     }
   } else {
@@ -143,8 +143,6 @@ function readTAP(filename) {
     }
   }
 
-
-  // snapshot.scrdata = snapshot.data.subarray(0, 6912);
   return snapshot;
 }
 

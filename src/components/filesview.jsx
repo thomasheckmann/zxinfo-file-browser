@@ -6,6 +6,8 @@ import Divider from "@mui/material/Divider";
 import RenderIfVisible from "react-render-if-visible";
 
 import FileDetails from "./filedetails.jsx";
+import { Toolbar, Typography } from "@mui/material";
+import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 
 class FilesView extends React.Component {
   constructor(props) {
@@ -23,8 +25,11 @@ class FilesView extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Box sx={{ flexGrow: 1 }}>
-          <h3 align="left">{this.props.foldername}</h3>
+        <Box sx={{ flexGrow: 1, my: 2 }}>
+          <Box sx={{ display: 'flex'}}>
+            <FolderTwoToneIcon />
+            <Typography variant="button">{this.props.foldername}</Typography>
+          </Box>
           <Divider variant="middle" />
           <Grid container spacing={4}>
             {this.state.data.map((file) => (

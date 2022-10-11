@@ -130,8 +130,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
       totalFiles += value;
     });
 
-    mylog.debug(`Total files found: ${totalFiles}`);
-    return result;
+    return {root: filePaths[0], folders: result, total: totalFiles};
   }
 });
 
@@ -374,12 +373,12 @@ ipcMain.handle("load-file", async (event, arg) => {
     mylog.debug(
       `FILE INFO: ${file}, extension: ${extension}, dir: ${directory}`
     );
-    result.scr = "https://zxinfo.dk/media/images/placeholder.png";
+    result.scr = "./images/no_image.png";
   }
 
   if (obj.error) {
     result.error = obj.error;
-    result.scr = "https://zxinfo.dk/media/images/placeholder.png";
+    result.scr = "./images/no_image.png";
     return result;
   }
 
@@ -396,7 +395,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       }
     });
   } else {
-    result.scr = "https://zxinfo.dk/media/images/placeholder.png";
+    result.scr = "./images/no_image.png";
   }
 
   return result;

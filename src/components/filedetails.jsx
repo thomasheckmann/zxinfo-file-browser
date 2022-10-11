@@ -34,7 +34,7 @@ class FileDetails extends React.Component {
       zxdbID: null,
       zxdbTitle: null,
       data: [],
-      scr: "https://zxinfo.dk/media/images/placeholder.png",
+      scr: "./images/no_image.png",
       error: null,
     };
   }

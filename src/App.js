@@ -35,7 +35,10 @@ const theme = createTheme({
 });
 
 function App() {
-  const [startFolder, setStartFolder] = React.useState({ folders: [] });
+  const [startFolder, setStartFolder] = React.useState({
+    folders: [],
+    total: 0,
+  });
 
   return (
     <ThemeProvider theme={theme}>
@@ -50,7 +53,11 @@ function App() {
             component="label"
             onClick={async () => {
               const foldersWithFiles = await window.electronAPI.openFolder();
-              setStartFolder({ folders: foldersWithFiles });
+              setStartFolder({
+                root: foldersWithFiles.root,
+                folders: foldersWithFiles.folders,
+                total: foldersWithFiles.total,
+              });
             }}
           >
             <FolderOpenIcon />
@@ -61,10 +68,16 @@ function App() {
         </Toolbar>
       </AppBar>
       <Container>
-        <Box sx={{ my: 2 }}>
+        <Box sx={{ my: 0 }}>
           {/* MAIN CONTENT */}
           {startFolder.folders.length > 0 ? (
-            <FolderView folders={startFolder.folders} />
+            <React.Fragment>
+              <Toolbar></Toolbar>
+              <Typography variant="overline">
+                {startFolder.total} file(s) found in {startFolder.root}
+              </Typography>
+              <FolderView folders={startFolder.folders} />
+            </React.Fragment>
           ) : (
             <IntroText></IntroText>
           )}
