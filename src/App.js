@@ -3,7 +3,7 @@
  * Creates general layout
  *
  */
-import React from "react";
+import React, { useEffect } from "react";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -48,8 +48,11 @@ function App() {
     folders: [],
     total: 0,
   });
-  const [drawerIsOpen, setDrawerIsOpen] = React.useState(false);
 
+  /**
+   * Drawer
+   */
+  const [drawerIsOpen, setDrawerIsOpen] = React.useState(false);
   const toggleDrawer = (open) => (event) => {
     if (
       event.type === "keydown" &&
@@ -60,6 +63,54 @@ function App() {
 
     setDrawerIsOpen(open);
   };
+
+  /**
+   * User settings
+   */
+
+  const [userSettings, setUserSettings] = React.useState({
+    sortOrderFiles: true,
+    sortOrderFolders: true,
+  });
+
+  //  let sortOrderFolders = window.electronAPI.getStoreValue("sort-folders");
+
+  const handleChangeFiles = (event) => {
+    window.electronAPI.setStoreValue("sort-files", event.target.checked);
+    setUserSettings({ ...userSettings, sortOrderFiles: event.target.checked });
+  };
+
+  const handleChangeFolders = (event) => {
+    window.electronAPI.setStoreValue("sort-folders", event.target.checked);
+    setUserSettings({
+      ...userSettings,
+      sortOrderFolders: event.target.checked,
+    });
+    if (event.target.checked === true) {
+      setStartFolder({
+        ...startFolder,
+        folders: startFolder.folders.sort(),
+      });
+    } else if (event.target.checked === false) {
+      setStartFolder({
+        ...startFolder,
+        folders: startFolder.folders.sort().reverse(),
+      });
+    }
+  };
+
+  useEffect(() => {
+    window.electronAPI
+      .getStoreValue("sort-folders")
+      .then((data) =>
+        setUserSettings({ ...userSettings, sortOrderFolders: data })
+      );
+    window.electronAPI
+      .getStoreValue("sort-files")
+      .then((data) =>
+        setUserSettings({ ...userSettings, sortOrderFiles: data })
+      );
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -109,9 +160,9 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    color="secondary"
                     name="sortOrderFolders"
-                    value="yes"
+                    checked={userSettings.sortOrderFolders}
+                    onChange={handleChangeFolders}
                   />
                 }
                 label="Sort folders ascending"
@@ -121,14 +172,15 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    color="secondary"
                     name="sortOrderFiles"
-                    value="yes"
+                    checked={userSettings.sortOrderFiles}
+                    onChange={handleChangeFiles}
                   />
                 }
                 label="Sort filenames ascending"
               />
             </Grid>
+            <Grid item xs={12}></Grid>
             <Button
               variant="contained"
               onClick={toggleDrawer(false)}
@@ -147,7 +199,7 @@ function App() {
               <Typography variant="overline">
                 {startFolder.total} file(s) found in {startFolder.root}
               </Typography>
-              <FolderView folders={startFolder.folders} />
+              <FolderView folders={startFolder.folders} sortOrder={userSettings.sortOrderFiles} />
             </React.Fragment>
           ) : (
             <IntroText></IntroText>

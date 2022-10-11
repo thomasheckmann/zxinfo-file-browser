@@ -36,6 +36,9 @@ async function handleFolderOpen() {
 function createWindow() {
   const mylog = log.scope("createWindow");
 
+  mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
+  mylog.debug(`sort-files: ${store.get("sort-files")}`);
+
   mylog.debug("creating window");
   const win = new BrowserWindow({
     width: 1400,
@@ -74,6 +77,27 @@ app.whenReady().then(() => {
   });
 });
 
+/**
+ * Uses settings
+ */
+const Store = require("electron-store");
+const store = new Store();
+
+ipcMain.handle("getStoreValue", (event, key) => {
+  const mylog = log.scope("getStoreValue");
+  const value = store.get(key);
+
+  mylog.debug(`key, value = {${key}, ${value}}`);
+  return store.get(key);
+});
+
+ipcMain.handle("setStoreValue", (event, key, value) => {
+  const mylog = log.scope("setStoreValue");
+  mylog.debug(`key, value = {${key}, ${value}}`);
+
+  store.set(key, value);
+});
+
 const supportedExts = [".sna", ".z80", ".tap"];
 
 /**
@@ -108,7 +132,7 @@ function scanDirectory(dirPath, obj) {
 }
 
 /**
- * Returns an arrray with names of folders containing known files, sorted
+ * Returns an arrray with names of folders containing known files
  */
 ipcMain.handle("dialog:openFolder", async (event, arg) => {
   const mylog = log.scope("dialog:openFolder");
@@ -118,9 +142,9 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   });
   if (canceled) {
     mylog.debug(`handle('dialog:openFolder'): CANCEL`);
-    return { root: null, folders: [], total: 0 };  // TODO: Handling cancel - use previous or ...
+    return { root: null, folders: [], total: 0 }; // TODO: Handling cancel - use previous or ...
   } else {
-    const files = new Map([...scanDirectory(filePaths[0], new Map()).r].sort());
+    const files = new Map([...scanDirectory(filePaths[0], new Map()).r]);
 
     var result = [];
 
@@ -130,12 +154,18 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
       totalFiles += value;
     });
 
+    if (store.get("sort-folders") === true) {
+      result.sort();
+    } else if (store.get("sort-folders") === false) {
+      result.sort().reverse();
+    }
+
     return { root: filePaths[0], folders: result, total: totalFiles };
   }
 });
 
 /**
- * Scan a folder for known files, and return sorted array
+ * Scan a folder for known files and return array with filenames. Consider userSettings for sorting option.
  */
 ipcMain.handle("scan-folder", (event, arg) => {
   const mylog = log.scope("scan-folder");
@@ -159,7 +189,12 @@ ipcMain.handle("scan-folder", (event, arg) => {
   });
 
   mylog.debug(`total files: ${filesInDir}`);
-  return result.sort();
+
+  if (store.get("sort-files") === true) {
+    return result.sort();
+  } else if (store.get("sort-files") === false) {
+    return result.sort().reverse();
+  } else return result;
 });
 
 /****************************************************************

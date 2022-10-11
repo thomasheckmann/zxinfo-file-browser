@@ -9,6 +9,37 @@ import FileDetails from "./filedetails.jsx";
 import { Toolbar, Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 
+function showFiles(files, sortOptions) {
+  if (sortOptions) {
+    return (
+      <React.Fragment>
+        {files.sort().map((file) => (
+          <Grid xs={12} sm={6} lg={4} key={file}>
+            <RenderIfVisible defaultHeight={500} stayRendered>
+              <FileDetails filename={file}></FileDetails>
+            </RenderIfVisible>
+          </Grid>
+        ))}
+      </React.Fragment>
+    );
+  } else {
+    return (
+      <React.Fragment>
+        {files
+          .sort()
+          .reverse()
+          .map((file) => (
+            <Grid xs={12} sm={6} lg={4} key={file}>
+              <RenderIfVisible defaultHeight={500} stayRendered>
+                <FileDetails filename={file}></FileDetails>
+              </RenderIfVisible>
+            </Grid>
+          ))}
+      </React.Fragment>
+    );
+  }
+}
+
 class FilesView extends React.Component {
   constructor(props) {
     super(props);
@@ -26,19 +57,13 @@ class FilesView extends React.Component {
     return (
       <React.Fragment>
         <Box sx={{ flexGrow: 1, my: 2 }}>
-          <Box sx={{ display: 'flex'}}>
+          <Box sx={{ display: "flex" }}>
             <FolderTwoToneIcon />
             <Typography variant="button">{this.props.foldername}</Typography>
           </Box>
           <Divider variant="middle" />
           <Grid container spacing={4}>
-            {this.state.data.map((file) => (
-              <Grid xs={12} sm={6} lg={4} key={file}>
-                <RenderIfVisible defaultHeight={500} stayRendered>
-                  <FileDetails filename={file}></FileDetails>
-                </RenderIfVisible>
-              </Grid>
-            ))}
+            {showFiles(this.state.data, this.props.sortOrder)}
           </Grid>
         </Box>
       </React.Fragment>
