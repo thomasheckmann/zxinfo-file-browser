@@ -20,7 +20,7 @@ const z80fmt = require("./main/utilities/z80_format");
 const tapfmt = require("./main/utilities/tap_format");
 const log = require("electron-log");
 
-log.transports.console.level = "debug";
+log.transports.console.level = isDev ? "debug" : "info";
 
 async function handleFolderOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -118,7 +118,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   });
   if (canceled) {
     mylog.debug(`handle('dialog:openFolder'): CANCEL`);
-    return [];
+    return { root: null, folders: [], total: 0 };  // TODO: Handling cancel - use previous or ...
   } else {
     const files = new Map([...scanDirectory(filePaths[0], new Map()).r].sort());
 
@@ -130,7 +130,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
       totalFiles += value;
     });
 
-    return {root: filePaths[0], folders: result, total: totalFiles};
+    return { root: filePaths[0], folders: result, total: totalFiles };
   }
 });
 

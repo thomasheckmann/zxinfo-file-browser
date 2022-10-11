@@ -9,11 +9,20 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+
 import {
   AppBar,
   Box,
+  Button,
+  Checkbox,
   Container,
+  Divider,
+  Drawer,
+  FormControlLabel,
+  Grid,
   IconButton,
+  Paper,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -39,12 +48,34 @@ function App() {
     folders: [],
     total: 0,
   });
+  const [drawerIsOpen, setDrawerIsOpen] = React.useState(false);
+
+  const toggleDrawer = (open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    setDrawerIsOpen(open);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppBar position="fixed">
         <Toolbar variant="dense">
+          <IconButton
+            edge="start"
+            color="inherit"
+            sx={{ mr: 2 }}
+            aria-label="Settings"
+            component="label"
+            onClick={toggleDrawer(true)}
+          >
+            <SettingsOutlinedIcon />
+          </IconButton>
           <IconButton
             edge="start"
             color="inherit"
@@ -67,10 +98,50 @@ function App() {
           </Typography>
         </Toolbar>
       </AppBar>
+      <Drawer anchor="left" open={drawerIsOpen} onClose={toggleDrawer(false)}>
+        <Paper variant="outlined" sx={{ my: 0, p: 2, width: 350 }}>
+          <Typography component="h1" variant="h6">
+            Settings
+          </Typography>
+          <Divider />
+          <Grid container spacing={0}>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="secondary"
+                    name="sortOrderFolders"
+                    value="yes"
+                  />
+                }
+                label="Sort folders ascending"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="secondary"
+                    name="sortOrderFiles"
+                    value="yes"
+                  />
+                }
+                label="Sort filenames ascending"
+              />
+            </Grid>
+            <Button
+              variant="contained"
+              onClick={toggleDrawer(false)}
+              sx={{ mt: 3, ml: 1 }}
+            >
+              OK
+            </Button>
+          </Grid>
+        </Paper>
+      </Drawer>
       <Container>
         <Box sx={{ my: 0 }}>
-          {/* MAIN CONTENT */}
-          {startFolder.folders.length > 0 ? (
+          {startFolder.folders && startFolder.folders.length > 0 ? (
             <React.Fragment>
               <Toolbar></Toolbar>
               <Typography variant="overline">
@@ -81,8 +152,6 @@ function App() {
           ) : (
             <IntroText></IntroText>
           )}
-
-          {/* MAIN CONTENT */}
         </Box>
       </Container>
     </ThemeProvider>

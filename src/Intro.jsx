@@ -61,17 +61,18 @@ class IntroText extends React.Component {
               <ul>
                 <li>.sna - 48K and 128K formats</li>
                 <li>.z80 - Version 1, 2 & 3</li>
+                <li>.tap</li>
               </ul>
               In the future, planing support for:
               <ul>
-                <li>.tap</li>
+              <li>...</li>
               </ul>
               <Typography variant="h4">Features</Typography>
               <Divider />
               <ul>
                 <li>Scan local files</li>
                 <li>Non-Destructive - original files won't be touched</li>
-                <li>Read various formats: SNA, Z80, (TAP...)</li>
+                <li>Read various formats: SNA, Z80, TAP</li>
                 <li>Integrates with ZXDB using ZXInfo API</li>
                 <li>Favorites</li>
                 <li>Browse by ....</li>
