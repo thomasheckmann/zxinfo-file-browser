@@ -11,6 +11,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { styled } from "@mui/material/styles";
 
 import {
   AppBar,
@@ -29,11 +30,24 @@ import {
   Typography,
 } from "@mui/material";
 
+import MuiToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+
 import FolderView from "./components/folderview.jsx";
 import IntroText from "./Intro.jsx";
 
 import "./App.css";
 
+const ToggleButton = styled(MuiToggleButton)({
+  "&.Mui-selected, &.Mui-selected:hover": {
+    color: "white",
+    backgroundColor: '#008000'
+  },
+  "&.Mui-disabled": {
+    color: "#a0a0a0",
+    backgroundColor: '#004000'
+  }
+});
 const theme = createTheme({
   palette: {
     primary: {
@@ -55,6 +69,7 @@ function App() {
     total: 0,
     showDrawerFolders: true,
     showDrawerSettings: false,
+    fileFilters: ["sna", "z80", "tap"]
   });
 
   /**
@@ -68,7 +83,7 @@ function App() {
       return;
     }
 
-    setStartFolder({ ...startFolder, showDrawerSettings: open });
+    setStartFolder({ ...startFolder, showDrawerSettings: open, showDrawerFolders: false });
     // setShowDrawerSettings(open);
   };
 
@@ -109,6 +124,10 @@ function App() {
         folders: startFolder.folders.sort().reverse(),
       });
     }
+  };
+
+  const handleFormat = (event, newFormats) => {
+    setStartFolder({ ...startFolder, fileFilters: newFormats, showDrawerFolders: false });
   };
 
   useEffect(() => {
@@ -158,6 +177,8 @@ function App() {
                   folders: foldersWithFiles.folders,
                   total: foldersWithFiles.total,
                   showDrawerFolders: false,
+                  showDrawerSettings: false,
+                  fileFilters: ["sna", "z80", "tap"]
                 });
                 window.scrollTo({
                   top: 0,
@@ -169,7 +190,7 @@ function App() {
               </Tooltip>
             </IconButton>
             <IconButton
-              disabled={(startFolder.folders.length < 2)}
+              disabled={startFolder.folders.length < 2}
               edge="start"
               color="inherit"
               sx={{ mr: 2 }}
@@ -180,6 +201,7 @@ function App() {
                 <ExpandMoreOutlinedIcon />
               </Tooltip>
             </IconButton>
+
             <Typography
               variant="h6"
               color="inherit"
@@ -188,6 +210,17 @@ function App() {
             >
               ZXInfo Explorer
             </Typography>
+            <ToggleButtonGroup size="small"
+            value={startFolder.fileFilters}
+            onChange={handleFormat}
+            aria-label="Formats"
+            disabled={startFolder.total === 0}
+            sx={{background: "#ffffff", mr: 10}}
+          >
+            <ToggleButton value="z80">z80</ToggleButton>
+            <ToggleButton value="sna">sna</ToggleButton>
+            <ToggleButton value="tap">tap</ToggleButton>
+          </ToggleButtonGroup>
             <Box
               sx={{ maxHeight: 50 }}
               component="img"
@@ -250,6 +283,7 @@ function App() {
                   folders={startFolder.folders}
                   sortOrder={userSettings.sortOrderFiles}
                   showDrawerFolders={startFolder.showDrawerFolders}
+                  fileFilters={startFolder.fileFilters}
                 />
               </React.Fragment>
             ) : (

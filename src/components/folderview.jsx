@@ -76,6 +76,7 @@ class FolderView extends React.Component {
             key={folder}
             foldername={folder}
             sortOrder={this.props.sortOrder}
+            fileFilters={this.props.fileFilters}
           ></FilesView>
         ))}
 

@@ -9,11 +9,19 @@ import FileDetails from "./filedetails.jsx";
 import { Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 
-function showFiles(files, sortOptions) {
+function showFiles(files, sortOptions, fileFilters) {
+  let newFiles = files.sort();
+
+    newFiles = files.filter((fileName) => {
+      let result = fileFilters.some(extension => {
+        return fileName.toLowerCase().endsWith(extension);})
+
+      return result;
+    });
   if (sortOptions) {
     return (
       <React.Fragment>
-        {files.sort().map((file) => (
+        {newFiles.map((file) => (
           <Grid xs={12} sm={6} lg={4} key={file}>
             <RenderIfVisible defaultHeight={500} stayRendered>
               <FileDetails filename={file}></FileDetails>
@@ -25,8 +33,7 @@ function showFiles(files, sortOptions) {
   } else {
     return (
       <React.Fragment>
-        {files
-          .sort()
+        {newFiles
           .reverse()
           .map((file) => (
             <Grid xs={12} sm={6} lg={4} key={file}>
@@ -56,14 +63,18 @@ class FilesView extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Box sx={{ flexGrow: 1, my: 2 }}>
+        <Box sx={{ flexGrow: 1, my: 2, minHeight:20 }}>
           <Box sx={{ display: "flex" }}>
             <FolderTwoToneIcon />
             <Typography variant="button">{this.props.foldername}</Typography>
           </Box>
           <Divider variant="middle" />
-          <Grid container spacing={4}  id={this.props.foldername}>
-            {showFiles(this.state.data, this.props.sortOrder)}
+          <Grid container spacing={4} id={this.props.foldername}>
+            {showFiles(
+              this.state.data,
+              this.props.sortOrder,
+              this.props.fileFilters
+            )}
           </Grid>
         </Box>
       </React.Fragment>
