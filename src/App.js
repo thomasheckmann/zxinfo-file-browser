@@ -54,12 +54,12 @@ function App() {
     folders: [],
     total: 0,
     showDrawerFolders: true,
+    showDrawerSettings: false,
   });
 
   /**
    * Drawer for settings
    */
-  const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
   const toggleDrawerSettings = (open) => (event) => {
     if (
       event.type === "keydown" &&
@@ -68,7 +68,8 @@ function App() {
       return;
     }
 
-    setShowDrawerSettings(open);
+    setStartFolder({ ...startFolder, showDrawerSettings: open });
+    // setShowDrawerSettings(open);
   };
 
   const toggleDrawerFolders = (open) => (event) => {
@@ -141,7 +142,6 @@ function App() {
               aria-label="Settings"
               onClick={toggleDrawerSettings(true)}
             >
-              {" "}
               <Tooltip title="Settings">
                 <SettingsOutlinedIcon />
               </Tooltip>
@@ -164,13 +164,12 @@ function App() {
                 });
               }}
             >
-              {" "}
               <Tooltip title="Open Folder">
                 <FolderOpenIcon />
               </Tooltip>
             </IconButton>
             <IconButton
-              disabled={startFolder.total === 0}
+              disabled={(startFolder.folders.length < 2)}
               edge="start"
               color="inherit"
               sx={{ mr: 2 }}
@@ -198,7 +197,7 @@ function App() {
         </AppBar>
         <Drawer
           anchor="left"
-          open={showDrawerSettings}
+          open={startFolder.showDrawerSettings}
           onClose={toggleDrawerSettings(false)}
         >
           <Paper variant="outlined" sx={{ my: 0, p: 2, width: 350 }}>
