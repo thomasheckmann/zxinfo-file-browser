@@ -9,7 +9,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 import {
@@ -25,6 +25,7 @@ import {
   IconButton,
   Paper,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -42,8 +43,8 @@ const theme = createTheme({
       main: "#c0c0c0",
     },
     action: {
-      disabled: "#808080"
-    }
+      disabled: "#808080",
+    },
   },
 });
 
@@ -140,7 +141,10 @@ function App() {
               aria-label="Settings"
               onClick={toggleDrawerSettings(true)}
             >
-              <SettingsOutlinedIcon />
+              {" "}
+              <Tooltip title="Settings">
+                <SettingsOutlinedIcon />
+              </Tooltip>
             </IconButton>
             <IconButton
               edge="start"
@@ -155,9 +159,15 @@ function App() {
                   total: foldersWithFiles.total,
                   showDrawerFolders: false,
                 });
+                window.scrollTo({
+                  top: 0,
+                });
               }}
             >
-              <FolderOpenIcon />
+              {" "}
+              <Tooltip title="Open Folder">
+                <FolderOpenIcon />
+              </Tooltip>
             </IconButton>
             <IconButton
               disabled={startFolder.total === 0}
@@ -167,7 +177,9 @@ function App() {
               aria-label="Jump to folder"
               onClick={toggleDrawerFolders(true)}
             >
-              <ExpandMoreOutlinedIcon />
+              <Tooltip title="Jump to folder">
+                <ExpandMoreOutlinedIcon />
+              </Tooltip>
             </IconButton>
             <Typography
               variant="h6"
@@ -248,15 +260,15 @@ function App() {
           </Box>
         </Container>
 
-          <div className="footer">
+        <div className="footer">
           <Container>
             <Box sx={{ display: "flex" }}>
               <Typography>
                 {startFolder.total} file(s) found in {startFolder.root}
               </Typography>
             </Box>
-            </Container>
-          </div>
+          </Container>
+        </div>
       </Box>
     </ThemeProvider>
   );
