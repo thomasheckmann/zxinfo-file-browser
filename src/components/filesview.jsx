@@ -6,7 +6,7 @@ import Divider from "@mui/material/Divider";
 import RenderIfVisible from "react-render-if-visible";
 
 import FileDetails from "./filedetails.jsx";
-import { Toolbar, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 
 function showFiles(files, sortOptions) {
@@ -62,7 +62,7 @@ class FilesView extends React.Component {
             <Typography variant="button">{this.props.foldername}</Typography>
           </Box>
           <Divider variant="middle" />
-          <Grid container spacing={4}>
+          <Grid container spacing={4}  id={this.props.foldername}>
             {showFiles(this.state.data, this.props.sortOrder)}
           </Grid>
         </Box>
