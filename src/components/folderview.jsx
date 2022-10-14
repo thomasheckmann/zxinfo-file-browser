@@ -45,7 +45,7 @@ class FolderView extends React.Component {
       <React.Fragment>
         <Drawer
           anchor="top"
-          variant="persistent"
+          variant="temporary"
           open={this.state.showDrawerFolders}
           onClose={toggleFolderDrawer(false)}
         >
