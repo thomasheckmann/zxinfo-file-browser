@@ -66,11 +66,13 @@ class FileDetails extends React.Component {
               </Typography>
             </Avatar>
           }
-          title={<Tooltip title={this.state.filename}>
-            <Typography variant="subtitle2" noWrap>
-              {this.state.filename}
-            </Typography>
-          </Tooltip>}
+          title={
+            <Tooltip title={this.state.filename}>
+              <Typography variant="subtitle2" noWrap>
+                {this.state.filename}
+              </Typography>
+            </Tooltip>
+          }
         ></CardHeader>
         {this.state.error ? (
           <Alert severity="warning">{this.state.error}</Alert>
@@ -80,7 +82,6 @@ class FileDetails extends React.Component {
         <CardMedia
           component="img"
           image={this.state.scr}
-          /*"https://zxinfo.dk/media/zxscreens/0002259/HeadOverHeels-load.png"*/
           alt={this.state.filename}
         />
         <CardContent>
