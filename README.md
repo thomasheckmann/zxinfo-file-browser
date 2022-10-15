@@ -1,6 +1,6 @@
 
 # ZXINFO File Manager
-Organize your ZX Spectrum emulator files, powered by the web.
+Manage your ZX Spectrum emulator files, powered by the web.
 
 <img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
 
