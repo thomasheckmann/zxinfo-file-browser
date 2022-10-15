@@ -10,6 +10,14 @@ Download build for:
 * [MacOS]
 * [Linux]
 
+# Features
+* Scan local files
+* Non-Destructive - original files won't be touched
+* Read various formats: SNA, Z80, TAP
+* Integrates with ZXDB using ZXInfo API
+* Browse by file formats (sna, z80, tap)
+* Quick access to folders
+
 # Build it yourself
 Requirements:
 * Git client - for example [GitHub Desktop](https://desktop.github.com/)
@@ -26,13 +34,5 @@ npm run build
 ```
 The app is then available in the 'dist' folder.
 
-# Features
-* Scan local files
-* Non-Destructive - original files won't be touched
-* Read various formats: SNA, Z80, TAP
-* Integrates with ZXDB using ZXInfo API
-* Browse by file formats (sna, z80, tap)
-* Quick access to folders
-
 # Development
-See [Development.md](Development.md) for details about how to build Picturama.
+See [Development.md](Development.md) for details about how to build zxinfo-file-manager.
