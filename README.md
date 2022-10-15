@@ -17,3 +17,6 @@ Download build for:
 * Integrates with ZXDB using ZXInfo API
 * Browse by file formats (sna, z80, tap)
 * Quick access to folders
+
+# Development
+See [Development.md](Development.md) for details about how to build Picturama.
