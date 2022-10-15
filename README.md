@@ -10,6 +10,22 @@ Download build for:
 * [MacOS]
 * [Linux]
 
+# Build it yourself
+Requirements:
+* Git client - for example [GitHub Desktop](https://desktop.github.com/)
+* Install node.js - find installation [here] - (https://nodejs.org/en/download/)
+
+## Simple - just build the app ready to run
+Clone the repository and run build
+```
+cd <some folder>
+git clone xxx
+cd zxinfo-file-manager
+npm i
+npm run build
+```
+The app is then available in the 'dist' folder.
+
 # Features
 * Scan local files
 * Non-Destructive - original files won't be touched
