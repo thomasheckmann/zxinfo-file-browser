@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# How to develop ZXINFO File Manager
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This app is created as an Electron app with React and Material design - MUI, bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
 
 ## Available Scripts
 
