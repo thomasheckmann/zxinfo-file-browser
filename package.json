@@ -6,7 +6,16 @@
   "main": "public/electron.js",
   "private": true,
   "build": {
-    "appId": "zxinfo.filemanager.app"
+    "appId": "zxinfo.filemanager.app",
+    "mac": {
+      "icon": "./public/icons/icon.png"
+    },
+    "win": {
+      "icon": "./public/icons/icon.png"
+    },
+    "linux": {
+      "icon": "./public/icons/icon.png"
+    }
   },
   "workspaces": [
     "src/*"
