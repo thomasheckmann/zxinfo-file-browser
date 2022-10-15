@@ -2,6 +2,21 @@
 
 This app is created as an Electron app with React and Material design - MUI, bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
 
+Requirements:
+* Git client - for example [GitHub Desktop](https://desktop.github.com/)
+* Install node.js - find installation [here] - (https://nodejs.org/en/download/)
+* Install using npm cross-env and electron-is-dev `npm install cross-env electron-is-dev`
+
+To run ZXINFO File Manager in development
+```
+cd <some folder>
+git clone git@github.com:thomasheckmann/zxinfo-file-manager.git
+cd zxinfo-file-manager
+npm i
+npm install cross-env electron-is-dev
+npm start
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
