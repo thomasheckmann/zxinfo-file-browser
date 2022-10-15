@@ -27,7 +27,7 @@ Requirements:
 Clone the repository and run build
 ```
 cd <some folder>
-git clone xxx
+git clone git@github.com:thomasheckmann/zxinfo-file-manager.git
 cd zxinfo-file-manager
 npm i
 npm run build
