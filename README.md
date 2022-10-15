@@ -5,7 +5,7 @@ Manage your ZX Spectrum emulator files, powered by the web.
 <img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
 
 # Download
-Download build for:
+Download latest build for:
 * Windows - [Windows Download](https://drive.google.com/drive/folders/1egnpMV1TWWqsOxIy3Vyt6gmkF_sdpxVK?usp=sharing)
 * [MacOS]
 * [Linux]
