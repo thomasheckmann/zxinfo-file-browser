@@ -1,6 +1,6 @@
 # How to develop ZXINFO File Manager
 
-This app is created as an Electron app with React and Material design - MUI, bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
+This app is created as an [Electron app](https://www.electronjs.org/) with [React](https://reactjs.org/) and [Material UI](https://mui.com/), bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
 
 Requirements:
 * Git client - for example [GitHub Desktop](https://desktop.github.com/)
