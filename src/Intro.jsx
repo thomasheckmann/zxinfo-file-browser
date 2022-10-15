@@ -10,6 +10,10 @@ import {
 import React from "react";
 class IntroText extends React.Component {
   render() {
+    const invokeOpenFolderParent = (event) => {
+      this.props.parentCallback(event);
+    };
+
     return (
       <React.Fragment>
         <Grid container component="main" sx={{ height: "100vh" }}>
@@ -75,9 +79,10 @@ class IntroText extends React.Component {
                 <li>[Favorites]</li>
               </ul>
               <Typography variant="body1">
-                Start scanning now ... 
-                <Button variant="contained">Open Folder</Button>
-
+                Start scanning now ...
+                <Button variant="contained" onClick={invokeOpenFolderParent}>
+                  Open Folder
+                </Button>
               </Typography>
             </Box>
           </Grid>

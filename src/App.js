@@ -41,12 +41,12 @@ import "./App.css";
 const ToggleButton = styled(MuiToggleButton)({
   "&.Mui-selected, &.Mui-selected:hover": {
     color: "white",
-    backgroundColor: '#008000'
+    backgroundColor: "#008000",
   },
   "&.Mui-disabled": {
     color: "#a0a0a0",
-    backgroundColor: '#004000'
-  }
+    backgroundColor: "#004000",
+  },
 });
 const theme = createTheme({
   palette: {
@@ -69,7 +69,7 @@ function App() {
     total: 0,
     showDrawerFolders: true,
     showDrawerSettings: false,
-    fileFilters: ["sna", "z80", "tap"]
+    fileFilters: ["sna", "z80", "tap"],
   });
 
   /**
@@ -83,7 +83,11 @@ function App() {
       return;
     }
 
-    setStartFolder({ ...startFolder, showDrawerSettings: open, showDrawerFolders: false });
+    setStartFolder({
+      ...startFolder,
+      showDrawerSettings: open,
+      showDrawerFolders: false,
+    });
     // setShowDrawerSettings(open);
   };
 
@@ -127,7 +131,11 @@ function App() {
   };
 
   const handleFormat = (event, newFormats) => {
-    setStartFolder({ ...startFolder, fileFilters: newFormats, showDrawerFolders: false });
+    setStartFolder({
+      ...startFolder,
+      fileFilters: newFormats,
+      showDrawerFolders: false,
+    });
   };
 
   useEffect(() => {
@@ -142,6 +150,21 @@ function App() {
         setUserSettings({ ...userSettings, sortOrderFiles: data })
       );
   }, []);
+
+  const handleOpenFolderFromChild = async (childData) => {
+    const foldersWithFiles = await window.electronAPI.openFolder();
+    setStartFolder({
+      root: foldersWithFiles.root,
+      folders: foldersWithFiles.folders,
+      total: foldersWithFiles.total,
+      showDrawerFolders: false,
+      showDrawerSettings: false,
+      fileFilters: ["sna", "z80", "tap"],
+    });
+    window.scrollTo({
+      top: 0,
+    });
+};
 
   return (
     <ThemeProvider theme={theme}>
@@ -178,7 +201,7 @@ function App() {
                   total: foldersWithFiles.total,
                   showDrawerFolders: false,
                   showDrawerSettings: false,
-                  fileFilters: ["sna", "z80", "tap"]
+                  fileFilters: ["sna", "z80", "tap"],
                 });
                 window.scrollTo({
                   top: 0,
@@ -210,17 +233,18 @@ function App() {
             >
               ZXInfo Explorer
             </Typography>
-            <ToggleButtonGroup size="small"
-            value={startFolder.fileFilters}
-            onChange={handleFormat}
-            aria-label="Formats"
-            disabled={startFolder.total === 0}
-            sx={{background: "#ffffff", mr: 10}}
-          >
-            <ToggleButton value="z80">z80</ToggleButton>
-            <ToggleButton value="sna">sna</ToggleButton>
-            <ToggleButton value="tap">tap</ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              size="small"
+              value={startFolder.fileFilters}
+              onChange={handleFormat}
+              aria-label="Formats"
+              disabled={startFolder.total === 0}
+              sx={{ background: "#ffffff", mr: 10 }}
+            >
+              <ToggleButton value="z80">z80</ToggleButton>
+              <ToggleButton value="sna">sna</ToggleButton>
+              <ToggleButton value="tap">tap</ToggleButton>
+            </ToggleButtonGroup>
             <Box
               sx={{ maxHeight: 50 }}
               component="img"
@@ -287,7 +311,7 @@ function App() {
                 />
               </React.Fragment>
             ) : (
-              <IntroText></IntroText>
+              <IntroText parentCallback = {handleOpenFolderFromChild}></IntroText>
             )}
             <Toolbar />
           </Box>
