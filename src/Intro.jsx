@@ -41,7 +41,7 @@ class IntroText extends React.Component {
           >
             <Box
               sx={{
-                my: 8,
+                my: 1,
                 mx: 2,
                 display: "flex",
                 flexDirection: "column",
@@ -63,10 +63,6 @@ class IntroText extends React.Component {
                 <li>.z80 - Version 1, 2 & 3</li>
                 <li>.tap</li>
               </ul>
-              In the future, planing support for:
-              <ul>
-              <li>...</li>
-              </ul>
               <Typography variant="h4">Features</Typography>
               <Divider />
               <ul>
@@ -74,8 +70,9 @@ class IntroText extends React.Component {
                 <li>Non-Destructive - original files won't be touched</li>
                 <li>Read various formats: SNA, Z80, TAP</li>
                 <li>Integrates with ZXDB using ZXInfo API</li>
-                <li>Favorites</li>
-                <li>Browse by ....</li>
+                <li>Browse by file formats (sna, z80, tap)</li>
+                <li>Quick access to folders</li>
+                <li>[Favorites]</li>
               </ul>
               <Typography variant="body1">
                 Start scanning now ... 
