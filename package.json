@@ -8,7 +8,14 @@
   "build": {
     "appId": "zxinfo.filemanager.app",
     "mac": {
-      "icon": "./public/icons/icon.png"
+      "icon": "./public/icons/icon.png",
+      "target": {
+        "target": "default",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
     },
     "win": {
       "icon": "./public/icons/icon.png"
@@ -79,6 +86,8 @@
     "concurrently": "^7.4.0",
     "electron": "^21.1.1",
     "electron-builder": "^23.6.0",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-icon-builder": "^2.0.1",
     "wait-on": "^6.0.1"
   }
 }

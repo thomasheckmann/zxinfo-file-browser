@@ -7,6 +7,7 @@
  * - one way (toMain), use ipcRenderer.send and ipcMain.on
  * - two way, use ipcRenderer.invoke and ipcMain.handle
  */
+
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
