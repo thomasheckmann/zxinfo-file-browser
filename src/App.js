@@ -231,7 +231,7 @@ function App() {
               component="div"
               sx={{ flexGrow: 1 }}
             >
-              ZXInfo Explorer
+              ZXInfo File Browser
             </Typography>
             <ToggleButtonGroup
               size="small"
@@ -248,7 +248,7 @@ function App() {
             <Box
               sx={{ maxHeight: 50 }}
               component="img"
-              src="./images/rainbow.png"
+              src="./images/rainbow2.jpg"
             />
           </Toolbar>
         </AppBar>
