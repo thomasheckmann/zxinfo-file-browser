@@ -62,6 +62,18 @@ const theme = createTheme({
   },
 });
 
+const defaultFileFilters = [
+  "sna",
+  "z80",
+  "slt",
+  "dsk",
+  "trd",
+  "mdr",
+  "tap",
+  "tzx",
+  "zip",
+];
+
 function App() {
   const [startFolder, setStartFolder] = React.useState({
     root: [],
@@ -69,7 +81,7 @@ function App() {
     total: 0,
     showDrawerFolders: true,
     showDrawerSettings: false,
-    fileFilters: ["sna", "z80", "tap"],
+    fileFilters: defaultFileFilters,
   });
 
   /**
@@ -103,8 +115,6 @@ function App() {
     sortOrderFiles: true,
     sortOrderFolders: true,
   });
-
-  //  let sortOrderFolders = window.electronAPI.getStoreValue("sort-folders");
 
   const handleChangeSettingsFiles = (event) => {
     window.electronAPI.setStoreValue("sort-files", event.target.checked);
@@ -159,12 +169,12 @@ function App() {
       total: foldersWithFiles.total,
       showDrawerFolders: false,
       showDrawerSettings: false,
-      fileFilters: ["sna", "z80", "tap"],
+      fileFilters: defaultFileFilters,
     });
     window.scrollTo({
       top: 0,
     });
-};
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -201,7 +211,7 @@ function App() {
                   total: foldersWithFiles.total,
                   showDrawerFolders: false,
                   showDrawerSettings: false,
-                  fileFilters: ["sna", "z80", "tap"],
+                  fileFilters: defaultFileFilters,
                 });
                 window.scrollTo({
                   top: 0,
@@ -241,9 +251,9 @@ function App() {
               disabled={startFolder.total === 0}
               sx={{ background: "#ffffff", mr: 10 }}
             >
-              <ToggleButton value="z80">z80</ToggleButton>
-              <ToggleButton value="sna">sna</ToggleButton>
-              <ToggleButton value="tap">tap</ToggleButton>
+              {defaultFileFilters.map((ext) => (
+                <ToggleButton value={ext} key={ext}>{ext}</ToggleButton>
+              ))}
             </ToggleButtonGroup>
             <Box
               sx={{ maxHeight: 50 }}
@@ -311,7 +321,7 @@ function App() {
                 />
               </React.Fragment>
             ) : (
-              <IntroText parentCallback = {handleOpenFolderFromChild}></IntroText>
+              <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
             )}
             <Toolbar />
           </Box>

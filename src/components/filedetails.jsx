@@ -57,7 +57,7 @@ class FileDetails extends React.Component {
 
   render() {
     return (
-      <Card /*sx={{ maxWidth: 320 }}*/>
+      <Card raised /*sx={{ maxWidth: 320 }}*/>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">

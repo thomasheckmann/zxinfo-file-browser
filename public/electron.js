@@ -99,7 +99,18 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
   store.set(key, value);
 });
 
-const supportedExts = [".sna", ".z80", ".tap"];
+// supportedExts must be synced with startFolder.fileFilters in App.js
+const supportedExts = [
+  ".sna",
+  ".z80",
+  ".slt",
+  ".dsk",
+  ".trd",
+  ".mdr",
+  ".tap",
+  ".tzx",
+  ".zip",
+];
 
 /**
  *
@@ -110,6 +121,7 @@ const supportedExts = [".sna", ".z80", ".tap"];
  * @returns
  */
 function scanDirectory(dirPath, obj) {
+  const mylog = log.scope("scanDirectory");
   let filesInDir = 0;
   fs.readdirSync(dirPath).forEach(function (file) {
     let filepath = path.join(dirPath, file);
@@ -123,6 +135,7 @@ function scanDirectory(dirPath, obj) {
       let extension = path.extname(filepath).toLowerCase();
       if (supportedExts.indexOf(extension) >= 0) {
         filesInDir++;
+        mylog.debug(`counting ${filepath} - ${supportedExts}`);
       }
     }
   });
@@ -166,7 +179,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
 });
 
 /**
- * Scan a folder for known files and return array with filenames. Consider userSettings for sorting option.
+ * Scan a folder for known files and return array with filenames, NOT including subfolders. Consider userSettings for sorting option.
  */
 ipcMain.handle("scan-folder", (event, arg) => {
   const mylog = log.scope("scan-folder");
@@ -403,7 +416,7 @@ ipcMain.handle("load-file", async (event, arg) => {
     result.type = "tapfmt";
     obj = tapfmt.readTAP(filename);
   } else {
-    obj = { version: null, type: null, error: "Unknown file format" };
+    obj = { version: null, type: null, error: "Unhandled file format" };
     result.type = null;
     mylog.warn(`Can't identify file format for: ${file}`);
     mylog.debug(

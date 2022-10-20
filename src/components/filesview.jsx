@@ -68,7 +68,7 @@ class FilesView extends React.Component {
             <Typography variant="button">{this.props.foldername} - ({this.state.data.length})</Typography>
           </Box>
           <Divider variant="middle" />
-          <Grid container spacing={4} id={this.props.foldername}>
+          <Grid container spacing={4} id={this.props.foldername} sx={{my: 2}}>
             {showFiles(
               this.state.data,
               this.props.sortOrder,
