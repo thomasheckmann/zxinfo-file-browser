@@ -14,10 +14,18 @@ import { Stack } from "@mui/system";
 import React from "react";
 
 function formatType(t) {
-  if (t === "snafmt") return "SNA";
-  if (t === "z80fmt") return "Z80";
-  if (t === "tapfmt") return "TAP";
-  return "?";
+  switch (t) {
+    case "snafmt":
+      return "SNA";
+    case "z80fmt":
+      return "Z80";
+    case "tapfmt":
+      return "TAP";
+    case "zip":
+      return "ZIP";
+    default:
+      return "?";
+  }
 }
 
 /**
@@ -57,8 +65,9 @@ class FileDetails extends React.Component {
 
   render() {
     return (
-      <Card raised /*sx={{ maxWidth: 320 }}*/>
+      <Card raised elevation={5} /*sx={{ maxWidth: 320 }}*/>
         <CardHeader
+          sx={{ backgroundColor: "#808080" }}
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
               <Typography variant="overline" display="block" gutterBottom>
