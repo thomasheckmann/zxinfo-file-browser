@@ -10,9 +10,6 @@
  *    error,
  * }
  */
-
-const fs = require("fs");
-
 const log = require("electron-log");
 //log.transports.console.level = 'debug';
 
@@ -96,15 +93,14 @@ function createData(data) {
   return dataBlock;
 }
 
-function readTAP(filename) {
+function readTAP(data) {
   const mylog = log.scope("readTAP");
-  mylog.log(`input: ${filename}`);
+  mylog.log(`input: ${data.length}`);
 
   var snapshot = { type: null, error: null, scrdata: null };
   snapshot.type = "TAP";
 
   let tap = [];
-  var data = fs.readFileSync(filename);
 
   for (let index = 0; index < data.length; ) {
     const blockLength = data[index] + data[index + 1] * 256;

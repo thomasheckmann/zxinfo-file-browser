@@ -12,32 +12,25 @@
  *    error,
  * }
  */
-
-const fs = require("fs");
-
 const log = require("electron-log");
 //log.transports.console.level = 'debug';
 
-function readSNA(filename) {
+function readSNA(data) {
   const mylog = log.scope("readSNA48K");
-  mylog.log(`input: ${filename}`);
+  mylog.log(`input: ${data.length}`);
 
   var snapshot = {};
 
   // 48K or 128K?
-  var stats = fs.statSync(filename);
-  var fileSize = stats.size;
+  var fileSize = data.length;
   if(fileSize === 49179) {
     snapshot.type = "SNA 48K";
   } else if (fileSize === 131103 || fileSize === 147487) {
     snapshot.type = "SNA 128K";
   } else {
     snapshot.error = "Corrupt or unknown SNA format"
-    mylog.error(`unknown SNA format: ${filename}`);
     return snapshot;
   }
-
-  var data = fs.readFileSync(filename);
 
   snapshot.I = data[0];
   snapshot.HLalt = data[1] + data[2] * 256;

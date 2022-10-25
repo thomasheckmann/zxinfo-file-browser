@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 
 import { Link } from "react-scroll";
-
 import FilesView from "./filesview.jsx";
 
 class FolderView extends React.Component {
@@ -18,26 +17,36 @@ class FolderView extends React.Component {
     this.state = {
       showDrawerFolders: this.props.showDrawerFolders,
       forceClose: false,
+      folderToShow: this.props.folders[0],
     };
   }
-  
+
+  /**
+   * If props are changed by parent
+   * 
+   * @param {*} props
+   * @param {*} current_state
+   * @returns
+   */
   static getDerivedStateFromProps(props, current_state) {
-    if(current_state.forceClose) {
+    if (current_state.forceClose) {
       return {
         showDrawerFolders: false,
         forceClose: false,
-      }
+      };
     } else if (current_state.showDrawerFolders !== props.showDrawerFolders) {
       return {
         showDrawerFolders: props.showDrawerFolders,
-      }
+      };
+    } else if (current_state.folderToShow !== props.folders[0]) {
+      return { folderToShow: props.folders[0] };
     }
-    return null
+    return null;
   }
-  
+
   render() {
     const toggleFolderDrawer = (open) => (event) => {
-      this.setState({ forceClose: true });
+      this.setState({ forceClose: true, folderToShow: open });
     };
 
     return (
@@ -60,7 +69,7 @@ class FolderView extends React.Component {
                     to={folder}
                     spy={true}
                     smooth={false}
-                    onClick={toggleFolderDrawer(false)}
+                    onClick={toggleFolderDrawer(folder)}
                   >
                     {folder}
                   </Link>
@@ -69,16 +78,11 @@ class FolderView extends React.Component {
             </List>
           </Paper>
         </Drawer>
-
-        {this.props.folders.map((folder) => (
-          <FilesView
-            key={folder}
-            foldername={folder}
-            sortOrder={this.props.sortOrder}
-            fileFilters={this.props.fileFilters}
-          ></FilesView>
-        ))}
-
+        <FilesView
+          foldername={this.state.folderToShow}
+          sortOrder={this.props.sortOrder}
+          fileFilters={this.props.fileFilters}
+        ></FilesView>
       </React.Fragment>
     );
   }

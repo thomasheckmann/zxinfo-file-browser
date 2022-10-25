@@ -10,8 +10,6 @@
 const log = require("electron-log");
 //log.transports.console.level = 'debug';
 
-const fs = require("fs");
-
 function readCompressed(data, length) {
   var zxram = [];
 
@@ -91,11 +89,9 @@ function readV2(data, compressed) {
   return zxram;
 }
 
-function readZ80(filename) {
+function readZ80(data) {
   const mylog = log.scope("readZ80");
-  mylog.log(`input: ${filename}`);
-
-  var data = fs.readFileSync(filename);
+  mylog.log(`input: ${data.length}`);
 
   var snapshot = {};
   var version = 1;

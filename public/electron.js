@@ -12,12 +12,10 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
-const crypto = require("crypto");
-const axios = require("axios");
-const snafmt = require("./main/utilities/sna_format");
-const z80fmt = require("./main/utilities/z80_format");
-const tapfmt = require("./main/utilities/tap_format");
-const screenZX = require("./main/utilities/handleSCR");
+
+const handleFormats = require("./main/utilities/handleFormats");
+
+const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
@@ -211,10 +209,6 @@ ipcMain.handle("scan-folder", (event, arg) => {
   } else return result;
 });
 
-/****************************************************************
- * HANDLING SNAPSHOT FILES
- ****************************************************************/
-
 /**
  *  identify metadata about file
  *
@@ -223,97 +217,48 @@ ipcMain.handle("scan-folder", (event, arg) => {
  * .Z80 and ...
  */
 ipcMain.handle("load-file", async (event, arg) => {
-  const mylog = log.scope("load-file");
-  mylog.log(`input: ${arg}`);
+  const mylog = log.scope(`load-file ${arg}`);
 
-  var result = {
-    filename: "",
-    type: "",
-    zxdbID: null,
-    zxdbTitle: null,
-    data: [], // in case of zip, contains array of "load-file" within archive (no subfolders)
-    scr: null,
-    error: null,
-  };
+  let result; // either object or array (zip)
 
   const filename = arg; // TODO: Validate input
-
-  var file = path.basename(filename);
-  var directory = path.dirname(filename);
   var extension = path.extname(filename).toLowerCase();
-
-  mylog.log(`file: ${file}, extension: ${extension}, dir: ${directory}`);
-
-  let sum = crypto.createHash("sha512");
   let buf = fs.readFileSync(filename);
-  sum.update(buf);
-  const sha512 = sum.digest("hex");
-  mylog.debug(`sha512: ${sha512}`);
 
-  // lookup filehash from API - https://api.zxinfo.dk/v3/filecheck/{hash}
-  let zxdbID = null;
-  const dataURL = `https://api.zxinfo.dk/v3/filecheck/${sha512}`;
-  mylog.info(`looking sha512 in ZXInfo API - ${file}`);
-  await axios
-    .get(dataURL)
-    .then((response) => {
-      result.zxdbID = response.data.entry_id;
-      result.zxdbTitle = response.data.title;
-      mylog.debug(`YES - found: ${response.data.title}`);
-    })
-    .catch((error) => {
-      result.zxdbID = null;
-      result.zxdbTitle = null;
-      mylog.warn(`OH NO, NOT found in ZXInfo API: ${sha512}`);
-    })
-    .finally(() => {});
+  let fileObj = handleFormats.getZXFormat(filename, null, buf);
+  mylog.debug(fileObj.sha512);
 
-  result.filename = file;
-
-  var obj;
   if (extension === ".sna") {
-    result.type = "snafmt";
-    obj = snafmt.readSNA(filename);
   } else if (extension === ".z80") {
-    result.type = "z80fmt";
-    obj = z80fmt.readZ80(filename);
   } else if (extension === ".tap") {
-    result.type = "tapfmt";
-    obj = tapfmt.readTAP(filename);
   } else if (extension === ".zip") {
-    result.type = "zip";
-    obj = { version: null, type: null, scrdata: null, error: null };
-  } else {
-    obj = { version: null, type: null, error: "Unhandled file format" };
-    result.type = null;
-    mylog.warn(`Can't identify file format for: ${file}`);
-    mylog.debug(
-      `FILE INFO: ${file}, extension: ${extension}, dir: ${directory}`
-    );
-    result.scr = "./images/no_image.png";
-  }
-
-  if (obj.error) {
-    result.error = obj.error;
-    result.scr = "./images/no_image.png";
-    return result;
-  }
-
-  result.version = obj.type;
-  result.hwmodel = obj.hwModel;
-  mylog.debug(`snapshot type: ${obj.type}`);
-
-  if (result.type !== null && obj.scrdata !== null) {
-    screenZX.createSCR(obj.scrdata, obj.border).then((res) => {
-      if (res.buffer) {
-        result.scr = "data:image/gif;base64," + res.buffer.toString("base64");
-      } else {
-        result.scr = res;
+    result = [fileObj];
+    var zip = new AdmZip(filename);
+    var zipEntries = zip.getEntries();
+    mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
+    zipEntries.forEach(async function (zipEntry) {
+      if (!zipEntry.isDirectory) {
+        let zxObj = handleFormats.getZXFormat(
+          filename,
+          zipEntry.name,
+          zipEntry.getData()
+        );
+        result.push(zxObj);
       }
     });
   } else {
-    result.scr = "./images/no_image.png";
+    fileObj.type = null;
+    mylog.warn(`Can't identify file format`);
+    fileObj.scr = "./images/no_image.png";
   }
 
-  return result;
+  if (fileObj.error) {
+    return [fileObj];
+  }
+
+  if (result && result.length > 0) {
+    return result;
+  } else {
+    return [fileObj];
+  }
 });
