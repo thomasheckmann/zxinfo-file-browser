@@ -17,13 +17,13 @@ class FolderView extends React.Component {
     this.state = {
       showDrawerFolders: this.props.showDrawerFolders,
       forceClose: false,
-      folderToShow: this.props.folders[0],
+      // folderToShow: this.props.folders,
     };
   }
 
   /**
    * If props are changed by parent
-   * 
+   *
    * @param {*} props
    * @param {*} current_state
    * @returns
@@ -38,15 +38,16 @@ class FolderView extends React.Component {
       return {
         showDrawerFolders: props.showDrawerFolders,
       };
-    } else if (current_state.folderToShow !== props.folders[0]) {
+    } /** else if (current_state.folderToShow !== props.folders[0]) {
       return { folderToShow: props.folders[0] };
-    }
+    }*/
     return null;
   }
 
   render() {
+    // folderToShow must be send to parent
     const toggleFolderDrawer = (open) => (event) => {
-      this.setState({ forceClose: true, folderToShow: open });
+      this.setState({ forceClose: true, /* folderToShow: open */});
     };
 
     return (
@@ -69,7 +70,7 @@ class FolderView extends React.Component {
                     to={folder}
                     spy={true}
                     smooth={false}
-                    onClick={toggleFolderDrawer(folder)}
+                    onClick={toggleFolderDrawer(true)}
                   >
                     {folder}
                   </Link>
@@ -78,11 +79,14 @@ class FolderView extends React.Component {
             </List>
           </Paper>
         </Drawer>
-        <FilesView
-          foldername={this.state.folderToShow}
-          sortOrder={this.props.sortOrder}
-          fileFilters={this.props.fileFilters}
-        ></FilesView>
+        {this.props.folders.map((folder) => (
+          <FilesView
+            key={folder}
+            foldername={folder}
+            sortOrder={this.props.sortOrder}
+            fileFilters={this.props.fileFilters}
+          ></FilesView>
+        ))}
       </React.Fragment>
     );
   }

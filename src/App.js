@@ -127,6 +127,7 @@ function App() {
       ...userSettings,
       sortOrderFolders: event.target.checked,
     });
+
     if (event.target.checked === true) {
       setStartFolder({
         ...startFolder,
@@ -140,7 +141,7 @@ function App() {
     }
   };
 
-  const handleFormat = (event, newFormats) => {
+  const handleFormatFilter = (event, newFormats) => {
     setStartFolder({
       ...startFolder,
       fileFilters: newFormats,
@@ -246,7 +247,7 @@ function App() {
             <ToggleButtonGroup
               size="small"
               value={startFolder.fileFilters}
-              onChange={handleFormat}
+              onChange={handleFormatFilter}
               aria-label="Formats"
               disabled={startFolder.total === 0}
               sx={{ background: "#ffffff", mr: 10 }}

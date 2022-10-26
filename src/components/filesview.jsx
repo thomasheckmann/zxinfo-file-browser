@@ -17,40 +17,32 @@ function showFiles(files, sortOptions, fileFilters) {
   });
 
   if (sortOptions) {
-    return (
-      <React.Fragment>
-        {newFiles.map((file) => (
-          <FileDetails filename={file} key={file}></FileDetails>
-        ))}
-      </React.Fragment>
-    );
+    return newFiles.map((file) => (
+      <FileDetails filename={file} key={file}></FileDetails>
+    ));
   } else {
-    return (
-      <React.Fragment>
-        {newFiles.reverse().map((file) => (
-          <FileDetails filename={file} key={file}></FileDetails>
-        ))}
-      </React.Fragment>
-    );
+    return newFiles
+      .reverse()
+      .map((file) => <FileDetails filename={file} key={file}></FileDetails>);
   }
 }
 
 class FilesView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { data: [] };
+    this.state = { filesInFolder: [] };
   }
 
   componentDidMount() {
     window.electronAPI.scanFolder(this.props.foldername).then((res) => {
-      this.setState({ data: res });
+      this.setState({ filesInFolder: res });
     });
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.foldername !== this.props.foldername) {
       window.electronAPI.scanFolder(this.props.foldername).then((res) => {
-        this.setState({ data: res });
+        this.setState({ filesInFolder: res });
       });
     }
   }
@@ -61,13 +53,13 @@ class FilesView extends React.Component {
         <Box sx={{ display: "flex" }}>
           <FolderTwoToneIcon />
           <Typography variant="button">
-            {this.props.foldername} - ({this.state.data.length})
+            {this.props.foldername} - ({this.state.filesInFolder.length})
           </Typography>
         </Box>
         <Divider variant="middle" />
         <Grid container spacing={2} id={this.props.foldername} sx={{ my: 2 }}>
           {showFiles(
-            this.state.data,
+            this.state.filesInFolder,
             this.props.sortOrder,
             this.props.fileFilters
           )}

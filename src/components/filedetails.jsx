@@ -14,6 +14,7 @@ import { Stack } from "@mui/system";
 import React from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import axios from "axios";
+import RenderIfVisible from 'react-render-if-visible'
 
 function formatType(t) {
   switch (t) {
@@ -49,7 +50,7 @@ class FileDetails extends React.Component {
         axios
           .get(dataURL)
           .then((response) => {
-            const item = data;
+            let item = data;
             item.zxdbID = response.data.entry_id;
             item.zxdbTitle = response.data.title;
 
@@ -57,7 +58,6 @@ class FileDetails extends React.Component {
             this.setState({ data: fileItems });
           })
           .catch((error) => {
-            console.error(`API not found: ${data.sha512}`);
             fileItems.push(data);
             this.setState({ data: fileItems });
           })
@@ -71,6 +71,7 @@ class FileDetails extends React.Component {
       <React.Fragment>
         {this.state.data.map((entry) => (
           <Grid xs={12} sm={6} lg={4} key={entry.filename + entry.subfilename}>
+          <RenderIfVisible>
             <Card raised elevation={5}>
               <CardHeader
                 sx={{
@@ -116,7 +117,7 @@ class FileDetails extends React.Component {
                   )}
                 </Stack>
               </CardContent>
-            </Card>
+            </Card></RenderIfVisible>
           </Grid>
         ))}
       </React.Fragment>
