@@ -17,6 +17,8 @@ class FolderView extends React.Component {
     this.state = {
       showDrawerFolders: this.props.showDrawerFolders,
       forceClose: false,
+      sortOrderFiles: this.props.sortOrder,
+      fileFilters: this.props.fileFilters,
       // folderToShow: this.props.folders,
     };
   }
@@ -38,7 +40,12 @@ class FolderView extends React.Component {
       return {
         showDrawerFolders: props.showDrawerFolders,
       };
-    } /** else if (current_state.folderToShow !== props.folders[0]) {
+    } else if(current_state.sortOrderFiles !== props.sortOrder) {
+      return {sortOrderFiles: props.sortOrder};
+    } else if (current_state.fileFilters !== props.fileFilters) {
+      return {fileFilters: props.fileFilters};
+    }
+      /** else if (current_state.folderToShow !== props.folders[0]) {
       return { folderToShow: props.folders[0] };
     }*/
     return null;
@@ -81,10 +88,10 @@ class FolderView extends React.Component {
         </Drawer>
         {this.props.folders.map((folder) => (
           <FilesView
-            key={folder}
+          key={folder}
             foldername={folder}
-            sortOrder={this.props.sortOrder}
-            fileFilters={this.props.fileFilters}
+            sortOrder={this.state.sortOrderFiles}
+            fileFilters={this.state.fileFilters}
           ></FilesView>
         ))}
       </React.Fragment>

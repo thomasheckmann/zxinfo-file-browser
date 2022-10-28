@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
+
 class IntroText extends React.Component {
   render() {
     const invokeOpenFolderParent = (event) => {
@@ -15,8 +16,7 @@ class IntroText extends React.Component {
     };
 
     return (
-      <React.Fragment>
-        <Grid container component="main" sx={{ height: "100vh" }}>
+        <Grid container component="main" sx={{ height: "100%" }}>
           <CssBaseline />
           <Grid
             item
@@ -52,7 +52,7 @@ class IntroText extends React.Component {
                 alignItems: "left",
               }}
             >
-              <Typography variant="h4">ZXInfo - Explorer</Typography>
+              <Typography variant="h4">ZXInfo - File - Browser</Typography>
               <Divider />
               <Typography variant="body1">
                 The easy ZX Spectrum file manager, scans local files and gives a
@@ -87,7 +87,6 @@ class IntroText extends React.Component {
             </Box>
           </Grid>
         </Grid>
-      </React.Fragment>
     );
   }
 }

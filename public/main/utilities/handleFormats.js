@@ -64,8 +64,8 @@ function getZXFormat(fileName, subFileName, data) {
   if (obj.version) {
     ZXFileInfo.version = obj.version;
   }
-  if (obj.hwmodel) {
-    ZXFileInfo.hwmodel = obj.hwmodel;
+  if (obj.hwModel) {
+    ZXFileInfo.hwmodel = obj.hwModel;
   }
 
   if (obj.error) {

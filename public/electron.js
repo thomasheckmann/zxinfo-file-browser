@@ -120,12 +120,44 @@ const supportedExts = [
  */
 function scanDirectory(dirPath, obj) {
   const mylog = log.scope("scanDirectory");
+
+  /**
+  fs.readdir(dirPath, (err, files) => {
+    if (err) {
+      console.log(err);
+    } else {
+      let filesInDir = 0;
+      files.forEach((file) => {
+        let filepath = path.join(dirPath, file);
+        let stat = fs.statSync(filepath);
+        if (stat.isDirectory()) {
+          let totalFiles = scanDirectory(filepath, obj).totalFiles;
+          if (totalFiles > 0) {
+            obj.set(filepath, totalFiles);
+          }
+        } else {
+          let extension = path.extname(filepath).toLowerCase();
+          if (supportedExts.indexOf(extension) >= 0) {
+            filesInDir++;
+            mylog.debug(`counting ${filepath} - ${supportedExts}`);
+          }
+        }
+      });
+    }
+    if (filesInDir > 0) {
+      obj.set(dirPath, filesInDir);
+    }
+    return { folders: obj, totalFiles: filesInDir };
+  
+  });
+ */
+
   let filesInDir = 0;
   fs.readdirSync(dirPath).forEach(function (file) {
     let filepath = path.join(dirPath, file);
     let stat = fs.statSync(filepath);
     if (stat.isDirectory()) {
-      let totalFiles = scanDirectory(filepath, obj).c;
+      let totalFiles = scanDirectory(filepath, obj).totalFiles;
       if (totalFiles > 0) {
         obj.set(filepath, totalFiles);
       }
@@ -137,10 +169,11 @@ function scanDirectory(dirPath, obj) {
       }
     }
   });
+
   if (filesInDir > 0) {
     obj.set(dirPath, filesInDir);
   }
-  return { r: obj, c: filesInDir };
+  return { folders: obj, totalFiles: filesInDir };
 }
 
 /**
@@ -156,8 +189,8 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
     mylog.debug(`handle('dialog:openFolder'): CANCEL`);
     return { root: null, folders: [], total: 0 }; // TODO: Handling cancel - use previous or ...
   } else {
-    const files = new Map([...scanDirectory(filePaths[0], new Map()).r]);
-
+    const foldersWithFiles = scanDirectory(filePaths[0], new Map());
+    const files = new Map([...foldersWithFiles.folders]);
     var result = [];
 
     let totalFiles = 0;
@@ -202,11 +235,14 @@ ipcMain.handle("scan-folder", (event, arg) => {
 
   mylog.debug(`total files: ${filesInDir}`);
 
+  /**
   if (store.get("sort-files") === true) {
     return result.sort();
   } else if (store.get("sort-files") === false) {
     return result.sort().reverse();
   } else return result;
+   */
+  return result;
 });
 
 /**

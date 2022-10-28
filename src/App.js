@@ -37,6 +37,7 @@ import FolderView from "./components/folderview.jsx";
 import IntroText from "./Intro.jsx";
 
 import "./App.css";
+import { Stack } from "@mui/system";
 
 const ToggleButton = styled(MuiToggleButton)({
   "&.Mui-selected, &.Mui-selected:hover": {
@@ -73,6 +74,8 @@ const defaultFileFilters = [
   "tzx",
   "zip",
 ];
+
+const Offset = styled("div")(({ theme }) => theme.mixins.toolbar);
 
 function App() {
   const [startFolder, setStartFolder] = React.useState({
@@ -145,7 +148,7 @@ function App() {
     setStartFolder({
       ...startFolder,
       fileFilters: newFormats,
-      showDrawerFolders: false,
+      // showDrawerFolders: false,
     });
   };
 
@@ -180,12 +183,12 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box
-        sx={{
-          width: "100%",
-          height: "100vh",
-        }}
-      >
+
+      <Box position="fixed" top={0} height="60px" width="100%">
+        -header-
+      </Box>
+
+      <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">
             <IconButton
@@ -253,7 +256,9 @@ function App() {
               sx={{ background: "#ffffff", mr: 10 }}
             >
               {defaultFileFilters.map((ext) => (
-                <ToggleButton value={ext} key={ext}>{ext}</ToggleButton>
+                <ToggleButton value={ext} key={ext}>
+                  {ext}
+                </ToggleButton>
               ))}
             </ToggleButtonGroup>
             <Box
@@ -309,25 +314,18 @@ function App() {
             </Grid>
           </Paper>
         </Drawer>
-        <Container fixed>
-          <Box sx={{ my: 0, height: "100%" }}>
-            <Toolbar />
-            {startFolder.folders && startFolder.folders.length > 0 ? (
-              <React.Fragment>
-                <FolderView
-                  folders={startFolder.folders}
-                  sortOrder={userSettings.sortOrderFiles}
-                  showDrawerFolders={startFolder.showDrawerFolders}
-                  fileFilters={startFolder.fileFilters}
-                />
-              </React.Fragment>
-            ) : (
-              <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
-            )}
-            <Toolbar />
-          </Box>
+        <Container>
+        {startFolder.folders && startFolder.folders.length > 0 ? (
+            <FolderView
+              folders={startFolder.folders}
+              sortOrder={userSettings.sortOrderFiles}
+              showDrawerFolders={startFolder.showDrawerFolders}
+              fileFilters={startFolder.fileFilters}
+            />
+        ) : (
+          <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
+        )}
         </Container>
-
         <div className="footer">
           <Container>
             <Box sx={{ display: "flex" }}>
