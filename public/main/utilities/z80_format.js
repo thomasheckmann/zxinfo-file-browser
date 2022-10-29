@@ -34,7 +34,7 @@ function readCompressed(data, length) {
 
 function readV1(data, compressed) {
   const mylog = log.scope("Z80 - readV1");
-  mylog.debug(`readV1 (${compressed})`);
+  mylog.log(`readV1 (${compressed})`);
 
   const mem = data.subarray(30);
   var zxram = [];
@@ -141,7 +141,7 @@ function readZ80(data) {
   }
 
   snapshot.type = "Z80 v" + version;
-  mylog.info(`snapshot type: ${snapshot.type}`);
+  mylog.debug(`snapshot type: ${snapshot.type}`);
 
   const hwMode = data[34];
   if (version === 1) {
@@ -205,7 +205,7 @@ function readZ80(data) {
         break;
     }
   }
-  mylog.info(`model: ${snapshot.hwModel}`);
+  mylog.debug(`model: ${snapshot.hwModel}`);
 
   return snapshot;
 }

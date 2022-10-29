@@ -6,6 +6,7 @@ import Divider from "@mui/material/Divider";
 import FileDetails from "./filedetails.jsx";
 import { Paper, Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
+import RenderIfVisible from "react-render-if-visible";
 
 function filterAndSortFiles(files, sortOptions, fileFilters) {
   const newFiles = files.filter((fileName) => {
@@ -36,12 +37,18 @@ class FilesView extends React.Component {
 
   componentDidMount() {
     window.electronAPI.scanFolder(this.props.foldername).then((res) => {
+      // filter out files based filtring
       const newList = filterAndSortFiles(
         res,
         this.state.sortOrderFiles,
         this.state.fileFilters
       );
-      this.setState({ filesInFolder: res, files: newList, sortOrder: this.state.sortOrderFiles, fileFilters: this.state.fileFilters });
+      this.setState({
+        filesInFolder: res,
+        files: newList,
+        sortOrder: this.state.sortOrderFiles,
+        fileFilters: this.state.fileFilters,
+      });
     });
   }
 
@@ -52,17 +59,17 @@ class FilesView extends React.Component {
         props.sortOrder,
         current_state.fileFilters
       );
-      
+
       return {
         files: newList,
         sortOrderFiles: props.sortOrder,
-        filesFilters: current_state.fileFilters
+        filesFilters: current_state.fileFilters,
       };
     } else if (current_state.fileFilters !== props.fileFilters) {
       const newList = filterAndSortFiles(
         current_state.filesInFolder,
         current_state.sortOrder,
-        props.fileFilters,
+        props.fileFilters
       );
       return {
         files: newList,
@@ -75,7 +82,7 @@ class FilesView extends React.Component {
 
   render() {
     return (
-      <Paper elevation={0}>
+      <Paper elevation={2}>
         <Box sx={{ display: "flex" }}>
           <FolderTwoToneIcon />
           <Typography variant="button">
@@ -85,7 +92,7 @@ class FilesView extends React.Component {
         <Divider variant="middle" />
         <Grid container spacing={2} id={this.props.foldername} sx={{ my: 2 }}>
           {this.state.files.map((file, index) => (
-            <FileDetails filename={file} key={file}></FileDetails>
+              <FileDetails filename={file} key={file}></FileDetails>
           ))}
         </Grid>
       </Paper>

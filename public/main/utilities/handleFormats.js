@@ -8,7 +8,7 @@ const tapfmt = require("./tap_format");
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
-  const mylog = log.scope(`getZXFormat (${fileName})`);
+  const mylog = log.scope("getZXFormat");
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // Calculate sha512 value

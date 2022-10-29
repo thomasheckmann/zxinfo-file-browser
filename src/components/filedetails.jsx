@@ -41,10 +41,30 @@ class FileDetails extends React.Component {
     };
   }
 
-  componentDidMount() {
+  /**
+  async getZXDBInfo(hash) {
+    let result = { zxdbID: null, zxdbTitle: null };
+    try {
+      const dataURL = `https://api.zxinfo.dk/v3/filecheck/${hash}`;
+      const response = axios.get(dataURL);
+      const data = await response;
+      if (data.status === 200) {
+        result.zxdbID = data.data.entry_id;
+        result.zxdbTitle = data.data.title;
+      }
+    } catch (error) {}
+    console.log(result);
+    return result;
+  }
+ */
+
+  async componentDidMount() {
     window.electronAPI.loadFile(this.props.filename).then((res) => {
+      this.setState({ data: res });
       let fileItems = [];
       res.forEach((data) => {
+        let item = data;
+
         const dataURL = `https://api.zxinfo.dk/v3/filecheck/${data.sha512}`;
         axios
           .get(dataURL)

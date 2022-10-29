@@ -19,7 +19,7 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "debug" : "info";
+log.transports.console.level = isDev ? "info" : "info";
 
 async function handleFolderOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -120,6 +120,7 @@ const supportedExts = [
  */
 function scanDirectory(dirPath, obj) {
   const mylog = log.scope("scanDirectory");
+  mylog.log(dirPath);
 
   /**
   fs.readdir(dirPath, (err, files) => {
@@ -181,6 +182,7 @@ function scanDirectory(dirPath, obj) {
  */
 ipcMain.handle("dialog:openFolder", async (event, arg) => {
   const mylog = log.scope("dialog:openFolder");
+  mylog.log("open:Folder");
 
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ["openDirectory"],
@@ -227,21 +229,13 @@ ipcMain.handle("scan-folder", (event, arg) => {
       let extension = path.extname(filepath).toLowerCase();
       if (supportedExts.indexOf(extension) >= 0) {
         filesInDir++;
-        mylog.log(`found a file: ${filepath}, count=${filesInDir}`);
+        mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
         result.push(filepath);
       }
     }
   });
 
-  mylog.debug(`total files: ${filesInDir}`);
-
-  /**
-  if (store.get("sort-files") === true) {
-    return result.sort();
-  } else if (store.get("sort-files") === false) {
-    return result.sort().reverse();
-  } else return result;
-   */
+  mylog.log(`total files: ${filesInDir}`);
   return result;
 });
 
@@ -253,7 +247,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
  * .Z80 and ...
  */
 ipcMain.handle("load-file", async (event, arg) => {
-  const mylog = log.scope(`load-file ${arg}`);
+  const mylog = log.scope("load-file");
 
   let result; // either object or array (zip)
 

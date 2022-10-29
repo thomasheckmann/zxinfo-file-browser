@@ -169,7 +169,7 @@ function App() {
     const foldersWithFiles = await window.electronAPI.openFolder();
     setStartFolder({
       root: foldersWithFiles.root,
-      folders: foldersWithFiles.folders,
+      folders: foldersWithFiles.folders[0],
       total: foldersWithFiles.total,
       showDrawerFolders: false,
       showDrawerSettings: false,
