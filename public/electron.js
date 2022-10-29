@@ -21,16 +21,7 @@ const log = require("electron-log");
 
 log.transports.console.level = isDev ? "info" : "info";
 
-async function handleFolderOpen() {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ["openDirectory"],
-  });
-  if (canceled) {
-    return;
-  } else {
-    return filePaths[0];
-  }
-}
+let win;
 
 function createWindow() {
   const mylog = log.scope("createWindow");
@@ -39,7 +30,7 @@ function createWindow() {
   mylog.debug(`sort-files: ${store.get("sort-files")}`);
 
   mylog.debug("creating window");
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1400,
     height: 800,
     title: "ZXInfo - file manager",
@@ -51,11 +42,7 @@ function createWindow() {
     },
   });
 
-  win.loadURL(
-    isDev
-      ? "http://localhost:3000"
-      : `file://${path.join(__dirname, "../build/index.html")}`
-  );
+  win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
 
   // Open the DevTools.
   if (isDev) {
@@ -98,17 +85,7 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
-const supportedExts = [
-  ".sna",
-  ".z80",
-  ".slt",
-  ".dsk",
-  ".trd",
-  ".mdr",
-  ".tap",
-  ".tzx",
-  ".zip",
-];
+const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", ".tzx", ".zip"];
 
 /**
  *
@@ -121,37 +98,6 @@ const supportedExts = [
 function scanDirectory(dirPath, obj) {
   const mylog = log.scope("scanDirectory");
   mylog.log(dirPath);
-
-  /**
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      console.log(err);
-    } else {
-      let filesInDir = 0;
-      files.forEach((file) => {
-        let filepath = path.join(dirPath, file);
-        let stat = fs.statSync(filepath);
-        if (stat.isDirectory()) {
-          let totalFiles = scanDirectory(filepath, obj).totalFiles;
-          if (totalFiles > 0) {
-            obj.set(filepath, totalFiles);
-          }
-        } else {
-          let extension = path.extname(filepath).toLowerCase();
-          if (supportedExts.indexOf(extension) >= 0) {
-            filesInDir++;
-            mylog.debug(`counting ${filepath} - ${supportedExts}`);
-          }
-        }
-      });
-    }
-    if (filesInDir > 0) {
-      obj.set(dirPath, filesInDir);
-    }
-    return { folders: obj, totalFiles: filesInDir };
-  
-  });
- */
 
   let filesInDir = 0;
   fs.readdirSync(dirPath).forEach(function (file) {
@@ -173,6 +119,7 @@ function scanDirectory(dirPath, obj) {
 
   if (filesInDir > 0) {
     obj.set(dirPath, filesInDir);
+    win.webContents.send("notify-about-folder", { folder: dirPath, totalFiles: filesInDir });
   }
   return { folders: obj, totalFiles: filesInDir };
 }
@@ -231,6 +178,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
         filesInDir++;
         mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
         result.push(filepath);
+        win.webContents.send("notify-about-file", path.basename(filepath));
       }
     }
   });
@@ -268,12 +216,8 @@ ipcMain.handle("load-file", async (event, arg) => {
     mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
     zipEntries.forEach(async function (zipEntry) {
       if (!zipEntry.isDirectory) {
-        let zxObj = handleFormats.getZXFormat(
-          filename,
-          zipEntry.name,
-          zipEntry.getData()
-        );
-        result.push(zxObj);
+        let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
+        if(zxObj !== null) result.push(zxObj);
       }
     });
   } else {

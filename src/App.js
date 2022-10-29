@@ -14,6 +14,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { styled } from "@mui/material/styles";
 
 import {
+  Alert,
   AppBar,
   Box,
   Button,
@@ -25,6 +26,7 @@ import {
   Grid,
   IconButton,
   Paper,
+  Snackbar,
   Toolbar,
   Tooltip,
   Typography,
@@ -78,6 +80,11 @@ const defaultFileFilters = [
 
 const Offset = styled("div")(({ theme }) => theme.mixins.toolbar);
 
+window.electronAPI.onNotifyAboutFolder((_event, value) => {
+  console.log(JSON.stringify(value));
+})
+
+
 function App() {
   const [startFolder, setStartFolder] = React.useState({
     root: [],
@@ -88,6 +95,20 @@ function App() {
     fileFilters: defaultFileFilters,
   });
 
+
+  const [notifyOpen, setNotifyOpen] = React.useState({status: false, filename: null});
+  const handleNotifyClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setNotifyOpen({...notifyOpen, status: false});
+  };
+  window.electronAPI.onNotifyAboutFile((_event, value) => {
+    console.log("Addind: " + value);
+    setNotifyOpen({status: false, filename: null});
+    setNotifyOpen({status: true, filename: value});
+  })
+  
   /**
    * xs, sm, md, lg, xl
    * @returns
@@ -211,7 +232,14 @@ function App() {
       <Box position="fixed" top={0} height="60px" width="100%">
         -header-
       </Box>
-
+  
+<Snackbar
+  open={notifyOpen.status}
+  onClose={handleNotifyClose}
+  autoHideDuration={1000}
+><Alert onClose={handleNotifyClose} severity="success" sx={{ width: '100%' }}>
+          Added file: {notifyOpen.filename}
+        </Alert></Snackbar>
       <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">

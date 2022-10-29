@@ -1,5 +1,6 @@
 const log = require("electron-log");
 const crypto = require("crypto");
+const path = require("path");
 
 const snafmt = require("./sna_format");
 const z80fmt = require("./z80_format");
@@ -10,6 +11,14 @@ const screenZX = require("./handleSCR");
 function getZXFormat(fileName, subFileName, data) {
   const mylog = log.scope("getZXFormat");
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
+
+  // test if file within zip is supported
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", ".tzx", ".zip"];
+  if (subFileName && subFileName.length > 0) {
+    let fileExt = path.extname(subFileName).toLowerCase();
+    console.log("FILE EXTENSION: " + fileExt);
+    if (supportedExts.indexOf(fileExt) < 0) return null;
+  }
 
   // Calculate sha512 value
   let sum = crypto.createHash("sha512");
@@ -77,8 +86,7 @@ function getZXFormat(fileName, subFileName, data) {
   if (obj.scrdata) {
     screenZX.createSCR(obj.scrdata, obj.border).then((res) => {
       if (res.buffer) {
-        ZXFileInfo.scr =
-          "data:image/gif;base64," + res.buffer.toString("base64");
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
         ZXFileInfo.scr = res;
       }
