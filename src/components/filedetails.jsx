@@ -59,37 +59,45 @@ class FileDetails extends React.Component {
  */
 
   async componentDidMount() {
-    window.electronAPI.loadFile(this.props.filename).then((res) => {
+    try {
+      window.electronAPI.loadFile(this.props.filename).then((res) => {
       this.setState({ data: res });
       let fileItems = [];
       res.forEach((data) => {
         let item = data;
+          const dataURL = `https://api.zxinfo.dk/v3/filecheck/${data.sha512}`;
+          axios
+            .get(dataURL)
+            .then((response) => {
+              let item = data;
+              item.zxdbID = response.data.entry_id;
+              item.zxdbTitle = response.data.title;
 
-        const dataURL = `https://api.zxinfo.dk/v3/filecheck/${data.sha512}`;
-        axios
-          .get(dataURL)
-          .then((response) => {
-            let item = data;
-            item.zxdbID = response.data.entry_id;
-            item.zxdbTitle = response.data.title;
-
-            fileItems.push(item);
-            this.setState({ data: fileItems });
-          })
-          .catch((error) => {
-            fileItems.push(data);
-            this.setState({ data: fileItems });
-          })
-          .finally(() => {});
+              fileItems.push(item);
+              this.setState({ data: fileItems });
+            })
+            .catch((error) => {
+              fileItems.push(data);
+              this.setState({ data: fileItems });
+            })
+            .finally(() => {});
       });
     });
-  }
+  } catch (e) {}
+}
 
   render() {
     return (
       <React.Fragment>
         {this.state.data.map((entry) => (
-          <Grid xs={12} sm={6} lg={4} key={entry.filename + entry.subfilename}>
+          <Grid
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            xl={2}
+            key={entry.filename + entry.subfilename}
+          >
             <Card raised elevation={5}>
               <CardHeader
                 sx={{

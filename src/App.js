@@ -28,6 +28,7 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 
 import MuiToggleButton from "@mui/material/ToggleButton";
@@ -86,6 +87,29 @@ function App() {
     showDrawerSettings: false,
     fileFilters: defaultFileFilters,
   });
+
+  /**
+   * xs, sm, md, lg, xl
+   * @returns
+   */
+  const greaterThanLG = useMediaQuery(theme.breakpoints.up("xl"));
+  const lgTOxl = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const mdTOlg = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const smTOmd = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const lessThanSM = useMediaQuery(theme.breakpoints.down("sm"));
+  function getBreakPointName() {
+    if (greaterThanLG) {
+      return "XL";
+    } else if (lgTOxl) {
+      return "LG";
+    } else if (mdTOlg) {
+      return "MD";
+    } else if (smTOmd) {
+      return "SM";
+    } else if (lessThanSM) {
+      return "XS";
+    }
+  }
 
   /**
    * Drawer for settings
@@ -246,6 +270,7 @@ function App() {
               sx={{ flexGrow: 1 }}
             >
               ZXInfo File Browser
+              {(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ? " - " + getBreakPointName(): ""}
             </Typography>
             <ToggleButtonGroup
               size="small"
@@ -314,17 +339,17 @@ function App() {
             </Grid>
           </Paper>
         </Drawer>
-        <Container>
-        {startFolder.folders && startFolder.folders.length > 0 ? (
+        <Container maxWidth="xl">
+          {startFolder.folders && startFolder.folders.length > 0 ? (
             <FolderView
               folders={startFolder.folders}
               sortOrder={userSettings.sortOrderFiles}
               showDrawerFolders={startFolder.showDrawerFolders}
               fileFilters={startFolder.fileFilters}
             />
-        ) : (
-          <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
-        )}
+          ) : (
+            <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
+          )}
         </Container>
         <div className="footer">
           <Container>
