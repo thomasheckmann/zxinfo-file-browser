@@ -179,6 +179,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
         mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
         result.push(filepath);
         win.webContents.send("notify-about-file", path.basename(filepath));
+        mylog.info("adding: " + path.basename(filepath));
       }
     }
   });

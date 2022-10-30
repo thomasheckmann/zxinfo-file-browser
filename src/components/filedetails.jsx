@@ -1,14 +1,4 @@
-import {
-  Alert,
-  Avatar,
-  Card,
-  CardContent,
-  CardHeader,
-  CardMedia,
-  Chip,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Alert, Avatar, Card, CardContent, CardHeader, CardMedia, Chip, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import { Stack } from "@mui/system";
 import React from "react";
@@ -61,10 +51,10 @@ class FileDetails extends React.Component {
   async componentDidMount() {
     try {
       window.electronAPI.loadFile(this.props.filename).then((res) => {
-      this.setState({ data: res });
-      let fileItems = [];
-      res.forEach((data) => {
-        let item = data;
+        this.setState({ data: res });
+        let fileItems = [];
+        res.forEach((data) => {
+          let item = data;
           const dataURL = `https://api.zxinfo.dk/v3/filecheck/${data.sha512}`;
           axios
             .get(dataURL)
@@ -81,23 +71,16 @@ class FileDetails extends React.Component {
               this.setState({ data: fileItems });
             })
             .finally(() => {});
+        });
       });
-    });
-  } catch (e) {}
-}
+    } catch (e) {}
+  }
 
   render() {
     return (
       <React.Fragment>
         {this.state.data.map((entry) => (
-          <Grid
-            xs={12}
-            sm={6}
-            md={4}
-            lg={3}
-            xl={2}
-            key={entry.filename + entry.subfilename}
-          >
+          <Grid xs={12} sm={6} md={4} lg={3} xl={3} key={entry.filename + entry.subfilename}>
             <Card raised elevation={5}>
               <CardHeader
                 sx={{
@@ -119,16 +102,8 @@ class FileDetails extends React.Component {
                 }
                 subheader={entry.subfilename}
               ></CardHeader>
-              {entry.error ? (
-                <Alert severity="warning">{entry.error}</Alert>
-              ) : (
-                ""
-              )}
-              <CardMedia
-                component="img"
-                image={entry.scr}
-                alt={entry.filename}
-              />
+              {entry.error ? <Alert severity="warning">{entry.error}</Alert> : ""}
+              <CardMedia component="img" image={entry.scr} alt={entry.filename} />
               <CardContent>
                 <Typography gutterBottom variant="h5" component="div" noWrap>
                   {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
@@ -136,11 +111,7 @@ class FileDetails extends React.Component {
                 <Stack direction="row" spacing={1}>
                   {entry.version ? <Chip label={entry.version} /> : ""}
                   {entry.hwmodel ? <Chip label={entry.hwmodel} /> : ""}
-                  {entry.zxdbID ? (
-                    <Chip label={entry.zxdbID} variant="outlined" />
-                  ) : (
-                    ""
-                  )}
+                  {entry.zxdbID ? <Chip label={entry.zxdbID} variant="outlined" /> : ""}
                 </Stack>
               </CardContent>
             </Card>

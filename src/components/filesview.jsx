@@ -38,11 +38,7 @@ class FilesView extends React.Component {
   componentDidMount() {
     window.electronAPI.scanFolder(this.props.foldername).then((res) => {
       // filter out files based filtring
-      const newList = filterAndSortFiles(
-        res,
-        this.state.sortOrderFiles,
-        this.state.fileFilters
-      );
+      const newList = filterAndSortFiles(res, this.state.sortOrderFiles, this.state.fileFilters);
       this.setState({
         filesInFolder: res,
         files: newList,
@@ -54,11 +50,7 @@ class FilesView extends React.Component {
 
   static getDerivedStateFromProps(props, current_state) {
     if (current_state.sortOrderFiles !== props.sortOrder) {
-      const newList = filterAndSortFiles(
-        current_state.filesInFolder,
-        props.sortOrder,
-        current_state.fileFilters
-      );
+      const newList = filterAndSortFiles(current_state.filesInFolder, props.sortOrder, current_state.fileFilters);
 
       return {
         files: newList,
@@ -66,11 +58,7 @@ class FilesView extends React.Component {
         filesFilters: current_state.fileFilters,
       };
     } else if (current_state.fileFilters !== props.fileFilters) {
-      const newList = filterAndSortFiles(
-        current_state.filesInFolder,
-        current_state.sortOrder,
-        props.fileFilters
-      );
+      const newList = filterAndSortFiles(current_state.filesInFolder, current_state.sortOrder, props.fileFilters);
       return {
         files: newList,
         sortOrderFiles: current_state.sortOrder,
@@ -92,7 +80,7 @@ class FilesView extends React.Component {
         <Divider variant="middle" />
         <Grid container spacing={2} id={this.props.foldername} sx={{ my: 2 }}>
           {this.state.files.map((file, index) => (
-              <FileDetails filename={file} key={file}></FileDetails>
+            <FileDetails filename={file} key={file}></FileDetails>
           ))}
         </Grid>
       </Paper>

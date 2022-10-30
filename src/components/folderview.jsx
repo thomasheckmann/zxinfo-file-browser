@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Divider, Drawer, List, ListItem, Paper, Typography } from "@mui/material";
 
 import { Link } from "react-scroll";
 import FilesView from "./filesview.jsx";
@@ -40,12 +33,12 @@ class FolderView extends React.Component {
       return {
         showDrawerFolders: props.showDrawerFolders,
       };
-    } else if(current_state.sortOrderFiles !== props.sortOrder) {
-      return {sortOrderFiles: props.sortOrder};
+    } else if (current_state.sortOrderFiles !== props.sortOrder) {
+      return { sortOrderFiles: props.sortOrder };
     } else if (current_state.fileFilters !== props.fileFilters) {
-      return {fileFilters: props.fileFilters};
+      return { fileFilters: props.fileFilters };
     }
-      /** else if (current_state.folderToShow !== props.folders[0]) {
+    /** else if (current_state.folderToShow !== props.folders[0]) {
       return { folderToShow: props.folders[0] };
     }*/
     return null;
@@ -54,7 +47,7 @@ class FolderView extends React.Component {
   render() {
     // folderToShow must be send to parent
     const toggleFolderDrawer = (open) => (event) => {
-      this.setState({ forceClose: true, /* folderToShow: open */});
+      this.setState({ forceClose: true /* folderToShow: open */ });
     };
 
     return (
@@ -66,19 +59,12 @@ class FolderView extends React.Component {
           onClose={toggleFolderDrawer(false)}
         >
           <Paper variant="outlined" sx={{ my: 0, p: 2 }}>
-            <Typography variant="button">
-              List of folders, click to jump to section
-            </Typography>
+            <Typography variant="button">List of folders, click to jump to section</Typography>
             <Divider />
             <List dense>
               {this.props.folders.map((folder) => (
                 <ListItem key={folder}>
-                  <Link
-                    to={folder}
-                    spy={true}
-                    smooth={false}
-                    onClick={toggleFolderDrawer(true)}
-                  >
+                  <Link to={folder} spy={true} smooth={false} onClick={toggleFolderDrawer(true)}>
                     {folder}
                   </Link>
                 </ListItem>
@@ -88,7 +74,7 @@ class FolderView extends React.Component {
         </Drawer>
         {this.props.folders.map((folder) => (
           <FilesView
-          key={folder}
+            key={folder}
             foldername={folder}
             sortOrder={this.state.sortOrderFiles}
             fileFilters={this.state.fileFilters}

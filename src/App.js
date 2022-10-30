@@ -66,24 +66,13 @@ const theme = createTheme({
   },
 });
 
-const defaultFileFilters = [
-  "sna",
-  "z80",
-  "slt",
-  "dsk",
-  "trd",
-  "mdr",
-  "tap",
-  "tzx",
-  "zip",
-];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "mdr", "tap", "tzx", "zip"];
 
 const Offset = styled("div")(({ theme }) => theme.mixins.toolbar);
 
 window.electronAPI.onNotifyAboutFolder((_event, value) => {
   console.log(JSON.stringify(value));
-})
-
+});
 
 function App() {
   const [startFolder, setStartFolder] = React.useState({
@@ -95,20 +84,18 @@ function App() {
     fileFilters: defaultFileFilters,
   });
 
-
-  const [notifyOpen, setNotifyOpen] = React.useState({status: false, filename: null});
+  const [notifyOpen, setNotifyOpen] = React.useState({ status: false, filename: null });
   const handleNotifyClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
-    setNotifyOpen({...notifyOpen, status: false});
+    setNotifyOpen({ ...notifyOpen, status: false });
   };
   window.electronAPI.onNotifyAboutFile((_event, value) => {
-    console.log("Addind: " + value);
-    setNotifyOpen({status: false, filename: null});
-    setNotifyOpen({status: true, filename: value});
-  })
-  
+    // setNotifyOpen({ status: false, filename: null });
+    setNotifyOpen({ status: true, filename: value });
+  });
+
   /**
    * xs, sm, md, lg, xl
    * @returns
@@ -136,10 +123,7 @@ function App() {
    * Drawer for settings
    */
   const toggleDrawerSettings = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
+    if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
       return;
     }
 
@@ -200,14 +184,10 @@ function App() {
   useEffect(() => {
     window.electronAPI
       .getStoreValue("sort-folders")
-      .then((data) =>
-        setUserSettings({ ...userSettings, sortOrderFolders: data })
-      );
+      .then((data) => setUserSettings({ ...userSettings, sortOrderFolders: data }));
     window.electronAPI
       .getStoreValue("sort-files")
-      .then((data) =>
-        setUserSettings({ ...userSettings, sortOrderFiles: data })
-      );
+      .then((data) => setUserSettings({ ...userSettings, sortOrderFiles: data }));
   }, []);
 
   const handleOpenFolderFromChild = async (childData) => {
@@ -232,14 +212,12 @@ function App() {
       <Box position="fixed" top={0} height="60px" width="100%">
         -header-
       </Box>
-  
-<Snackbar
-  open={notifyOpen.status}
-  onClose={handleNotifyClose}
-  autoHideDuration={1000}
-><Alert onClose={handleNotifyClose} severity="success" sx={{ width: '100%' }}>
+
+      <Snackbar open={notifyOpen.status} onClose={handleNotifyClose} autoHideDuration={1000}>
+        <Alert onClose={handleNotifyClose} severity="success" sx={{ width: "100%" }}>
           Added file: {notifyOpen.filename}
-        </Alert></Snackbar>
+        </Alert>
+      </Snackbar>
       <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">
@@ -291,14 +269,9 @@ function App() {
               </Tooltip>
             </IconButton>
 
-            <Typography
-              variant="h6"
-              color="inherit"
-              component="div"
-              sx={{ flexGrow: 1 }}
-            >
+            <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
               ZXInfo File Browser
-              {(!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ? " - " + getBreakPointName(): ""}
+              {!process.env.NODE_ENV || process.env.NODE_ENV === "development" ? " - " + getBreakPointName() : ""}
             </Typography>
             <ToggleButtonGroup
               size="small"
@@ -314,18 +287,10 @@ function App() {
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
-            <Box
-              sx={{ maxHeight: 50 }}
-              component="img"
-              src="./images/rainbow2.jpg"
-            />
+            <Box sx={{ maxHeight: 50 }} component="img" src="./images/rainbow2.jpg" />
           </Toolbar>
         </AppBar>
-        <Drawer
-          anchor="left"
-          open={startFolder.showDrawerSettings}
-          onClose={toggleDrawerSettings(false)}
-        >
+        <Drawer anchor="left" open={startFolder.showDrawerSettings} onClose={toggleDrawerSettings(false)}>
           <Paper variant="outlined" sx={{ my: 0, p: 2, width: 350 }}>
             <Typography component="h1" variant="h6">
               Settings
@@ -357,11 +322,7 @@ function App() {
                 />
               </Grid>
               <Grid item xs={12}></Grid>
-              <Button
-                variant="contained"
-                onClick={toggleDrawerSettings(false)}
-                sx={{ mt: 3, ml: 1 }}
-              >
+              <Button variant="contained" onClick={toggleDrawerSettings(false)} sx={{ mt: 3, ml: 1 }}>
                 OK
               </Button>
             </Grid>
