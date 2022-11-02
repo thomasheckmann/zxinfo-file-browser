@@ -221,7 +221,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       }
     });
   } else {
-    fileObj.type = null;
+    fileObj.type = extension.substring(1).toLowerCase();
     mylog.warn(`Can't identify file format`);
     fileObj.scr = "./images/no_image.png";
   }

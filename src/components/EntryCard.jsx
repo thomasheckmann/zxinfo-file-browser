@@ -39,7 +39,7 @@ function formatType(t) {
     case "zip":
       return "ZIP";
     default:
-      return "?";
+      return t;
   }
 }
 

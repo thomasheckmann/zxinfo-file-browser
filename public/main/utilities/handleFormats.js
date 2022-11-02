@@ -16,7 +16,6 @@ function getZXFormat(fileName, subFileName, data) {
   const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", ".tzx", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
-    console.log("FILE EXTENSION: " + fileExt);
     if (supportedExts.indexOf(fileExt) < 0) return null;
   }
 
@@ -65,7 +64,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.type = "zip";
   } else {
     obj = { version: null, type: null, error: "Unhandled file format" };
-    ZXFileInfo.type = null;
+    ZXFileInfo.type = "X";
     mylog.warn(`Can't identify file format for: ${extension}`);
     ZXFileInfo.scr = "./images/no_image.png";
   }
