@@ -17,6 +17,7 @@ import React from "react";
 
 import { Alert, Avatar, Card, CardContent, CardHeader, CardMedia, Chip, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
+import axios from "axios";
 
 var dummyObject = {
   filename: "myfile.zip",
@@ -43,12 +44,32 @@ function formatType(t) {
   }
 }
 
+const openLink = (id) => {
+  console.log(id);
+  window.electronAPI.openZXINFODetail(id).then((res) => {
+  });
+}
+
 class EntryCard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       entry: this.props.entry,
     };
+  }
+
+  componentDidMount() {
+    const dataURL = `https://api.zxinfo.dk/v3/filecheck/${this.state.entry.sha512}`;
+    axios
+      .get(dataURL)
+      .then((response) => {
+        let item = this.state.entry;
+        item.zxdbID = response.data.entry_id;
+        item.zxdbTitle = response.data.title;
+        this.setState(item);
+      })
+      .catch((error) => {})
+      .finally(() => {});
   }
 
   render() {
@@ -81,9 +102,9 @@ class EntryCard extends React.Component {
             {this.state.entry.zxdbTitle ? this.state.entry.zxdbTitle : this.state.entry.filename}
           </Typography>
           <Stack direction="row" spacing={1}>
-            {this.state.entry.version ? <Chip label={this.state.entry.version} /> : ""}
-            {this.state.entry.hwmodel ? <Chip label={this.state.entry.hwmodel} /> : ""}
-            {this.state.entry.zxdbID ? <Chip label={this.state.entry.zxdbID} variant="outlined" /> : ""}
+            {this.state.entry.version && <Chip label={this.state.entry.version} />}
+            {this.state.entry.hwmodel && <Chip label={this.state.entry.hwmodel} />}
+            {this.state.entry.zxdbID && <Chip label={this.state.entry.zxdbID} variant="outlined" onClick={(id) => openLink(this.state.entry.zxdbID)} />}
           </Stack>
         </CardContent>
       </Card>

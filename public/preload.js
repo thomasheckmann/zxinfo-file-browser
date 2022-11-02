@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setStoreValue: (key, value) => ipcRenderer.invoke("setStoreValue", key, value),
   onNotifyAboutFolder: (callback) => ipcRenderer.on("notify-about-folder", callback),
   onNotifyAboutFile: (callback) => ipcRenderer.on("notify-about-file", callback),
+  openZXINFODetail: (args) => ipcRenderer.invoke("open-zxinfo-detail", args),
 });

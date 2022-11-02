@@ -236,3 +236,10 @@ ipcMain.handle("load-file", async (event, arg) => {
     return [fileObj];
   }
 });
+
+ipcMain.handle("open-zxinfo-detail", (event, arg) => {
+  const mylog = log.scope("open-zxinfo-detail");
+  mylog.info(arg);
+  require('electron').shell.openExternal(`https://zxinfo.dk/details/${arg}`);
+
+});
