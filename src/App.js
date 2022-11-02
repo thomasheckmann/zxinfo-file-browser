@@ -41,6 +41,8 @@ import IntroText from "./Intro";
 
 import "./App.css";
 
+const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
+
 const ToggleButton = styled(MuiToggleButton)({
   "&.Mui-selected, &.Mui-selected:hover": {
     color: "white",
@@ -255,14 +257,14 @@ function App() {
 
             <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
               ZXInfo File Browser
-              {!process.env.NODE_ENV || process.env.NODE_ENV === "development" ? " - " + getBreakPointName() : ""}
+              {isDev ? " - " + getBreakPointName() : ""}
             </Typography>
             <ToggleButtonGroup
               size="small"
               value={startFolder.fileFilters}
               onChange={handleFormatFilter}
               aria-label="Formats"
-              disabled={startFolder.total === 0}
+              disabled={isDev && startFolder.total === 0}
               sx={{ background: "#ffffff", mr: 10 }}
             >
               {defaultFileFilters.map((ext) => (
