@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRef } from "react";
-import { Container, Paper } from "@mui/material";
+import { Box, Container, LinearProgress, Paper } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import styled from "@emotion/styled";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -60,7 +60,13 @@ function InfiniteEntriesList(props) {
           dataLength={items.length}
           next={fetchMoreData}
           hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
+          loader={
+            <Grid xs={12}>
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+              </Box>
+            </Grid>
+          }
           height={700}
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
