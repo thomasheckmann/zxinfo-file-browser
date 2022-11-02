@@ -36,11 +36,10 @@ import {
 import MuiToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import FolderView from "./components/folderview.jsx";
-import IntroText from "./Intro.jsx";
+import FolderView from "./components/FileBrowser";
+import IntroText from "./Intro";
 
 import "./App.css";
-import { Stack } from "@mui/system";
 
 const ToggleButton = styled(MuiToggleButton)({
   "&.Mui-selected, &.Mui-selected:hover": {
@@ -68,12 +67,6 @@ const theme = createTheme({
 
 const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "mdr", "tap", "tzx", "zip"];
 
-const Offset = styled("div")(({ theme }) => theme.mixins.toolbar);
-
-window.electronAPI.onNotifyAboutFolder((_event, value) => {
-  console.log(JSON.stringify(value));
-});
-
 function App() {
   const [startFolder, setStartFolder] = React.useState({
     root: [],
@@ -91,10 +84,13 @@ function App() {
     }
     setNotifyOpen({ ...notifyOpen, status: false });
   };
+
+  /**
   window.electronAPI.onNotifyAboutFile((_event, value) => {
     // setNotifyOpen({ status: false, filename: null });
     setNotifyOpen({ status: true, filename: value });
   });
+ */
 
   /**
    * xs, sm, md, lg, xl
@@ -132,7 +128,6 @@ function App() {
       showDrawerSettings: open,
       showDrawerFolders: false,
     });
-    // setShowDrawerSettings(open);
   };
 
   const toggleDrawerFolders = (open) => (event) => {
@@ -177,17 +172,12 @@ function App() {
     setStartFolder({
       ...startFolder,
       fileFilters: newFormats,
-      // showDrawerFolders: false,
     });
   };
 
   useEffect(() => {
-    window.electronAPI
-      .getStoreValue("sort-folders")
-      .then((data) => setUserSettings({ ...userSettings, sortOrderFolders: data }));
-    window.electronAPI
-      .getStoreValue("sort-files")
-      .then((data) => setUserSettings({ ...userSettings, sortOrderFiles: data }));
+    window.electronAPI.getStoreValue("sort-folders").then((data) => setUserSettings({ ...userSettings, sortOrderFolders: data }));
+    window.electronAPI.getStoreValue("sort-files").then((data) => setUserSettings({ ...userSettings, sortOrderFiles: data }));
   }, []);
 
   const handleOpenFolderFromChild = async (childData) => {
@@ -221,13 +211,7 @@ function App() {
       <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">
-            <IconButton
-              edge="start"
-              color="inherit"
-              sx={{ mr: 2 }}
-              aria-label="Settings"
-              onClick={toggleDrawerSettings(true)}
-            >
+            <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Settings" onClick={toggleDrawerSettings(true)}>
               <Tooltip title="Settings">
                 <SettingsOutlinedIcon />
               </Tooltip>
@@ -299,25 +283,13 @@ function App() {
             <Grid container spacing={0}>
               <Grid item xs={12}>
                 <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="sortOrderFolders"
-                      checked={userSettings.sortOrderFolders}
-                      onChange={handleChangeSettingsFolders}
-                    />
-                  }
+                  control={<Checkbox name="sortOrderFolders" checked={userSettings.sortOrderFolders} onChange={handleChangeSettingsFolders} />}
                   label="Sort folders ascending"
                 />
               </Grid>
               <Grid item xs={12}>
                 <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="sortOrderFiles"
-                      checked={userSettings.sortOrderFiles}
-                      onChange={handleChangeSettingsFiles}
-                    />
-                  }
+                  control={<Checkbox name="sortOrderFiles" checked={userSettings.sortOrderFiles} onChange={handleChangeSettingsFiles} />}
                   label="Sort filenames ascending"
                 />
               </Grid>
