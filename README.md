@@ -1,6 +1,6 @@
 
-# ZXINFO File Manager
-Manage your ZX Spectrum emulator files, powered by the web.
+# ZXINFO File Browser
+Browse your ZX Spectrum emulator files, powered by the web.
 
 <img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
 
@@ -27,12 +27,12 @@ Requirements:
 Clone the repository and run build
 ```
 cd <some folder>
-git clone git@github.com:thomasheckmann/zxinfo-file-manager.git
-cd zxinfo-file-manager
+git clone git@github.com:thomasheckmann/zxinfo-file-browser.git
+cd zxinfo-file-browser
 npm i
 npm run build
 ```
 The app is then available in the 'dist' folder.
 
 # Development
-See [Development.md](Development.md) for details about how to build zxinfo-file-manager.
+See [Development.md](Development.md) for details about how to build zxinfo-file-browser.
