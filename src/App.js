@@ -264,7 +264,7 @@ function App() {
               value={startFolder.fileFilters}
               onChange={handleFormatFilter}
               aria-label="Formats"
-              disabled={isDev && startFolder.total === 0}
+              disabled={!isDev || startFolder.total === 0}
               sx={{ background: "#ffffff", mr: 10 }}
             >
               {defaultFileFilters.map((ext) => (
