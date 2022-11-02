@@ -91,7 +91,7 @@ function readV2(data, compressed) {
 
 function readZ80(data) {
   const mylog = log.scope("readZ80");
-  mylog.log(`input: ${data.length}`);
+  mylog.info(`input: ${data.length}`);
 
   var snapshot = {};
   var version = 1;

@@ -6,22 +6,36 @@
  */
 
 import React, { useEffect, useState } from "react";
-import EntryCard from "./EntryCard";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { useRef } from "react";
+import { Container, Paper } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
+import styled from "@emotion/styled";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useIsVisible } from "react-is-visible";
+import EntryCard from "./EntryCard";
 
-const NO_OF_ITEMS = 9; // number of files to fetch/display
+const ItemEnd = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#ccc",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
 
 function InfiniteEntriesList(props) {
   const [items, setItems] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [index, setIndex] = useState(0);
+  const [maxSize, setMaxSize] = useState(props.maxsize);
+
+  const nodeRef = useRef();
+  const isVisible = useIsVisible(nodeRef);
 
   const fetchMoreData = async () => {
-    // console.log(`before: index=${index}, max: ${props.files.length}, current: ${items.length}, max=${NO_OF_ITEMS}`);
+    // console.log(`before: index=${index}, max: ${props.files.length}, current: ${items.length}, max=${maxSize}`);
     var itemsToAdd = [];
     var newIndex = index;
-    for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < NO_OF_ITEMS; newIndex++) {
+    for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
       const result = await window.electronAPI.loadFile(props.files[newIndex]);
       result.map((entry) => itemsToAdd.push(entry));
     }
@@ -29,28 +43,30 @@ function InfiniteEntriesList(props) {
     setItems(items.concat(itemsToAdd));
     if (newIndex >= props.files.length) {
       setHasMore(false);
+    } else {
+      setHasMore(true);
     }
   };
 
+  // TODO: sorting files + filtering does not work, props.files changes but does setIndex(0) is ignored
   useEffect(() => {
-    fetchMoreData();
-    setHasMore(true);
-  }, [props.files]);
+    if (isVisible) fetchMoreData();
+  }, [props.files, isVisible]);
 
   return (
-    <div>
-      <div id={"scrollableDiv" + props.foldername} style={{ height: 700, overflow: "auto" }}>
+    <Container ref={nodeRef} maxWidth="xl">
+      <div id={"scrollableDiv" + props.foldername} style={{ height: 750, overflow: "auto" }}>
         <InfiniteScroll
           dataLength={items.length}
           next={fetchMoreData}
           hasMore={hasMore}
           loader={<h4>Loading...</h4>}
-          height={650}
+          height={700}
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
-            <p style={{ textAlign: "center" }}>
-              <b>Yay! You have seen it all</b>
-            </p>
+            <Grid xs={12}>
+              <ItemEnd>Total number of entries: {items.length}</ItemEnd>
+            </Grid>
           }
         >
           <Grid container spacing={2} sx={{ my: 2 }}>
@@ -62,7 +78,7 @@ function InfiniteEntriesList(props) {
           </Grid>
         </InfiniteScroll>
       </div>
-    </div>
+    </Container>
   );
 }
 

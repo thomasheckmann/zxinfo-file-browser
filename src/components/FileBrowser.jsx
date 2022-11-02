@@ -52,12 +52,7 @@ class FolderView extends React.Component {
 
     return (
       <React.Fragment>
-        <Drawer
-          anchor="top"
-          variant="temporary"
-          open={this.state.showDrawerFolders}
-          onClose={toggleFolderDrawer(false)}
-        >
+        <Drawer anchor="top" variant="temporary" open={this.state.showDrawerFolders} onClose={toggleFolderDrawer(false)}>
           <Paper variant="outlined" sx={{ my: 0, p: 2 }}>
             <Typography variant="button">List of folders, click to jump to section</Typography>
             <Divider />
@@ -73,12 +68,7 @@ class FolderView extends React.Component {
           </Paper>
         </Drawer>
         {this.props.folders.map((folder) => (
-          <FilesView
-            key={folder}
-            foldername={folder}
-            sortOrderFiles={this.state.sortOrderFiles}
-            fileFilters={this.state.fileFilters}
-          ></FilesView>
+          <FilesView key={folder} foldername={folder} sortOrderFiles={this.state.sortOrderFiles} fileFilters={this.state.fileFilters}></FilesView>
         ))}
       </React.Fragment>
     );

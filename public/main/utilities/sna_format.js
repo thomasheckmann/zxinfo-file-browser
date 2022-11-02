@@ -17,7 +17,7 @@ const log = require("electron-log");
 
 function readSNA(data) {
   const mylog = log.scope("readSNA48K");
-  mylog.log(`input: ${data.length}`);
+  mylog.info(`input: ${data.length}`);
 
   var snapshot = {};
 

@@ -95,7 +95,7 @@ function createData(data) {
 
 function readTAP(data) {
   const mylog = log.scope("readTAP");
-  mylog.log(`input: ${data.length}`);
+  mylog.info(`input: ${data.length}`);
 
   var snapshot = { type: null, error: null, scrdata: null };
   snapshot.type = "TAP";

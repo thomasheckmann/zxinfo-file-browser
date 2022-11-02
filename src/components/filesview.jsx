@@ -9,7 +9,7 @@ import { useState } from "react";
 
 import InfiniteEntriesList from "./InfiniteEntriesList";
 
-const NO_OF_ITEMS_PER_VIEW = 5;
+const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
 
 function filterAndSortFiles(files, sortOptions, fileFilters) {
   const newFiles = files.filter((fileName) => {
@@ -33,22 +33,22 @@ const FilesView = (props) => {
   useEffect(() => {
     window.electronAPI.scanFolder(props.foldername).then((res) => {
       // filter out files based filtring
-      const newList = res; //filterAndSortFiles(res, this.state.sortOrderFiles, this.state.fileFilters);
+      const newList = filterAndSortFiles(res, props.sortOrderFiles, props.fileFilters);
       setFiles(newList);
     });
-  }, [props.foldername]);
+  }, [props.foldername, props.sortOrderFiles, props.fileFilters]);
 
   return (
-    <Paper elevation={2}>
-      <Box sx={{ display: "flex" }}>
+    <Paper elevation={5} sx={{ my: 4 }}>
+      <Box sx={{ display: "flex", p: 2 }}>
         <FolderTwoToneIcon />
         <Typography variant="button">
           {props.foldername} - ({files.length})
         </Typography>
       </Box>
       <Divider variant="middle" />
-      <InfiniteEntriesList files={files}></InfiniteEntriesList>
+      <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
     </Paper>
   );
-}
+};
 export default FilesView;
