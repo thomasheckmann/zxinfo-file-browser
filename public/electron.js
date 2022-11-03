@@ -19,7 +19,7 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "debug" : "warn";
+log.transports.console.level = isDev ? "debug" : "debug";
 
 let win;
 
@@ -70,7 +70,6 @@ const Store = require("electron-store");
 const store = new Store();
 
 ipcMain.handle("getStoreValue", (event, key) => {
-
   const mylog = log.scope("getStoreValue");
   const value = store.get(key);
 
@@ -171,20 +170,23 @@ ipcMain.handle("scan-folder", (event, arg) => {
   const dirPath = arg; // TODO: Validate input
 
   let filesInDir = 0;
-  fs.readdirSync(dirPath).forEach(function (folder) {
-    let filepath = path.join(dirPath, folder);
-    let stat = fs.statSync(filepath);
-    if (!stat.isDirectory()) {
-      let extension = path.extname(filepath).toLowerCase();
-      if (supportedExts.indexOf(extension) >= 0) {
-        filesInDir++;
-        mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
-        result.push(filepath);
-        // win.webContents.send("notify-about-file", path.basename(filepath));
+  try {
+    fs.readdirSync(dirPath).forEach(function (folder) {
+      let filepath = path.join(dirPath, folder);
+      let stat = fs.statSync(filepath);
+      if (!stat.isDirectory()) {
+        let extension = path.extname(filepath).toLowerCase();
+        if (supportedExts.indexOf(extension) >= 0) {
+          filesInDir++;
+          mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
+          result.push(filepath);
+          // win.webContents.send("notify-about-file", path.basename(filepath));
+        }
       }
-    }
-  });
-
+    });
+  } catch (error) {
+    mylog.error(error);
+  }
   mylog.log(`total files: ${filesInDir}`);
   return result;
 });
@@ -219,7 +221,7 @@ ipcMain.handle("load-file", async (event, arg) => {
     zipEntries.forEach(async function (zipEntry) {
       if (!zipEntry.isDirectory) {
         let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
-        if(zxObj !== null) result.push(zxObj);
+        if (zxObj !== null) result.push(zxObj);
       }
     });
   } else {
@@ -242,5 +244,5 @@ ipcMain.handle("load-file", async (event, arg) => {
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = log.scope("open-zxinfo-detail");
   mylog.info(arg);
-  require('electron').shell.openExternal(`https://zxinfo.dk/details/${arg}`);
+  require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
 });
