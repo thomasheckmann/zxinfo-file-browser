@@ -19,15 +19,15 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "warn" : "warn";
+log.transports.console.level = isDev ? "debug" : "warn";
 
 let win;
 
 function createWindow() {
   const mylog = log.scope("createWindow");
 
-  mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
-  mylog.debug(`sort-files: ${store.get("sort-files")}`);
+  // mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
+  // mylog.debug(`sort-files: ${store.get("sort-files")}`);
 
   mylog.debug("creating window");
   win = new BrowserWindow({
@@ -70,6 +70,7 @@ const Store = require("electron-store");
 const store = new Store();
 
 ipcMain.handle("getStoreValue", (event, key) => {
+
   const mylog = log.scope("getStoreValue");
   const value = store.get(key);
 
@@ -81,6 +82,7 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
   const mylog = log.scope("setStoreValue");
   mylog.debug(`key, value = {${key}, ${value}}`);
 
+  mylog.debug(`key, value = {${key}, ${value}}`);
   store.set(key, value);
 });
 
@@ -241,5 +243,4 @@ ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = log.scope("open-zxinfo-detail");
   mylog.info(arg);
   require('electron').shell.openExternal(`https://zxinfo.dk/details/${arg}`);
-
 });

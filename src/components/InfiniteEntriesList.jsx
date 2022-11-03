@@ -32,7 +32,6 @@ function InfiniteEntriesList(props) {
   const isVisible = useIsVisible(nodeRef);
 
   const fetchMoreData = async () => {
-    // console.log(`before: index=${index}, max: ${props.files.length}, current: ${items.length}, max=${maxSize}`);
     var itemsToAdd = [];
     var newIndex = index;
     for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
@@ -48,10 +47,11 @@ function InfiniteEntriesList(props) {
     }
   };
 
-  // TODO: sorting files + filtering does not work, props.files changes but does setIndex(0) is ignored
   useEffect(() => {
-    if (isVisible) fetchMoreData();
-  }, [props.files, isVisible]);
+    if (isVisible) {
+      fetchMoreData();
+    }
+  }, [props.files, isVisible, props.sortOrderFiles]);
 
   return (
     <Container ref={nodeRef} maxWidth="xl">

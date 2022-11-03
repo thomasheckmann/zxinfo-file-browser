@@ -47,7 +47,7 @@ const FilesView = (props) => {
         </Typography>
       </Box>
       <Divider variant="middle" />
-      <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+      <InfiniteEntriesList files={files} sortOrderFiles={props.sortOrderFiles} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
     </Paper>
   );
 };
