@@ -19,7 +19,7 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "debug" : "debug";
+log.transports.console.level = isDev ? "silly" : "silly";
 
 let win;
 
@@ -98,29 +98,37 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", "
  */
 function scanDirectory(dirPath, obj) {
   const mylog = log.scope("scanDirectory");
-  mylog.log(dirPath);
+  mylog.log(`scanning dir: ${dirPath}`);
 
   let filesInDir = 0;
-  fs.readdirSync(dirPath).forEach(function (file) {
-    let filepath = path.join(dirPath, file);
-    let stat = fs.statSync(filepath);
-    if (stat.isDirectory()) {
-      let totalFiles = scanDirectory(filepath, obj).totalFiles;
-      if (totalFiles > 0) {
-        obj.set(filepath, totalFiles);
+  try {
+    fs.readdirSync(dirPath).forEach(function (file) {
+      mylog.debug(`found this, have a look: ${file}`);
+      let filepath = path.join(dirPath, file);
+      try {
+        let stat = fs.lstatSync(filepath);
+        if (stat.isDirectory()) {
+          let totalFiles = scanDirectory(filepath, obj).totalFiles;
+          if (totalFiles > 0) {
+            obj.set(filepath, totalFiles);
+          }
+        } else {
+          let extension = path.extname(filepath).toLowerCase();
+          if (supportedExts.indexOf(extension) >= 0) {
+            filesInDir++;
+            mylog.debug(`counting ${filepath}`);
+          }
+        }
+      } catch (error) {
+        mylog.error(error);
       }
-    } else {
-      let extension = path.extname(filepath).toLowerCase();
-      if (supportedExts.indexOf(extension) >= 0) {
-        filesInDir++;
-        mylog.debug(`counting ${filepath} - ${supportedExts}`);
-      }
-    }
-  });
+    });
+  } catch (error) {
+    mylog.error(error);
+  }
 
   if (filesInDir > 0) {
     obj.set(dirPath, filesInDir);
-    win.webContents.send("notify-about-folder", { folder: dirPath, totalFiles: filesInDir });
   }
   return { folders: obj, totalFiles: filesInDir };
 }
@@ -180,14 +188,13 @@ ipcMain.handle("scan-folder", (event, arg) => {
           filesInDir++;
           mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
           result.push(filepath);
-          // win.webContents.send("notify-about-file", path.basename(filepath));
         }
       }
     });
   } catch (error) {
     mylog.error(error);
   }
-  mylog.log(`total files: ${filesInDir}`);
+  mylog.log(`Returning: total files: ${filesInDir}`);
   return result;
 });
 
@@ -200,6 +207,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
  */
 ipcMain.handle("load-file", async (event, arg) => {
   const mylog = log.scope("load-file");
+  mylog.debug(`loading details for file: ${arg}`);
 
   let result; // either object or array (zip)
 
@@ -208,7 +216,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   let buf = fs.readFileSync(filename);
 
   let fileObj = handleFormats.getZXFormat(filename, null, buf);
-  mylog.debug(fileObj.sha512);
+  mylog.debug(`hash: ${fileObj.sha512}`);
 
   if (extension === ".sna") {
   } else if (extension === ".z80") {
@@ -226,23 +234,25 @@ ipcMain.handle("load-file", async (event, arg) => {
     });
   } else {
     fileObj.type = extension.substring(1).toLowerCase();
-    mylog.warn(`Can't identify file format`);
+    mylog.warn(`Can't identify file format: ${fileObj.type}`);
     fileObj.scr = "./images/no_image.png";
   }
 
   if (fileObj.error) {
+    mylog.warn(`Problems loading file: ${fileObj.error}`);
     return [fileObj];
   }
 
   if (result && result.length > 0) {
+    mylog.debug(`returning multiple entries: ${result.length}`);
     return result;
   } else {
+    mylog.debug(`returning one entry`);
     return [fileObj];
   }
 });
 
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = log.scope("open-zxinfo-detail");
-  mylog.info(arg);
   require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
 });
