@@ -163,6 +163,24 @@ function App() {
   useEffect(() => {
     window.electronAPI.getStoreValue("sort-folders").then((data) => setUserSettings({ ...userSettings, sortOrderFolders: data }));
     window.electronAPI.getStoreValue("sort-files").then((data) => setUserSettings({ ...userSettings, sortOrderFiles: data }));
+
+    async function getStartFolder() {
+      const startFolder = await window.electronAPI.getStoreValue("start-folder");
+      if (startFolder) {
+        const foldersWithFiles = await window.electronAPI.openFolder(startFolder);
+        foldersWithFiles &&
+        setStartFolder({
+          root: foldersWithFiles.root,
+          folders: foldersWithFiles.folders,
+          total: foldersWithFiles.total,
+          showDrawerFolders: false,
+          showDrawerSettings: false,
+          fileFilters: defaultFileFilters,
+        });
+      }
+    }
+
+    getStartFolder();
   }, []);
 
   const handleOpenFolderFromChild = async (childData) => {
@@ -176,6 +194,11 @@ function App() {
         showDrawerSettings: false,
         fileFilters: defaultFileFilters,
       });
+      if(foldersWithFiles) {
+        // save start folder to app settings
+        window.electronAPI.setStoreValue("start-folder", foldersWithFiles.root);
+
+      }
     window.scrollTo({
       top: 0,
     });

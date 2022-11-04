@@ -73,15 +73,12 @@ const store = new Store();
 ipcMain.handle("getStoreValue", (event, key) => {
   const mylog = log.scope("getStoreValue");
   const value = store.get(key);
-
   mylog.debug(`key, value = {${key}, ${value}}`);
   return store.get(key);
 });
 
 ipcMain.handle("setStoreValue", (event, key, value) => {
   const mylog = log.scope("setStoreValue");
-  mylog.debug(`key, value = {${key}, ${value}}`);
-
   mylog.debug(`key, value = {${key}, ${value}}`);
   store.set(key, value);
 });
@@ -135,21 +132,16 @@ function scanDirectory(dirPath, obj) {
 }
 
 /**
+ * Opens folder dialog, or preload with folder given as input.
  * Returns an arrray with names of folders containing known files or null, if user cancels dialog
  *
  */
 ipcMain.handle("dialog:openFolder", async (event, arg) => {
   const mylog = log.scope("dialog:openFolder");
-  mylog.log("open:Folder");
+  mylog.debug(`${event}, ${arg}`);
 
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ["openDirectory"],
-  });
-  if (canceled) {
-    mylog.debug(`handle('dialog:openFolder'): CANCEL`);
-    return null; // TODO: Handling cancel - use previous or ...
-  } else {
-    const foldersWithFiles = scanDirectory(filePaths[0], new Map());
+  function initFolderView(startFolder) {
+    const foldersWithFiles = scanDirectory(startFolder, new Map());
     const files = new Map([...foldersWithFiles.folders]);
     var result = [];
 
@@ -165,7 +157,27 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
       result.sort().reverse();
     }
 
-    return { root: filePaths[0], folders: result, total: totalFiles };
+    return { root: startFolder, folders: result, total: totalFiles };
+  }
+
+  if (arg && fs.existsSync(arg)) {
+    mylog.debug(`open folder from input: ${arg}`);
+    return initFolderView(arg);
+  } else if (arg && !fs.existsSync(arg)) {
+    mylog.warn(`folder does not exist... ${arg}`);
+    return null;
+  }
+
+  mylog.debug(`asking user which folder to open...`);
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+
+  if (canceled) {
+    mylog.debug(`handle('dialog:openFolder'): CANCEL`);
+    return null;
+  } else {
+    return initFolderView(filePaths[0]);
   }
 });
 

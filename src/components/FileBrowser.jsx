@@ -68,7 +68,7 @@ class FolderView extends React.Component {
           </Paper>
         </Drawer>
         {this.props.folders.map((folder) => (
-          <FilesView key={folder} foldername={folder} sortOrderFiles={this.state.sortOrderFiles} fileFilters={this.state.fileFilters}></FilesView>
+          <FilesView key={folder} foldername={folder} sortOrderFiles={true} fileFilters={this.state.fileFilters}></FilesView>
         ))}
       </React.Fragment>
     );

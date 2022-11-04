@@ -1,8 +1,8 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  // Open file dialog, from render to main
-  openFolder: () => ipcRenderer.invoke("dialog:openFolder"),
+  // Open file dialog or folder in args, from render to main
+  openFolder: (args) => ipcRenderer.invoke("dialog:openFolder", args),
 
   // Scan folder, from render to main
   scanFolder: (args) => ipcRenderer.invoke("scan-folder", args),
