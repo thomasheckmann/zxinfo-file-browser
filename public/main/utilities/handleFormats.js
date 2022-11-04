@@ -59,9 +59,14 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.version = obj.type;
     ZXFileInfo.type = "tapfmt";
   } else if (extension.toLowerCase().endsWith(".zip")) {
-    mylog.debug(`handling ZIP`);
-    obj = { version: null, type: null, scrdata: null, error: null };
-    ZXFileInfo.type = "zip";
+    if (subFileName && subFileName.length > 0) {
+      mylog.info(`ZIP inside ZIP, skippiung...`);
+      return null;
+    } else {
+      mylog.debug(`handling ZIP`);
+      obj = { version: null, type: null, scrdata: null, error: null };
+      ZXFileInfo.type = "zip";
+    }
   } else {
     obj = { version: null, type: null, error: "Unhandled file format" };
     ZXFileInfo.type = "?" +  path.extname(extension).toLowerCase().substring(1);

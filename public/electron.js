@@ -225,13 +225,25 @@ ipcMain.handle("load-file", async (event, arg) => {
     result = [fileObj];
     var zip = new AdmZip(filename);
     var zipEntries = zip.getEntries();
+    var zipCount = 0;
     mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
     zipEntries.forEach(async function (zipEntry) {
       if (!zipEntry.isDirectory) {
         let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
-        if (zxObj !== null) result.push(zxObj);
+        if (zxObj !== null) {
+          mylog.info(`addind zip entry (${zipEntry.name}) to list...`);
+          zipCount++;
+          result.push(zxObj);
+        } else {
+          mylog.debug(`${zipEntry.name} - not recognized, skipping...`);
+        }
       }
     });
+    mylog.debug(`entries found in ZIP: ${zipCount}`);
+    if(zipCount === 0) {
+      mylog.info(`NO known files found in ZIP, removing from list...`);
+      return [];
+    }
   } else {
     fileObj.type = "?" + extension.substring(1).toLowerCase();
     mylog.warn(`Can't identify file format: ${fileObj.type}`);
