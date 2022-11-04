@@ -19,7 +19,7 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "silly" : "silly";
+log.transports.console.level = isDev ? "debug" : "error";
 
 let win;
 

@@ -107,9 +107,6 @@ class EntryCard extends React.Component {
             {this.state.entry.zxdbTitle ? this.state.entry.zxdbTitle : this.state.entry.filename}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton aria-label="add to favorites" onClick={toggleFavorite}>
-              <FavoriteIcon />
-            </IconButton>
             {this.state.entry.version && <Chip label={this.state.entry.version} />}
             {this.state.entry.hwmodel && <Chip label={this.state.entry.hwmodel} />}
             {this.state.entry.zxdbID && <Chip label={this.state.entry.zxdbID} variant="outlined" onClick={(id) => openLink(this.state.entry.zxdbID)} />}
