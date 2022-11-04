@@ -15,11 +15,10 @@
 
 import React from "react";
 
-import { Alert, Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Alert, Avatar, Card, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
+import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
 
 var dummyObject = {
   filename: "myfile.zip",
@@ -47,13 +46,16 @@ function formatType(t) {
 }
 
 const openLink = (id) => {
-  console.log(id);
   window.electronAPI.openZXINFODetail(id).then((res) => {});
+};
+
+const openFolderFile = (name) => {
+  window.electronAPI.locateFileAndFolder(name).then((res) => {});
 };
 
 const toggleFavorite = (event) => {
   console.log("toogleFavorite: " + event.value);
-}
+};
 
 class EntryCard extends React.Component {
   constructor(props) {
@@ -83,6 +85,11 @@ class EntryCard extends React.Component {
         <CardHeader
           sx={{
             backgroundColor: this.state.entry.type === "zip" ? "#606060" : "#808080",
+            display: "flex",
+            overflow: "hidden",
+            "& .MuiCardHeader-content": {
+              overflow: "hidden",
+            },
           }}
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -91,15 +98,23 @@ class EntryCard extends React.Component {
               </Typography>
             </Avatar>
           }
+          action={
+            <Tooltip title="Locate file">
+              <IconButton aria-label="Locate file" onClick={(name) => openFolderFile(this.state.entry.filename)}>
+                <InsertLinkOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          }
           title={
             <Tooltip title={this.state.entry.filename}>
-              <Typography variant="subtitle2" noWrap>
+              <Typography variant="subtitle" noWrap gutterBottom>
                 {this.state.entry.filename}
               </Typography>
             </Tooltip>
           }
+          titleTypographyProps={{ noWrap: true }}
           subheader={this.state.entry.subfilename}
-        ></CardHeader>
+        />
         {this.state.entry.error ? <Alert severity="warning">{this.state.entry.error}</Alert> : ""}
         <CardMedia component="img" image={this.state.entry.scr} alt={this.state.entry.filename} />
         <CardContent>

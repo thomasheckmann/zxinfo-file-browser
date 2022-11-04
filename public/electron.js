@@ -8,7 +8,7 @@
  * - two way, use ipcRenderer.invoke and ipcMain.handle
  */
 
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
@@ -274,5 +274,11 @@ ipcMain.handle("load-file", async (event, arg) => {
 
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = log.scope("open-zxinfo-detail");
+  shell.openPath('.')
   require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
+});
+
+ipcMain.handle("locate-file-and-folder", (event, arg) => {
+  const mylog = log.scope("locate-file-and-folder");
+  shell.showItemInFolder(arg);
 });
