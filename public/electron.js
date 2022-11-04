@@ -35,6 +35,7 @@ function createWindow() {
     height: 800,
     title: "ZXInfo - file manager",
     webPreferences: {
+      autoHideMenuBar: true,
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote

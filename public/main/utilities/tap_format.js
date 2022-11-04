@@ -107,6 +107,7 @@ function readTAP(data) {
     index += 2; // skip two length bytes
     const dataBlock = data.subarray(index, index + blockLength);
     if (dataBlock[0] === 0) {
+      mylog.info(`found header block at index: ${index}`);
       const block = createHeader(dataBlock);
       if (block.error) {
         snapshot.error = block.error;
@@ -117,7 +118,10 @@ function readTAP(data) {
       if (block.error) {
         snapshot.error = block.error;
       }
+      mylog.info(`found data block at index: ${index}, length=${block.data.length}`);
       tap.push(block);
+    } else {
+      mylog.info(`found unknown block at index: ${index} - ${dataBlock[0]}`);
     }
     index += blockLength; // skip data block
   }
@@ -125,16 +129,25 @@ function readTAP(data) {
   // iterate tap[] - find first code block starting at 16384 OR with lengh og 6912
   for (let index = 0; index < tap.length; index++) {
     const element = tap[index];
-    if(element.type = "Code") {
-      if(element.startAddress === 16384) {
+    console.log(`${index}: ${element.type}, ${element.flag}`);
+    if (element.type === "Code") {
+      if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
-        snapshot.scrdata = tap[index+1].data;
+        snapshot.scrdata = tap[index + 1].data;
         break;
       } else if (element.len === 6912) {
         mylog.debug(`Found code with length 6912...(screen length)`);
-        snapshot.scrdata = tap[index+1].data;
+        snapshot.scrdata = tap[index + 1].data;
         snapshot.border = 7;
         break;
+      }
+    } else if (!element.type && element.flag === "data") {
+      // headerless data with length 6912 or bigger than 32768
+      mylog.info(`data block: ${element.data.length}`);
+      if (element.data.length > 32767 || element.data.length === 6912) {
+        mylog.debug(`Headerless data with length > 32767 - try using it as screen...`);
+        snapshot.scrdata = element.data;
+        snapshot.border = 7;
       }
     }
   }
