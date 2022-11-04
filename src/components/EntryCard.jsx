@@ -15,9 +15,11 @@
 
 import React from "react";
 
-import { Alert, Avatar, Card, CardContent, CardHeader, CardMedia, Chip, Stack, Tooltip, Typography } from "@mui/material";
+import { Alert, Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ShareIcon from "@mui/icons-material/Share";
 
 var dummyObject = {
   filename: "myfile.zip",
@@ -46,8 +48,11 @@ function formatType(t) {
 
 const openLink = (id) => {
   console.log(id);
-  window.electronAPI.openZXINFODetail(id).then((res) => {
-  });
+  window.electronAPI.openZXINFODetail(id).then((res) => {});
+};
+
+const toggleFavorite = (event) => {
+  console.log("toogleFavorite: " + event.value);
 }
 
 class EntryCard extends React.Component {
@@ -101,7 +106,10 @@ class EntryCard extends React.Component {
           <Typography gutterBottom variant="h5" component="div" noWrap>
             {this.state.entry.zxdbTitle ? this.state.entry.zxdbTitle : this.state.entry.filename}
           </Typography>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton aria-label="add to favorites" onClick={toggleFavorite}>
+              <FavoriteIcon />
+            </IconButton>
             {this.state.entry.version && <Chip label={this.state.entry.version} />}
             {this.state.entry.hwmodel && <Chip label={this.state.entry.hwmodel} />}
             {this.state.entry.zxdbID && <Chip label={this.state.entry.zxdbID} variant="outlined" onClick={(id) => openLink(this.state.entry.zxdbID)} />}

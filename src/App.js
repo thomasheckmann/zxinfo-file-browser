@@ -186,7 +186,7 @@ function App() {
     const foldersWithFiles = await window.electronAPI.openFolder();
     setStartFolder({
       root: foldersWithFiles.root,
-      folders: foldersWithFiles.folders[0],
+      folders: foldersWithFiles.folders,
       total: foldersWithFiles.total,
       showDrawerFolders: false,
       showDrawerSettings: false,
@@ -290,7 +290,8 @@ function App() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel disabled
+                <FormControlLabel
+                  disabled
                   control={<Checkbox name="sortOrderFiles" checked={userSettings.sortOrderFiles} onChange={handleChangeSettingsFiles} />}
                   label="Sort filenames ascending"
                 />
