@@ -223,24 +223,31 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".tap") {
   } else if (extension === ".zip") {
     result = [fileObj];
-    var zip = new AdmZip(filename);
-    var zipEntries = zip.getEntries();
     var zipCount = 0;
-    mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
-    zipEntries.forEach(async function (zipEntry) {
-      if (!zipEntry.isDirectory) {
-        let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
-        if (zxObj !== null) {
-          mylog.info(`addind zip entry (${zipEntry.name}) to list...`);
-          zipCount++;
-          result.push(zxObj);
-        } else {
-          mylog.debug(`${zipEntry.name} - not recognized, skipping...`);
+    try {
+      var zip = new AdmZip(filename);
+      var zipEntries = zip.getEntries();
+      mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
+      zipEntries.forEach(async function (zipEntry) {
+        if (!zipEntry.isDirectory) {
+          let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
+          if (zxObj !== null) {
+            mylog.info(`addind zip entry (${zipEntry.name}) to list...`);
+            zipCount++;
+            result.push(zxObj);
+          } else {
+            mylog.debug(`${zipEntry.name} - not recognized, skipping...`);
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      mylog.error(`error reading ZIP file: ${filename}, skipping...`);
+      fileObj.error = "ZIP corrupt?";
+      zipCount = 1;
+    }
+
     mylog.debug(`entries found in ZIP: ${zipCount}`);
-    if(zipCount === 0) {
+    if (zipCount === 0) {
       mylog.info(`NO known files found in ZIP, removing from list...`);
       return [];
     }
