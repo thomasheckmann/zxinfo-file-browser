@@ -64,7 +64,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.type = "zip";
   } else {
     obj = { version: null, type: null, error: "Unhandled file format" };
-    ZXFileInfo.type = "X";
+    ZXFileInfo.type = "?" + extension;
     mylog.warn(`Unfandled file format: ${extension}`);
     ZXFileInfo.scr = "./images/no_image.png";
   }
