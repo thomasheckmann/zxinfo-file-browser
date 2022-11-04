@@ -14,7 +14,6 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { styled } from "@mui/material/styles";
 
 import {
-  Alert,
   AppBar,
   Box,
   Button,
@@ -26,7 +25,6 @@ import {
   Grid,
   IconButton,
   Paper,
-  Snackbar,
   Toolbar,
   Tooltip,
   Typography,
@@ -78,21 +76,6 @@ function App() {
     showDrawerSettings: false,
     fileFilters: defaultFileFilters,
   });
-
-  const [notifyOpen, setNotifyOpen] = React.useState({ status: false, filename: null });
-  const handleNotifyClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setNotifyOpen({ ...notifyOpen, status: false });
-  };
-
-  /**
-  window.electronAPI.onNotifyAboutFile((_event, value) => {
-    // setNotifyOpen({ status: false, filename: null });
-    setNotifyOpen({ status: true, filename: value });
-  });
- */
 
   /**
    * xs, sm, md, lg, xl
@@ -184,14 +167,15 @@ function App() {
 
   const handleOpenFolderFromChild = async (childData) => {
     const foldersWithFiles = await window.electronAPI.openFolder();
-    setStartFolder({
-      root: foldersWithFiles.root,
-      folders: foldersWithFiles.folders,
-      total: foldersWithFiles.total,
-      showDrawerFolders: false,
-      showDrawerSettings: false,
-      fileFilters: defaultFileFilters,
-    });
+    foldersWithFiles &&
+      setStartFolder({
+        root: foldersWithFiles.root,
+        folders: foldersWithFiles.folders,
+        total: foldersWithFiles.total,
+        showDrawerFolders: false,
+        showDrawerSettings: false,
+        fileFilters: defaultFileFilters,
+      });
     window.scrollTo({
       top: 0,
     });
@@ -205,11 +189,6 @@ function App() {
         -header-
       </Box>
 
-      <Snackbar open={notifyOpen.status} onClose={handleNotifyClose} autoHideDuration={1000}>
-        <Alert onClose={handleNotifyClose} severity="success" sx={{ width: "100%" }}>
-          Added file: {notifyOpen.filename}
-        </Alert>
-      </Snackbar>
       <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">
@@ -218,26 +197,7 @@ function App() {
                 <SettingsOutlinedIcon />
               </Tooltip>
             </IconButton>
-            <IconButton
-              edge="start"
-              color="inherit"
-              sx={{ mr: 2 }}
-              aria-label="Open Folder"
-              onClick={async () => {
-                const foldersWithFiles = await window.electronAPI.openFolder();
-                setStartFolder({
-                  root: foldersWithFiles.root,
-                  folders: foldersWithFiles.folders,
-                  total: foldersWithFiles.total,
-                  showDrawerFolders: false,
-                  showDrawerSettings: false,
-                  fileFilters: defaultFileFilters,
-                });
-                window.scrollTo({
-                  top: 0,
-                });
-              }}
-            >
+            <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Open Folder" onClick={handleOpenFolderFromChild}>
               <Tooltip title="Open Folder">
                 <FolderOpenIcon />
               </Tooltip>

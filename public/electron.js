@@ -135,7 +135,8 @@ function scanDirectory(dirPath, obj) {
 }
 
 /**
- * Returns an arrray with names of folders containing known files
+ * Returns an arrray with names of folders containing known files or null, if user cancels dialog
+ *
  */
 ipcMain.handle("dialog:openFolder", async (event, arg) => {
   const mylog = log.scope("dialog:openFolder");
@@ -146,7 +147,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   });
   if (canceled) {
     mylog.debug(`handle('dialog:openFolder'): CANCEL`);
-    return { root: null, folders: [], total: 0 }; // TODO: Handling cancel - use previous or ...
+    return null; // TODO: Handling cancel - use previous or ...
   } else {
     const foldersWithFiles = scanDirectory(filePaths[0], new Map());
     const files = new Map([...foldersWithFiles.folders]);
@@ -274,7 +275,6 @@ ipcMain.handle("load-file", async (event, arg) => {
 
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = log.scope("open-zxinfo-detail");
-  shell.openPath('.')
   require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
 });
 
