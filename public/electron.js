@@ -19,7 +19,10 @@ const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
 
-log.transports.console.level = isDev ? "debug" : "error";
+// use error, warn, info for production
+log.transports.console.level = isDev ? "silly" : "info";
+log.transports.file.level = isDev ? "silly" : "info";
+log.transports.file.getFile().clear();
 
 let win;
 
@@ -29,7 +32,7 @@ function createWindow() {
   // mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
   // mylog.debug(`sort-files: ${store.get("sort-files")}`);
 
-  mylog.debug("creating window");
+  mylog.info("########### STARTING zxinfo-file-browser vXXX: " + new Date());
   win = new BrowserWindow({
     width: 1400,
     height: 800,
@@ -186,7 +189,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
  */
 ipcMain.handle("scan-folder", (event, arg) => {
   const mylog = log.scope("scan-folder");
-  mylog.log(`input: ${arg}`);
+  mylog.log(`input folder: ${arg}`);
   var result = [];
 
   const dirPath = arg; // TODO: Validate input
@@ -208,7 +211,7 @@ ipcMain.handle("scan-folder", (event, arg) => {
   } catch (error) {
     mylog.error(error);
   }
-  mylog.log(`Returning: total files: ${filesInDir}`);
+  mylog.debug(`Returning: total files: ${filesInDir}`);
   return result;
 });
 
@@ -246,11 +249,11 @@ ipcMain.handle("load-file", async (event, arg) => {
         if (!zipEntry.isDirectory) {
           let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
           if (zxObj !== null) {
-            mylog.info(`addind zip entry (${zipEntry.name}) to list...`);
+            mylog.debug(`addind zip entry (${zipEntry.name}) to list...`);
             zipCount++;
             result.push(zxObj);
           } else {
-            mylog.debug(`${zipEntry.name} - not recognized, skipping...`);
+            mylog.warn(`${zipEntry.name} - not recognized, skipping...`);
           }
         }
       });
@@ -262,7 +265,7 @@ ipcMain.handle("load-file", async (event, arg) => {
 
     mylog.debug(`entries found in ZIP: ${zipCount}`);
     if (zipCount === 0) {
-      mylog.info(`NO known files found in ZIP, removing from list...`);
+      mylog.warn(`NO known files found in ZIP, removing from list...`);
       return [];
     }
   } else {
@@ -272,7 +275,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   }
 
   if (fileObj.error) {
-    mylog.warn(`Problems loading file: ${fileObj.error}`);
+    mylog.error(`Problems loading file: ${fileObj.error}`);
     return [fileObj];
   }
 

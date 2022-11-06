@@ -35,9 +35,11 @@ function getZXFormat(fileName, subFileName, data) {
 
   let extension;
   if (subFileName && subFileName.length > 0) {
+    mylog.info(`processing: ${subFileName}`);
     mylog.debug(`File inside archive`);
     extension = subFileName;
   } else {
+    mylog.info(`processing: ${fileName}`);
     mylog.debug(`Single file`);
     extension = fileName;
   }
@@ -69,7 +71,7 @@ function getZXFormat(fileName, subFileName, data) {
     }
   } else {
     obj = { version: null, type: null, error: "Unhandled file format" };
-    ZXFileInfo.type = "?" +  path.extname(extension).toLowerCase().substring(1);
+    ZXFileInfo.type = "?" + path.extname(extension).toLowerCase().substring(1);
     mylog.warn(`Unfandled file format: ${extension}`);
     ZXFileInfo.scr = "./images/no_image.png";
   }
