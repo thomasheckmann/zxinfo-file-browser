@@ -13,6 +13,8 @@ import styled from "@emotion/styled";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useIsVisible } from "react-is-visible";
 import EntryCard from "./EntryCard";
+import { useContext } from "react";
+import ZXInfoSettings from "../common/ZXInfoSettings";
 
 const ItemEnd = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#ccc",
@@ -23,6 +25,8 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 function InfiniteEntriesList(props) {
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+
   const [items, setItems] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [index, setIndex] = useState(0);
@@ -51,7 +55,7 @@ function InfiniteEntriesList(props) {
     if (isVisible) {
       fetchMoreData();
     }
-  }, [props.files, isVisible, props.sortOrderFiles]);
+  }, [props.files, isVisible, appSettings.sortOrderFiles]);
 
   return (
     <Container ref={nodeRef} maxWidth="xl">
