@@ -15,9 +15,11 @@ import { styled } from "@mui/material/styles";
 
 import {
   AppBar,
+  Backdrop,
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Container,
   Divider,
   Drawer,
@@ -75,6 +77,7 @@ function App() {
     showDrawerFolders: true,
     showDrawerSettings: false,
     fileFilters: defaultFileFilters,
+    isBusyWorking: false,
   });
 
   /**
@@ -165,18 +168,20 @@ function App() {
     window.electronAPI.getStoreValue("sort-files").then((data) => setUserSettings({ ...userSettings, sortOrderFiles: data }));
 
     async function getStartFolder() {
-      const startFolder = await window.electronAPI.getStoreValue("start-folder");
+      const initialFolder = await window.electronAPI.getStoreValue("start-folder");
       if (startFolder) {
-        const foldersWithFiles = await window.electronAPI.openFolder(startFolder);
+        startFolder.isBusyWorking = true;
+        const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
         foldersWithFiles &&
-        setStartFolder({
-          root: foldersWithFiles.root,
-          folders: foldersWithFiles.folders,
-          total: foldersWithFiles.total,
-          showDrawerFolders: false,
-          showDrawerSettings: false,
-          fileFilters: defaultFileFilters,
-        });
+          setStartFolder({
+            root: foldersWithFiles.root,
+            folders: foldersWithFiles.folders,
+            total: foldersWithFiles.total,
+            showDrawerFolders: false,
+            showDrawerSettings: false,
+            fileFilters: defaultFileFilters,
+            isBusyWorking: false,
+          });
       }
     }
 
@@ -184,6 +189,7 @@ function App() {
   }, []);
 
   const handleOpenFolderFromChild = async (childData) => {
+    startFolder.isBusyWorking = true;
     const foldersWithFiles = await window.electronAPI.openFolder();
     foldersWithFiles &&
       setStartFolder({
@@ -193,12 +199,12 @@ function App() {
         showDrawerFolders: false,
         showDrawerSettings: false,
         fileFilters: defaultFileFilters,
+        isBusyWorking: false,
       });
-      if(foldersWithFiles) {
-        // save start folder to app settings
-        window.electronAPI.setStoreValue("start-folder", foldersWithFiles.root);
-
-      }
+    if (foldersWithFiles) {
+      // save start folder to app settings
+      window.electronAPI.setStoreValue("start-folder", foldersWithFiles.root);
+    }
     window.scrollTo({
       top: 0,
     });
@@ -211,7 +217,9 @@ function App() {
       <Box position="fixed" top={0} height="60px" width="100%">
         -header-
       </Box>
-
+      <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={startFolder.isBusyWorking}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box marginTop="50px">
         <AppBar position="fixed">
           <Toolbar variant="dense">
