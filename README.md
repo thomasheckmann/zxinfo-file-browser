@@ -22,6 +22,9 @@ Please note all builds are unsiged, so you might need to give persmisson to run 
 * Direct link to detail page, if found in ZXDB, to ZXInfo.dk
 * Quick access to folders
 
+# Questions?
+See the [FAQ](FAQ.md)
+
 # Build it yourself
 Requirements:
 * Git client - for example [GitHub Desktop](https://desktop.github.com/)
