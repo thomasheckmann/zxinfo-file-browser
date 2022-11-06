@@ -34,7 +34,7 @@ function readCompressed(data, length) {
 
 function readV1(data, compressed) {
   const mylog = log.scope("Z80 - readV1");
-  mylog.log(`readV1 (${compressed})`);
+  mylog.debug(`readV1 compressed? (${compressed})`);
 
   const mem = data.subarray(30);
   var zxram = [];
@@ -43,7 +43,7 @@ function readV1(data, compressed) {
     mylog.debug(`reading compressed v1`);
     return readCompressed(mem, 49152);
   } else {
-    mylog.debug(`version NOT supported yet!`);
+    mylog.warn(`version NOT supported yet!`);
   }
 
   return zxram;
@@ -51,7 +51,6 @@ function readV1(data, compressed) {
 
 function readV2(data, compressed) {
   const mylog = log.scope("Z80 - readV2");
-  mylog.debug(`(${compressed}), compression ignored`);
 
   const headerLength = data[30];
 
@@ -91,7 +90,7 @@ function readV2(data, compressed) {
 
 function readZ80(data) {
   const mylog = log.scope("readZ80");
-  mylog.info(`input: ${data.length}`);
+  mylog.debug(`input: ${data.length}`);
 
   var snapshot = {};
   var version = 1;
@@ -111,7 +110,7 @@ function readZ80(data) {
   }
   snapshot.border = (data[12] >> 1) & 0b00000111;
   if (data[12] & 0b00010000) {
-    mylog.debug(`SAM ROM?`);
+    mylog.warn(`SAM ROM?`);
   }
   if (data[12] & 0b00100000) {
     compressed = true;
@@ -134,10 +133,14 @@ function readZ80(data) {
     if (v === 23) {
       version = 2;
       mylog.debug(`- - extra header length: 23, version 2`);
+      mylog.info(`processing Z80 v2 file...`);
     } else if (v === 54 || v === 55) {
       version = 3;
       mylog.debug(`- - extra header length: 54 or 55, version 3`);
+      mylog.info(`processing Z80 v3 file...`);
     }
+  } else {
+    mylog.info(`processing Z80 v1 file...`);
   }
 
   snapshot.type = "Z80 v" + version;

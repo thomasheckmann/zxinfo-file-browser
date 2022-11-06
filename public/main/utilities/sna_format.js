@@ -2,7 +2,7 @@
  *
  * https://worldofspectrum.org/faq/reference/formats.htm
  *
- * 
+ *
  * snapshot = {
  *    I, HLalt,....
  *    HL, ... IX, IY
@@ -17,18 +17,21 @@ const log = require("electron-log");
 
 function readSNA(data) {
   const mylog = log.scope("readSNA48K");
-  mylog.info(`input: ${data.length}`);
+  mylog.debug(`input: ${data.length}`);
 
   var snapshot = {};
 
   // 48K or 128K?
   var fileSize = data.length;
-  if(fileSize === 49179) {
+  if (fileSize === 49179) {
+    mylog.info(`processing SNA 48K file...`);
     snapshot.type = "SNA 48K";
   } else if (fileSize === 131103 || fileSize === 147487) {
+    mylog.info(`processing SNA 128K file...`);
     snapshot.type = "SNA 128K";
   } else {
-    snapshot.error = "Corrupt or unknown SNA format"
+    snapshot.error = "Corrupt or unknown SNA format";
+    mylog.warn(`Corrupt or unknown SNA format`);
     return snapshot;
   }
 

@@ -88,6 +88,7 @@ function createData(data) {
     dataBlock.data = data.subarray(1, data.length - 1);
   } else {
     dataBlock.error = `Not a data block: ${flagByte}`;
+    mylog.warn(`Not a data block: ${flagByte}`);
   }
 
   return dataBlock;
@@ -95,7 +96,8 @@ function createData(data) {
 
 function readTAP(data) {
   const mylog = log.scope("readTAP");
-  mylog.info(`input: ${data.length}`);
+  mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing TAP file...`);
 
   var snapshot = { type: null, error: null, scrdata: null };
   snapshot.type = "TAP";
@@ -107,7 +109,7 @@ function readTAP(data) {
     index += 2; // skip two length bytes
     const dataBlock = data.subarray(index, index + blockLength);
     if (dataBlock[0] === 0) {
-      mylog.info(`found header block at index: ${index}`);
+      mylog.debug(`found header block at index: ${index}`);
       const block = createHeader(dataBlock);
       if (block.error) {
         snapshot.error = block.error;
@@ -118,10 +120,10 @@ function readTAP(data) {
       if (block.error) {
         snapshot.error = block.error;
       }
-      mylog.info(`found data block at index: ${index}, length=${block.data.length}`);
+      mylog.debug(`found data block at index: ${index}, length=${block.data.length}`);
       tap.push(block);
     } else {
-      mylog.info(`found unknown block at index: ${index} - ${dataBlock[0]}`);
+      mylog.warn(`found unknown block at index: ${index} - ${dataBlock[0]}`);
     }
     index += blockLength; // skip data block
   }
@@ -143,7 +145,7 @@ function readTAP(data) {
       }
     } else if (!element.type && element.flag === "data") {
       // headerless data with length 6912 or bigger than 32768
-      mylog.info(`data block: ${element.data.length}`);
+      mylog.debug(`data block: ${element.data.length}`);
       if (element.data.length > 32767 || element.data.length === 6912) {
         mylog.debug(`Headerless data with length > 32767 - try using it as screen...`);
         snapshot.scrdata = element.data;
