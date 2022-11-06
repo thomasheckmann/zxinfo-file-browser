@@ -15,7 +15,7 @@ Please note all builds are unsiged, so you might need to give persmisson to run 
 
 # Features
 * Scan files local on your harddisk
-* Displays files in the following formats: SNA, Z80, TAP, TZX, SLT, DSK, TRD, MDR
+* Display files in the following formats: SNA, Z80, TAP, TZX, SLT, DSK, TRD, MDR
 * Handles files in ZIP archives (to one level)
 * Generates SCR preview and other details for various formats: SNA, Z80, TAP
 * Integrates with ZXDB using ZXInfo API, using sha512 hash on files, to lookup title and ZXDB id
