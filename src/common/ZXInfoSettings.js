@@ -19,4 +19,4 @@ const ZXInfoSettings = createContext({
   sortOrderFolders: true,
 });
 
-export default ZXInfoSettings
+export default ZXInfoSettings;
