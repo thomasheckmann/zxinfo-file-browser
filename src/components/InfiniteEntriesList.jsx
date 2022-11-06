@@ -51,9 +51,29 @@ function InfiniteEntriesList(props) {
     }
   };
 
+  const fetchFirstData = async () => {
+    setIndex(0);
+    setItems([]);
+    setHasMore(true);
+    var itemsToAdd = [];
+    var newIndex = index;
+    for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
+      const result = await window.electronAPI.loadFile(props.files[newIndex]);
+      result.map((entry) => itemsToAdd.push(entry));
+    }
+    setIndex(newIndex);
+    setItems(items.concat(itemsToAdd));
+    if (newIndex >= props.files.length) {
+      setHasMore(false);
+    } else {
+      setHasMore(true);
+    }
+  };
+
   useEffect(() => {
+    fetchFirstData();
     if (isVisible) {
-      fetchMoreData();
+      console.log("trying to fetch data...");
     }
   }, [props.files, isVisible, appSettings.sortOrderFiles]);
 
