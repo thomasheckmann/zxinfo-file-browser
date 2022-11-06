@@ -5,17 +5,21 @@ Browse your ZX Spectrum emulator files, powered by the web.
 <img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
 
 # Download
-Download latest build for:
-* Windows - [Windows Download](https://drive.google.com/drive/folders/1egnpMV1TWWqsOxIy3Vyt6gmkF_sdpxVK?usp=sharing)
-* [MacOS]
-* [Linux]
+Download latest build for macOS, Windows and Linx on [release page](https://github.com/thomasheckmann/zxinfo-file-browser/releases)
+Please note all builds are unsiged, so you might need to give persmisson to run - depending on what OS you are running.
+
+* zxinfo-file-browser-Vnn-arm64.dmg - macOS on M1
+* zxinfo-file-browser-Vnn.dmg - macOS on Intel
+* zxinfo-file-browser-Vnn.exe - Windows
+* zxinfo-file-browser-Vnn.AppImage - Linux
 
 # Features
-* Scan local files
-* Non-Destructive - original files won't be touched
-* Read various formats: SNA, Z80, TAP
-* Integrates with ZXDB using ZXInfo API
-* Browse by file formats (sna, z80, tap)
+* Scan files local on your harddisk
+* Displays files in the following formats: SNA, Z80, TAP, TZX, SLT, DSK, TRD, MDR
+* Handles files in ZIP archives (to one level)
+* Generates SCR preview and other details for various formats: SNA, Z80, TAP
+* Integrates with ZXDB using ZXInfo API, using sha512 hash on files, to lookup title and ZXDB id
+* Direct link to detail page, if found in ZXDB, to ZXInfo.dk
 * Quick access to folders
 
 # Build it yourself
