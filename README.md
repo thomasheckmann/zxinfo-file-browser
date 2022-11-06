@@ -1,6 +1,6 @@
 
 # ZXINFO File Browser
-Browse your ZX Spectrum emulator files, powered by the web.
+Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-)
 
 <img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
 
