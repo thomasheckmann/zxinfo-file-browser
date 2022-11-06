@@ -25,10 +25,8 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
   });
 
   if (sortOptions) {
-    console.log("sort asc");
     return [...newFiles.sort()];
   } else {
-    console.log("sort desc");
     return [...newFiles.sort().reverse()];
   }
 }
@@ -47,7 +45,6 @@ const FilesView = (props) => {
 
   return (
     <Paper elevation={5} sx={{ my: 4 }} id={props.foldername}>
-          {isDev && "FilesView: " + JSON.stringify(appSettings)}
       <Box sx={{ display: "flex", p: 2 }}>
         <FolderTwoToneIcon />
         <Typography variant="button">

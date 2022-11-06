@@ -296,8 +296,6 @@ function App() {
               </List>
             </Paper>
           </Drawer>
-
-          {isDev && "App: " + JSON.stringify(appSettings)}
           <Container maxWidth="xl">
             {startFolder.folders && startFolder.folders.length > 0 ? (
               <FolderView folders={startFolder.folders} />
