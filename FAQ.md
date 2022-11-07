@@ -15,5 +15,5 @@ Delete the 'start-folder' property in the config file and restart the app.
 By default zxinfo-file-browser uses the config.json on the following locations:
 
 * on macOS: ~/Library/Application Support/zxinfo-file-browser/config.json
-* on Windows:
-* on Linux:
+* on Windows: %USERPROFILE%\AppData\Roaming\zxinfo-file-browser\config.json
+* on Linux: ~/.config/zxinfo-file-browser/config.json
