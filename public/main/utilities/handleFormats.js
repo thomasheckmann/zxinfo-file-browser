@@ -5,7 +5,7 @@ const path = require("path");
 const snafmt = require("./sna_format");
 const z80fmt = require("./z80_format");
 const tapfmt = require("./tap_format");
-
+const tzxfmt = require("./tzx_format");
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
@@ -24,8 +24,10 @@ function getZXFormat(fileName, subFileName, data) {
   sum.update(data);
 
   let ZXFileInfo = {
-    filename: fileName,
+    filepath: fileName,
+    filename: path.basename(fileName),
     subfilename: subFileName,
+    text: null,
     version: null,
     type: null,
     sha512: sum.digest("hex"),
@@ -60,6 +62,13 @@ function getZXFormat(fileName, subFileName, data) {
     obj = tapfmt.readTAP(data);
     ZXFileInfo.version = obj.type;
     ZXFileInfo.type = "tapfmt";
+    ZXFileInfo.text = obj.text;
+  } else if (extension.toLowerCase().endsWith(".tzx")) {
+    mylog.debug(`handling TZX`);
+    obj = tzxfmt.readTZX(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "tzxfmt";
+    ZXFileInfo.text = obj.text;
   } else if (extension.toLowerCase().endsWith(".zip")) {
     if (subFileName && subFileName.length > 0) {
       mylog.info(`ZIP inside ZIP, skippiung...`);

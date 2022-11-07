@@ -238,6 +238,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   if (extension === ".sna") {
   } else if (extension === ".z80") {
   } else if (extension === ".tap") {
+  } else if (extension === ".tzx") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;

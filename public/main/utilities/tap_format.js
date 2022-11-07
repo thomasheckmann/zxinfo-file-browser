@@ -13,86 +13,7 @@
 const log = require("electron-log");
 //log.transports.console.level = 'debug';
 
-/**
- * Then raw tape data follows, including the flag and checksum bytes.
- * @param {*} data
- */
-function createHeader(data) {
-  const mylog = log.scope("createHeader");
-
-  let dataBlock = {
-    flag: null,
-    error: null,
-  };
-
-  const flagByte = data[0];
-  mylog.debug(`flag: ${flagByte}`);
-  if (flagByte === 0) {
-    dataBlock.flag = "header";
-    const headerBlock = data.subarray(1, 18);
-
-    switch (headerBlock[0]) {
-      case 0:
-        dataBlock.type = "Program";
-        dataBlock.name = String(headerBlock.subarray(1, 11));
-        dataBlock.len = headerBlock[11] + headerBlock[12] * 256;
-        // param 1
-        const param1 = headerBlock[13] + headerBlock[14] * 256;
-        if (param1 < 32768) dataBlock.autostart = param1;
-        // param 2
-        const param2 = headerBlock[15] + headerBlock[16] * 256;
-        dataBlock.varstart = param2;
-        break;
-      case 1:
-        dataBlock.type = "Number Array";
-        break;
-      case 2:
-        dataBlock.type = "Character Array";
-        break;
-      case 3:
-        dataBlock.type = "Code";
-        dataBlock.name = String(headerBlock.subarray(1, 11));
-        dataBlock.len = headerBlock[11] + headerBlock[12] * 256;
-        // param 1
-        dataBlock.startAddress = headerBlock[13] + headerBlock[14] * 256;
-        // param 2
-        if (headerBlock[15] + headerBlock[16] * 256 !== 32768) {
-          mylog.warn(`For code - param 2 should be 32768....`);
-        }
-        break;
-      default:
-        dataBlock.type = null;
-        dataBlock.error = "Invalid headertype (0, 1, 2, 3): " + headerBlock[0];
-        break;
-    }
-  } else {
-    dataBlock.error = `Not a header block: ${flagByte}`;
-  }
-
-  mylog.debug(`${JSON.stringify(dataBlock)}`);
-  return dataBlock;
-}
-
-function createData(data) {
-  const mylog = log.scope("createData");
-
-  let dataBlock = {
-    flag: null,
-    data: null,
-    error: null,
-  };
-  const flagByte = data[0];
-  mylog.debug(`flag: ${flagByte}`);
-  if (flagByte === 0xff) {
-    dataBlock.flag = "data";
-    dataBlock.data = data.subarray(1, data.length - 1);
-  } else {
-    dataBlock.error = `Not a data block: ${flagByte}`;
-    mylog.warn(`Not a data block: ${flagByte}`);
-  }
-
-  return dataBlock;
-}
+const util = require("./tape_util");
 
 function readTAP(data) {
   const mylog = log.scope("readTAP");
@@ -110,13 +31,13 @@ function readTAP(data) {
     const dataBlock = data.subarray(index, index + blockLength);
     if (dataBlock[0] === 0) {
       mylog.debug(`found header block at index: ${index}`);
-      const block = createHeader(dataBlock);
+      const block = util.createHeader(dataBlock);
       if (block.error) {
         snapshot.error = block.error;
       }
       tap.push(block);
     } else if (dataBlock[0] === 255) {
-      const block = createData(dataBlock);
+      const block = util.createData(dataBlock);
       if (block.error) {
         snapshot.error = block.error;
       }
@@ -129,16 +50,23 @@ function readTAP(data) {
   }
 
   // iterate tap[] - find first code block starting at 16384 OR with lengh og 6912
+  snapshot.text = tap[0].type + ": " + tap[0].name;
   for (let index = 0; index < tap.length; index++) {
     const element = tap[index];
-    console.log(`${index}: ${element.type}, ${element.flag}`);
+    mylog.debug(`${index}: ${element.type}, ${element.flag}`);
     if (element.type === "Code") {
       if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
         snapshot.scrdata = tap[index + 1].data;
+        snapshot.border = 7;
         break;
       } else if (element.len === 6912) {
         mylog.debug(`Found code with length 6912...(screen length)`);
+        snapshot.scrdata = tap[index + 1].data;
+        snapshot.border = 7;
+        break;
+      } else if (element.len > 6912) {
+        mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
         snapshot.scrdata = tap[index + 1].data;
         snapshot.border = 7;
         break;
@@ -147,11 +75,13 @@ function readTAP(data) {
       // headerless data with length 6912 or bigger than 32768
       mylog.debug(`data block: ${element.data.length}`);
       if (element.data.length > 32767 || element.data.length === 6912) {
-        mylog.debug(`Headerless data with length > 32767 - try using it as screen...`);
+        mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
         snapshot.scrdata = element.data;
         snapshot.border = 7;
       }
     }
+
+    snapshot.data = tap;
   }
 
   return snapshot;

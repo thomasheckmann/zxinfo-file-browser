@@ -38,7 +38,9 @@ function formatType(t) {
       return "Z80";
     case "tapfmt":
       return "TAP";
-    case "zip":
+      case "tzxfmt":
+        return "TZX";
+      case "zip":
       return "ZIP";
     default:
       return t;
@@ -100,7 +102,7 @@ class EntryCard extends React.Component {
           }
           action={
             <Tooltip title="Locate file">
-              <IconButton aria-label="Locate file" onClick={(name) => openFolderFile(this.state.entry.filename)}>
+              <IconButton aria-label="Locate file" onClick={(name) => openFolderFile(this.state.entry.filepath)}>
                 <InsertLinkOutlinedIcon />
               </IconButton>
             </Tooltip>
@@ -118,8 +120,11 @@ class EntryCard extends React.Component {
         {this.state.entry.error ? <Alert severity="warning">{this.state.entry.error}</Alert> : ""}
         <CardMedia component="img" image={this.state.entry.scr} alt={this.state.entry.filename} />
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div" noWrap>
+          <Typography gutterBottom variant="subtitle1" component="div" noWrap>
             {this.state.entry.zxdbTitle ? this.state.entry.zxdbTitle : this.state.entry.filename}
+          </Typography>
+          <Typography gutterBottom variant="subtitle2" component="div" noWrap>
+            {this.state.entry.text}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             {this.state.entry.version && <Chip label={this.state.entry.version} />}
