@@ -8,8 +8,12 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import InfiniteEntriesList from "./InfiniteEntriesList";
+import { useContext } from "react";
+import ZXInfoSettings from "../common/ZXInfoSettings";
 
 const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
+
+const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
 function filterAndSortFiles(files, sortOptions, fileFilters) {
   const newFiles = files.filter((fileName) => {
@@ -28,15 +32,16 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
 }
 
 const FilesView = (props) => {
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
     window.electronAPI.scanFolder(props.foldername).then((res) => {
       // filter out files based filtring
-      const newList = filterAndSortFiles(res, props.sortOrderFiles, props.fileFilters);
+      const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
       setFiles(newList);
     });
-  }, [props.foldername, props.sortOrderFiles, props.fileFilters]);
+  }, [props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
     <Paper elevation={5} sx={{ my: 4 }} id={props.foldername}>
@@ -47,7 +52,7 @@ const FilesView = (props) => {
         </Typography>
       </Box>
       <Divider variant="middle" />
-      <InfiniteEntriesList files={files} sortOrderFiles={props.sortOrderFiles} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+      <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
     </Paper>
   );
 };
