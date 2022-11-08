@@ -38,6 +38,7 @@ function readTAP(data) {
       tap.push(block);
     } else if (dataBlock[0] === 255) {
       const block = util.createData(dataBlock);
+      block.type = "...data";
       if (block.error) {
         snapshot.error = block.error;
       }
@@ -50,10 +51,11 @@ function readTAP(data) {
   }
 
   // iterate tap[] - find first code block starting at 16384 OR with lengh og 6912
+  mylog.debug(`tap structure length: ${tap.length}`);
   snapshot.text = tap[0].type + ": " + tap[0].name;
   for (let index = 0; index < tap.length; index++) {
     const element = tap[index];
-    mylog.debug(`${index}: ${element.type}, ${element.flag}`);
+    mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
     if (element.type === "Code") {
       if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
@@ -71,7 +73,7 @@ function readTAP(data) {
         snapshot.border = 7;
         break;
       }
-    } else if (!element.type && element.flag === "data") {
+    } else if (snapshot.scrdata === null && element.type === "...data") {
       // headerless data with length 6912 or bigger than 32768
       mylog.debug(`data block: ${element.data.length}`);
       if (element.data.length > 32767 || element.data.length === 6912) {
