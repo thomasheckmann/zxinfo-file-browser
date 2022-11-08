@@ -47,7 +47,7 @@ function StandardSpeedDataBlock(len, data) {
   this.blockType = data[0x04] === 0 ? "Header" : "Data";
   this.data = data.subarray(0x04, 0x04 + data.length);
   this.text = `Type: ${this.blockType}, Pause: ${this.pause}, Block len: ${len}`;
-  mylog.info(`Data length: ${this.length}`);
+  mylog.debug(`Data length: ${this.length}`);
   if (this.data[0] === 0) {
     this.block = util.createHeader(this.data);
   } else if (this.data[0] === 255) {
@@ -69,7 +69,7 @@ function TurboSpeedDataBlock(len, data) {
   this.blockType = data[0x12] === 0 ? "Header" : "Data";
   this.data = data.slice(0x12, 0x12 + data.length);
   this.text = `Type: ${this.blockType}, Pause: ${this.pause}, Block len: ${len}`;
-  mylog.info(`Data length: ${this.length}`);
+  mylog.debug(`Data length: ${this.length}`);
   if (this.data[0] === 0 && this.length === 19) {
     this.block = util.createHeader(this.data);
   } else {
@@ -254,7 +254,178 @@ function ArchiveInfo(len, data) {
   }
 }
 
+const HWTYPE = new Map([
+  [
+    0,
+    {
+      type: "Computer",
+      hardware: [
+        "ZX Spectrum 16k",
+        "ZX Spectrum 48k, Plus",
+        "ZX Spectrum 48k ISSUE 1",
+        "ZX Spectrum 128k +(Sinclair)",
+        "ZX Spectrum 128k +2 (grey case)",
+        "ZX Spectrum 128k +2A, +3",
+        "Timex Sinclair TC-2048",
+        "Timex Sinclair TS-2068",
+        "Pentagon 128",
+        "Sam Coupe",
+        "Didaktik M",
+        "Didaktik Gama",
+        "ZX-80",
+        "ZX-81",
+        "ZX Spectrum 128k, Spanish version",
+        "ZX Spectrum, Arabic version",
+        "Microdigital TK 90-X",
+        "Microdigital TK 95",
+        "Byte",
+        "Elwro 800-3",
+        "ZS Scorpion 256",
+        "Amstrad CPC 464",
+        "Amstrad CPC 664",
+        "Amstrad CPC 6128",
+        "Amstrad CPC 464+",
+        "Amstrad CPC 6128+",
+        "Jupiter ACE",
+        "Enterprise",
+        "N/A",
+        "N/A",
+        "Inves Spectrum+",
+        "Profi",
+        "GrandRomMax",
+        "Kay 1024",
+        "Ice Felix HC 91",
+        "Ice Felix HC 2000",
+        "Amaterske RADIO Mistrum",
+        "Quorum 128",
+        "MicroART ATM",
+        "MicroART ATM Turbo 2",
+        "Chrome",
+        "ZX Badaloc",
+        "TS-1500",
+        "Lambda",
+        "TK-65",
+        "ZX-97",
+      ],
+    },
+  ],
+  [
+    1,
+    {
+      type: "External storage",
+      hardware: [
+        "ZX Microdrive",
+        "Opus Discovery",
+        "MGT Disciple",
+        "MGT Plus-D",
+        "Rotronics Wafadrive",
+        "TR-DOS (BetaDisk)",
+        "Byte Drive",
+        "Watsford",
+        "FIZ",
+        "Radofin",
+        "Didaktik disk drives",
+        "BS-DOS (MB-02)",
+        "ZX Spectrum +3 disk drive",
+        "JLO (Oliger) disk interface",
+        "Timex FDD3000",
+        "Zebra disk drive",
+        "Ramex Millenia",
+        "Larken",
+        "Kempston disk interface",
+        "Sandy",
+        "ZX Spectrum +3e hard disk",
+        "ZXATASP",
+        "DivIDE",
+        "ZXCF",
+      ],
+    },
+  ],
+  [
+    2,
+    {
+      type: "ROM/RAM type add-ons",
+      hardware: [
+        "Sam Ram",
+        "Multiface ONE",
+        "Multiface 128k",
+        "Multiface +3",
+        "MultiPrint",
+        "MB-02 ROM/RAM expansion",
+        "SoftROM",
+        "1k",
+        "16k",
+        "48k",
+        "Memory in 8-16k used",
+      ],
+    },
+  ],
+  [
+    3,
+    {
+      type: "Sound devices",
+      hardware: [
+        "Classic AY hardware (compatible with 128k ZXs)",
+        "Fuller Box AY sound hardware",
+        "Currah microSpeech",
+        "SpecDrum",
+        "AY ACB stereo (A+C=left, B+C=right); Melodik",
+        "AY ABC stereo (A+B=left, B+C=right)",
+        "RAM Music Machine",
+        "Covox",
+        "General Sound",
+        "Intec Electronics Digital Interface B8001",
+        "Zon-X AY",
+        "QuickSilva AY",
+        "Jupiter ACE",
+      ],
+    },
+  ],
+  [4, { type: "Joysticks", hardware: ["Kempston", "Cursor, Protek, AGF", "Sinclair 2 Left (12345)", "Sinclair 1 Right (67890)", "Fuller"] }],
+  [5, { type: "Mice", hardware: [] }],
+  [6, { type: "Other controllers", hardware: [] }],
+  [7, { type: "Serial ports", hardware: [] }],
+  [8, { type: "Parallel ports", hardware: [] }],
+  [9, { type: "Printers", hardware: [] }],
+  [10, { type: "Modems", hardware: [] }],
+  [11, { type: "Digitizers", hardware: [] }],
+  [12, { type: "Network adapters", hardware: [] }],
+  [13, { type: "Keyboards & keypads", hardware: [] }],
+  [14, { type: "AD/DA converters", hardware: [] }],
+  [15, { type: "EPROM programmers", hardware: [] }],
+  [16, { type: "Graphics", hardware: [] }],
+]);
+
+const HWINFO = new Map([
+  [0, "The tape RUNS on this machine or with this hardware, but may or may not use the hardware or special features of the machine."],
+  [1, "The tape USES the hardware or special features of the machine, such as extra memory or a sound chip."],
+  [2, "The tape RUNS but it DOESN'T use the hardware or special features of the machine."],
+  [3, "The tape DOESN'T RUN on this machine or with this hardware."],
+]);
+
 // ID 0x33 TODO: Hardware type
+function HardwareBlock(len, data) {
+  const mylog = log.scope("HardwareBlock");
+  this.id = 0x33;
+  this.blockName = "Hardware Info Block";
+  this.length = data[0];
+  this.hw = [];
+
+  mylog.debug(`Number of entries: ${this.length}`);
+  const hwData = data.slice(1);
+  for (var i = 0; i < this.length; i++) {
+    const hardwareType = hwData[i * 3];
+    const hardwareId = hwData[i * 3 + 1];
+    const hardwareInfo = hwData[i * 3 + 2];
+    mylog.debug(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
+    if (HWINFO.get(hardwareInfo)) {
+      this.hw.push(HWTYPE.get(hardwareType).hardware[hardwareId]);
+    }
+  }
+
+  this.block = { type: "Hardware Info Block", name: "" };
+}
+
 // ID 0x35 TODO: Custom info block
 
 function processTZXData(data) {
@@ -382,7 +553,7 @@ function processTZXData(data) {
       case 0x33: // ID 33 - Hardware type
         length = data[i] * 3 + 1;
         mylog.debug(`ID 33 - Hardware type: length=${length}`);
-        mylog.error("Unhandled... abort...");
+        block = new HardwareBlock(length, data.slice(i + 2, i + length));
         break;
       case 0x35: // ID 35 - Custom info block
         length = 9999;
@@ -422,15 +593,19 @@ function readTZX(data) {
   var snapshot = { type: null, error: null, scrdata: null, data: [] };
   snapshot.type = `TZX ${TZXMajorVersion}.${TZXMinorVersion}`;
 
-  var tzx = new TZXObject(TZXMajorVersion, TZXMinorVersion);
+  //var tzx = new TZXObject(TZXMajorVersion, TZXMinorVersion);
 
   const tzxData = processTZXData(data);
 
-  // create pseudo TAP structure
+  snapshot.hwModel;
+  // create pseudo TAP structure & find hwinfo
   var tap = tzxData.filter((d) => {
     if (d && d.id === 0x10) {
       mylog.debug("Adding Standard Block to tape....");
       return d.block;
+    }
+    if (d && d.id === 0x33) {
+      snapshot.hwModel = d.hw[0];
     }
   });
 
