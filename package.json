@@ -18,7 +18,15 @@
       }
     },
     "win": {
-      "icon": "./public/icons/icon.png"
+      "icon": "./public/icons/icon.png",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "linux": {
       "icon": "./public/icons/icon.png"
