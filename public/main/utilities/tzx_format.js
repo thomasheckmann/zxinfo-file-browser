@@ -120,11 +120,18 @@ function PureDataBlock(len, data) {
 function DirectRecordingBlock(len, data) {
   const mylog = log.scope("DirectRecordingBlock");
   this.id = 0x14;
-  this.blockName = "Direct Rercodring Block";
+  this.blockName = "Direct Recording Block";
   this.length = len;
-  this.block = { type: "Direct Rercodring Block", name: "" };
+  this.block = { type: "Direct Recording Block", name: "" };
 }
 // ID 0x18 TODO: CSW
+function CSWRecordingBlock(len, data) {
+  const mylog = log.scope("CSWRecordingBlock");
+  this.id = 0x18;
+  this.blockName = "CSW Recording Block";
+  this.length = len;
+  this.block = { type: "CSW Recording Block", name: "" };
+}
 
 // ID 19
 function GeneralizedDataBlock(len, data) {
@@ -293,9 +300,9 @@ function processTZXData(data) {
         block = new DirectRecordingBlock(length, data.slice(i, i + length));
         break;
       case 0x18: // ID 18 - CSW recording block
-        length = 9999;
+        length = getNWord(data[i + 0x01], data[i + 0x02], data[i + 0x03], data[i + 0x04]) + 4;
         mylog.debug(`ID 18 - CSW recording block: length=${length}`);
-        mylog.error("Unhandled... abort...");
+        block = new CSWRecordingBlock(length, data.slice(i, i + length));
         break;
       case 0x19: // ID 19 - Generalized Data Block
         length = getDWord(data[i], data[i + 1], data[i + 2], data[i + 3]) + 4;
