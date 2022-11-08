@@ -61,29 +61,42 @@ function createHeader(data) {
 }
 
 function createData(data) {
-    const mylog = log.scope("createData");
-  
-    let dataBlock = {
-      flag: null,
-      data: null,
-      error: null,
-    };
-    const flagByte = data[0];
-    mylog.debug(`flag: ${flagByte}`);
-    if (flagByte === 0xff) {
-      dataBlock.flag = "data";
-      dataBlock.data = data.subarray(1, data.length - 1);
-      mylog.debug(`data length: ` + dataBlock.data.length);
-    } else {
-      dataBlock.error = `Not a data block: ${flagByte}`;
-      mylog.warn(`Not a data block: ${flagByte}`);
-    }
-  
-    return dataBlock;
+  const mylog = log.scope("createData");
+
+  let dataBlock = {
+    flag: null,
+    data: null,
+    error: null,
+  };
+  const flagByte = data[0];
+  mylog.debug(`flag: ${flagByte}`);
+  if (flagByte === 0xff) {
+    dataBlock.flag = "data";
+    dataBlock.data = data.subarray(1, data.length - 1);
+    mylog.debug(`data length: ` + dataBlock.data.length);
+  } else {
+    dataBlock.error = `Not a data block: ${flagByte}`;
+    mylog.warn(`Not a data block: ${flagByte}`);
   }
-  
+
+  return dataBlock;
+}
+
+function createRAWData(data) {
+  const mylog = log.scope("createRAWData");
+
+  let dataBlock = {
+    data: null,
+  };
+  dataBlock.data = data.subarray(data);
+  dataBlock.len = data.length;
+
+  mylog.debug(`data size: ${dataBlock.data.length}`);
+  return dataBlock;
+}
+
 module.exports = {
-    createHeader: createHeader,
-    createData: createData
+  createHeader: createHeader,
+  createData: createData,
+  createRAWData: createRAWData
 };
-  

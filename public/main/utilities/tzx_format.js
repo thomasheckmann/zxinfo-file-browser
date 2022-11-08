@@ -41,12 +41,13 @@ function StandardSpeedDataBlock(len, data) {
   const mylog = log.scope("StandardSpeedDataBlock");
   this.id = 0x10;
   this.blockName = "Standard Speed Data Block";
-  this.length = len;
+  this.length = getWord(data[0x02], data[0x03]);
   this.pause = getWord(data[0], data[1]);
   // const dataLen = getWord(data[2], data[3]);
   this.blockType = data[0x04] === 0 ? "Header" : "Data";
-  this.data = data.subarray(0x04, 0x04+data.length);
+  this.data = data.subarray(0x04, 0x04 + data.length);
   this.text = `Type: ${this.blockType}, Pause: ${this.pause}, Block len: ${len}`;
+  mylog.info(`Data length: ${this.length}`);
   if (this.data[0] === 0) {
     this.block = util.createHeader(this.data);
   } else if (this.data[0] === 255) {
@@ -63,19 +64,18 @@ function TurboSpeedDataBlock(len, data) {
   const mylog = log.scope("TurboSpeedDataBlock");
   this.id = 0x10;
   this.blockName = "Turbo Speed Data Block";
-  this.length = len;
+  this.length = getWord(data[0x0f], data[0x10], data[0x11]);
   this.pause = getWord(data[0x0d], data[0x0e]);
   this.blockType = data[0x12] === 0 ? "Header" : "Data";
-  this.data = data.slice(0x12, data.length);
+  this.data = data.slice(0x12, 0x12 + data.length);
   this.text = `Type: ${this.blockType}, Pause: ${this.pause}, Block len: ${len}`;
-  if (this.data[0] === 0) {
+  mylog.info(`Data length: ${this.length}`);
+  if (this.data[0] === 0 && this.length === 19) {
     this.block = util.createHeader(this.data);
-  } else if (this.data[0] === 255) {
-    this.block = util.createData(this.data);
-    this.block.type = "...data";
   } else {
-    mylog.warn(`found unknown block: ${this.data[0]}`);
-    this.block = {type: "Turbo Speed Data Block", name: ""};
+    this.block = util.createRAWData(this.data);
+    this.block.type = "...data";
+    this.block.name = "Turbo Speed Data";
   }
 }
 
@@ -117,6 +117,13 @@ function PureDataBlock(len, data) {
 }
 
 // ID 0x15 TODO: Direct
+function DirectRecordingBlock(len, data) {
+  const mylog = log.scope("DirectRecordingBlock");
+  this.id = 0x14;
+  this.blockName = "Direct Rercodring Block";
+  this.length = len;
+  this.block = { type: "Direct Rercodring Block", name: "" };
+}
 // ID 0x18 TODO: CSW
 
 // ID 19
@@ -185,6 +192,12 @@ function LoopEnd() {
 // ID 26 TODO: Call sequence
 // ID 27 TODO: Return from sequence
 // ID 28 TODO: Select block
+function SelectBlock(len, data) {
+  this.id = 0x28;
+  this.blockName = "Select Block";
+  this.length = len;
+  this.block = { type: "Select Block", name: "" };
+}
 
 // ID 2A TODO: Stop tape if 48K
 // ID 2B TODO: Set signal level
@@ -256,7 +269,7 @@ function processTZXData(data) {
         break;
       case 0x11: // ID 11 - Turbo speed data block
         length = getWord(data[i + 0x0f], data[i + 0x10], data[i + 0x11]) + 0x12;
-        mylog.debug(`ID 11 - Turbo speed data block: length=${length}`);
+        mylog.debug(`ID 11 - Turbo speed data block: TZX block length=${length}`);
         block = new TurboSpeedDataBlock(length, data.slice(i, i + length));
         break;
       case 0x12: // ID 12 - Pure Tone
@@ -275,9 +288,9 @@ function processTZXData(data) {
         block = new PureDataBlock(length, data.slice(i, i + length));
         break;
       case 0x15: // ID 15 - Direct recording block
-        length = 9999;
+        length = getNWord(data[i + 0x05], data[i + 0x06], data[i + 0x07]) + 8;
         mylog.debug(`ID 15 - Direct recording block: length=${length}`);
-        mylog.error("Unhandled... abort...");
+        block = new DirectRecordingBlock(length, data.slice(i, i + length));
         break;
       case 0x18: // ID 18 - CSW recording block
         length = 9999;
@@ -330,9 +343,9 @@ function processTZXData(data) {
         mylog.error("Unhandled... abort...");
         break;
       case 0x28: // ID 28 - Select block
-        length = 9999;
+        length = getWord(data[i + 0x00], data[i + 0x01]) + 2;
         mylog.debug(`ID 28 - Select block: length=${length}`);
-        mylog.error("Unhandled... abort...");
+        block = new SelectBlock(length, data.slice(i + 1, i + length));
         break;
       case 0x2a: // ID 2A - Stop the tape if in 48K mode
         length = 9999;
@@ -408,7 +421,7 @@ function readTZX(data) {
 
   // create pseudo TAP structure
   var tap = tzxData.filter((d) => {
-    if (d.id === 0x10) {
+    if (d && d.id === 0x10) {
       mylog.debug("Adding Standard Block to tape....");
       return d.block;
     }
@@ -419,34 +432,37 @@ function readTZX(data) {
     mylog.debug(`Not any standard blocks - TZX v${TZXMajorVersion}.${TZXMinorVersion}, maybe ZX81?`);
     var zx81programName;
     const zx81 = tzxData.filter((d) => {
-        if(d.id === 0x30 && (d.text.includes('ZX81')||d.text.startsWith('Program Name:'))) {
-            mylog.debug(`Correct text found: ${d.text} - adding...`);
-            if(d.text.startsWith('Program Name:')) {
-                zx81programName = d.text; // d.text.substring(d.text.indexOf(': ') + 1);
-            };
-            return d;
+      if (d.id === 0x30 && (d.text.includes("ZX81") || d.text.startsWith("Program Name:"))) {
+        mylog.debug(`Correct text found: ${d.text} - adding...`);
+        if (d.text.startsWith("Program Name:")) {
+          zx81programName = d.text; // d.text.substring(d.text.indexOf(': ') + 1);
         }
+        return d;
+      }
       if (d.id === 0x19) {
         mylog.debug("Generalized Data Block found - adding...");
         return d;
       }
     });
     if (zx81.length === 3) {
-        mylog.debug(`found 3 blocks, OK`);
-        snapshot.text = zx81programName;
-        snapshot.hwModel = "ZX81";
-        return snapshot;
-      } else {
-        mylog.debug(`not 3 blocks, probaly not ZX81...`);
-      }
+      mylog.debug(`found 3 blocks, OK`);
+      snapshot.text = zx81programName;
+      snapshot.hwModel = "ZX81";
+      return snapshot;
+    } else {
+      mylog.debug(`not 3 blocks, probaly not ZX81...`);
+    }
   }
 
-  snapshot.text = tap[0].block.type + ": " + tap[0].block.name;
-  mylog.debug(`tap structure: ${tap.length}`);
+  if (tap.length > 0 && tap[0].block.type !== "...data") {
+    snapshot.text = tap[0].block.type + ": " + tap[0].block.name;
+  }
+
+  mylog.debug(`tap structure length: ${tap.length}`);
   for (var i = 0; i < tap.length; i++) {
     const element = tap[i].block;
-    mylog.debug(`${i}: ${element.type}, ${element.flag}`);
-    if (element.type === "Code") {
+    mylog.debug(`${i}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
+    if (element.type === "Code" && i < tap.length - 1) {
       if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
         snapshot.scrdata = tap[i + 1].block.data;
@@ -463,7 +479,7 @@ function readTZX(data) {
         snapshot.border = 7;
         break;
       }
-    } else if (snapshot.scrdata === null && element.type === "...data" && element.flag === "data") {
+    } else if (snapshot.scrdata === null && element.type === "...data") {
       // headerless data with length 6912 or bigger than 32768
       // mylog.debug(`${i} - data block: ${element.data.length}`);
       if (element.data.length > 16000 || element.data.length === 6912) {
