@@ -1,5 +1,14 @@
 # FAQ - frequently asked questions
 
+## Why does SCR preview looks like random data?
+
+For snapshot files SNA and Z80, the screen memory is part of the data - but for tape files TAP and TZX, there is no way to identify a screen 100%. For these files, the app tries at best to find a suitable SCR preview.
+- The code starts at 16384 (screen memory)
+- The code is of length 6912
+- For headerless data, it tries to find a data block with size 6912 bytes or just uses the first block with size > 16000 bytes.
+
+In many cases this leads to a nice SCR preview, in others it just shows whatever data is in the file - which might look randon on the screen.
+
 ## Where do I find the apps logfile?
 
 By default zxinfo-file-browser writes logs to the following locations:
