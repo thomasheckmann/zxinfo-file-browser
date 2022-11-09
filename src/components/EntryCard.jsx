@@ -38,9 +38,9 @@ function formatType(t) {
       return "Z80";
     case "tapfmt":
       return "TAP";
-      case "tzxfmt":
-        return "TZX";
-      case "zip":
+    case "tzxfmt":
+      return "TZX";
+    case "zip":
       return "ZIP";
     default:
       return t;
@@ -115,6 +115,7 @@ class EntryCard extends React.Component {
             </Tooltip>
           }
           titleTypographyProps={{ noWrap: true }}
+          subheaderTypographyProps={{ noWrap: true }}
           subheader={this.state.entry.subfilename}
         />
         {this.state.entry.error ? <Alert severity="warning">{this.state.entry.error}</Alert> : ""}

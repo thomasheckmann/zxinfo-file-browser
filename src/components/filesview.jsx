@@ -13,8 +13,6 @@ import ZXInfoSettings from "../common/ZXInfoSettings";
 
 const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
 
-const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
-
 function filterAndSortFiles(files, sortOptions, fileFilters) {
   const newFiles = files.filter((fileName) => {
     let result = fileFilters.some((extension) => {

@@ -32,11 +32,11 @@ function createWindow() {
   // mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
   // mylog.debug(`sort-files: ${store.get("sort-files")}`);
 
-  mylog.info("########### STARTING zxinfo-file-browser vXXX: " + new Date());
+  mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   win = new BrowserWindow({
-    width: 1400,
-    height: 800,
-    title: "ZXInfo - file manager",
+    width: 1600,
+    height: 900,
+    title: `ZXInfo - file manager v${app.getVersion()}`,
     webPreferences: {
       autoHideMenuBar: true,
       nodeIntegration: false, // is default value after Electron v5

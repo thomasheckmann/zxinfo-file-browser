@@ -4,7 +4,7 @@
  * - filFilters
  * - isBusyWorking
  */
-import { createContext, useContext, useState } from "react";
+import { createContext } from "react";
 
 const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "mdr", "tap", "tzx", "zip"];
 

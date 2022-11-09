@@ -626,7 +626,7 @@ function readTZX(data) {
         return d;
       }
     });
-    if (zx81.length === 3) {
+    if (zx81.length >= 3) {
       mylog.debug(`found 3 blocks, OK`);
       snapshot.text = zx81programName;
       snapshot.hwModel = "ZX81";

@@ -1,9 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import React from "react";
 
 import FilesView from "./filesview";
-
-const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
 function FolderView(props) {
   return (
