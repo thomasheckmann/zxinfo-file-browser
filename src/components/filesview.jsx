@@ -30,7 +30,7 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
 }
 
 const FilesView = (props) => {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
   const [files, setFiles] = useState([]);
 
   useEffect(() => {

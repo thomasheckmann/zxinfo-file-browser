@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRef } from "react";
-import { Box, Container, LinearProgress, Paper } from "@mui/material";
+import { Box, Container, createTheme, LinearProgress, Paper, useMediaQuery } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import styled from "@emotion/styled";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -25,15 +25,42 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 function InfiniteEntriesList(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
 
   const [items, setItems] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [index, setIndex] = useState(0);
-  const [maxSize, setMaxSize] = useState(props.maxsize);
+  const [maxSize, setMaxSize] = useState(8); // number of entries to fetch at a time
+  const [visibleHeight, setVisibleHeight] = useState(Math.round(window.innerHeight * 0.75));
+
 
   const nodeRef = useRef();
   const isVisible = useIsVisible(nodeRef);
+
+  const theme = createTheme();
+
+  /**
+   * xs, sm, md, lg, xl
+   * @returns
+   */
+  const greaterThanLG = useMediaQuery(theme.breakpoints.up("xl"));
+  const lgTOxl = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+  const mdTOlg = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const smTOmd = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const lessThanSM = useMediaQuery(theme.breakpoints.down("sm"));
+  function getRowSize() {
+    if (greaterThanLG) {
+      return 4; // LG
+    } else if (lgTOxl) {
+      return 4; // XL
+    } else if (mdTOlg) {
+      return 3; // MD
+    } else if (smTOmd) {
+      return 2; // SM
+    } else if (lessThanSM) {
+      return 1; // XS
+    }
+  }
 
   const fetchMoreData = async () => {
     var itemsToAdd = [];
@@ -54,12 +81,23 @@ function InfiniteEntriesList(props) {
   useEffect(() => {
     if (isVisible) {
       fetchMoreData();
+      const averageCardHeight = 450;
+      const maxHeight = window.innerHeight - 40; // total files bare
+
+      // avarage rows availble in space
+      const maxRows = Math.round(maxHeight / averageCardHeight);
+      setMaxSize(maxRows * getRowSize());
+
+      // adjust height, if less than one row
+      if(props.files.length < getRowSize()) {
+        setVisibleHeight(averageCardHeight + 120);
+      }
     }
   }, [props.files, isVisible, appSettings.sortOrderFiles]);
 
   return (
-    <Container ref={nodeRef} maxWidth="xl">
-      <div id={"scrollableDiv" + props.foldername} style={{ height: 750, overflow: "auto" }}>
+    <Container maxWidth="xl">
+      <div ref={nodeRef} id={"scrollableDiv" + props.foldername} style={{ height: visibleHeight, overflow: "auto" }}>
         <InfiniteScroll
           dataLength={items.length}
           next={fetchMoreData}
@@ -71,7 +109,7 @@ function InfiniteEntriesList(props) {
               </Box>
             </Grid>
           }
-          height={700}
+          height={visibleHeight}
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
             <Grid xs={12}>
