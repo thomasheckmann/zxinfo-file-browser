@@ -24,10 +24,10 @@ function readSNA(data) {
   // 48K or 128K?
   var fileSize = data.length;
   if (fileSize === 49179) {
-    mylog.info(`processing SNA 48K file...`);
+    mylog.debug(`processing SNA 48K file...`);
     snapshot.type = "SNA 48K";
   } else if (fileSize === 131103 || fileSize === 147487) {
-    mylog.info(`processing SNA 128K file...`);
+    mylog.debug(`processing SNA 128K file...`);
     snapshot.type = "SNA 128K";
   } else {
     snapshot.error = "Corrupt or unknown SNA format";

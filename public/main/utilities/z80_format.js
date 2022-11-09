@@ -133,14 +133,14 @@ function readZ80(data) {
     if (v === 23) {
       version = 2;
       mylog.debug(`- - extra header length: 23, version 2`);
-      mylog.info(`processing Z80 v2 file...`);
+      mylog.debug(`processing Z80 v2 file...`);
     } else if (v === 54 || v === 55) {
       version = 3;
       mylog.debug(`- - extra header length: 54 or 55, version 3`);
-      mylog.info(`processing Z80 v3 file...`);
+      mylog.debug(`processing Z80 v3 file...`);
     }
   } else {
-    mylog.info(`processing Z80 v1 file...`);
+    mylog.debug(`processing Z80 v1 file...`);
   }
 
   snapshot.type = "Z80 v" + version;

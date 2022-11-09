@@ -18,7 +18,7 @@ const util = require("./tape_util");
 function readTAP(data) {
   const mylog = log.scope("readTAP");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing TAP file...`);
+  mylog.debug(`processing TAP file...`);
 
   var snapshot = { type: null, error: null, scrdata: null };
   snapshot.type = "TAP";

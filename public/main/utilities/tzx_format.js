@@ -578,7 +578,7 @@ function processTZXData(data) {
 function readTZX(data) {
   const mylog = log.scope("readTZX");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing TZX file...`);
+  mylog.debug(`processing TZX file...`);
 
   const signature = String.fromCharCode.apply(null, data.slice(0, 7));
   if (signature !== "ZXTape!") {
