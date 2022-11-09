@@ -60,6 +60,7 @@
     "react-dom": "^18.2.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-is-visible": "^1.2.0",
+    "react-resize-detector": "^7.1.2",
     "react-scripts": "5.0.1",
     "react-scroll": "^1.8.8",
     "styled-components": "^5.3.6",
