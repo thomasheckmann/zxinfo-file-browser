@@ -8,6 +8,7 @@ const tapfmt = require("./tap_format");
 const tzxfmt = require("./tzx_format");
 const dskfmt = require("./dsk_format");
 const trdfmt = require("./trd_format");
+const sclfmt = require("./scl_format");
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
@@ -15,7 +16,7 @@ function getZXFormat(fileName, subFileName, data) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", ".tzx", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;
@@ -91,6 +92,19 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.type = "trdfmt";
     ZXFileInfo.text = obj.text;
     trdfmt.createDIRScreen(obj.dir_scr).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".scl")) {
+    mylog.debug(`handling SCL`);
+    obj = sclfmt.readSCL(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "sclfmt";
+    ZXFileInfo.text = obj.text;
+    sclfmt.createDIRScreen(obj.dir_scr).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
