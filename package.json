@@ -1,6 +1,6 @@
 {
   "name": "zxinfo-file-browser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ZX Spectrum emulator file browser powered by the web",
   "author": "thomas.kolbeck@gmail.com",
   "main": "public/electron.js",
