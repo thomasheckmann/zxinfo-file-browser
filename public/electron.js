@@ -240,6 +240,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".tap") {
   } else if (extension === ".tzx") {
   } else if (extension === ".dsk") {
+  } else if (extension === ".trd") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;

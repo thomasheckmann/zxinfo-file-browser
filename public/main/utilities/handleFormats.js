@@ -7,6 +7,7 @@ const z80fmt = require("./z80_format");
 const tapfmt = require("./tap_format");
 const tzxfmt = require("./tzx_format");
 const dskfmt = require("./dsk_format");
+const trdfmt = require("./trd_format");
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
@@ -76,6 +77,26 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.version = obj.type;
     ZXFileInfo.type = "dskfmt";
     ZXFileInfo.text = obj.text;
+    dskfmt.createDIRScreen(obj.dir_scr).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".trd")) {
+    mylog.debug(`handling TRD`);
+    obj = trdfmt.readTRD(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "trdfmt";
+    ZXFileInfo.text = obj.text;
+    trdfmt.createDIRScreen(obj.dir_scr).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
   } else if (extension.toLowerCase().endsWith(".zip")) {
     if (subFileName && subFileName.length > 0) {
       mylog.info(`ZIP inside ZIP, skippiung...`);
@@ -114,13 +135,6 @@ function getZXFormat(fileName, subFileName, data) {
       }
     });
   } else if (obj.dir_scr) {
-    dskfmt.createDIRScreen(obj.dir_scr).then((res) => {
-      if (res.buffer) {
-        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
-      } else {
-        ZXFileInfo.scr = res;
-      }
-    });
   } else if (!ZXFileInfo.scr){
     ZXFileInfo.scr = "./images/no_image.png";
   }
