@@ -239,6 +239,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".z80") {
   } else if (extension === ".tap") {
   } else if (extension === ".tzx") {
+  } else if (extension === ".dsk") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;
