@@ -40,9 +40,11 @@ function formatType(t) {
       return "TAP";
     case "tzxfmt":
       return "TZX";
-      case "dskfmt":
-        return "DSK";
-      case "zip":
+    case "dskfmt":
+      return "DSK";
+    case "trdfmt":
+      return "TRD";
+    case "zip":
       return "ZIP";
     default:
       return t;
