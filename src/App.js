@@ -72,7 +72,7 @@ const theme = createTheme({
   },
 });
 
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "mdr", "tap", "tzx", "zip"];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "zip"];
 
 function App() {
   const [startFolder, setStartFolder] = React.useState({

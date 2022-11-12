@@ -87,7 +87,7 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
-const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".mdr", ".tap", ".tzx", ".zip"];
+const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".zip"];
 
 /**
  *
@@ -241,6 +241,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".tzx") {
   } else if (extension === ".dsk") {
   } else if (extension === ".trd") {
+  } else if (extension === ".scl") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;
