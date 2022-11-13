@@ -77,7 +77,7 @@ function readSCL(data) {
   mylog.debug(`input: ${data.length}`);
 
   var snapshot = {};
-  snapshot.type = "TRD";
+  snapshot.type = "SCL";
   snapshot.scrdata = null;
 
   const disk_info = detectSCL(data);
