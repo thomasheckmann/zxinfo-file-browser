@@ -11,10 +11,13 @@ const NUM_SECTOR = 9;
 function read_track_info(data, track, DPB) {
   const mylog = log.scope("read_track_info");
 
-  mylog.debug("reading track info...");
+  mylog.debug(`reading track info for track: ${track}`);
 
+  var SIZ_TRACK = CPCEMU_TRACK_OFFSET + NUM_SECTOR * (128 << DPB.psh);
+  if (DPB.size_of_track) {
+    SIZ_TRACK = DPB.size_of_track;
+  }
   // READ TRACK INFORMATION BLOCK
-  const SIZ_TRACK = CPCEMU_TRACK_OFFSET + NUM_SECTOR * (128 << DPB.psh);
 
   const offset_track = CPCEMU_INFO_OFFSET + track * SIZ_TRACK;
   mylog.debug(`offset for track: ${track} - ${offset_track}`);
@@ -119,7 +122,10 @@ function readEDSK(data) {
 
   // detect additional +3 disk info
   // 16-byte record on track 0, head 0, physical sector 1
-  const fpsId = read_track_info(data, 0, DPB).sector_info_table[0].sector_id;
+  mylog.debug("Reading 16 byte record to detect additional +3 disk info");
+  const sector0 = read_track_info(data, 0, DPB);
+  const fpsId = sector0.sector_info_table[0].sector_id;
+
   mylog.debug(`First physical sector id: ${fpsId} (0x${fpsId.toString(16)})`);
   if (fpsId === 0xc1) {
     // CPM_DATA_DISK
@@ -128,6 +134,18 @@ function readEDSK(data) {
     DPB.off = 0x00;
   } else if (fpsId <= 0xc1) {
     mylog.debug("PCW/Spectrum +3");
+    const plus3info = {
+      format: sector0.sector_data[0][0],
+      sideness: sector0.sector_data[0][1],
+      tracks: sector0.sector_data[0][2],
+      sectors: sector0.sector_data[0][3],
+      psh: sector0.sector_data[0][4],
+      off: sector0.sector_data[0][5],
+      bsh: sector0.sector_data[0][6],
+      no_of_dir_blocks: sector0.sector_data[0][7],
+    };
+    DPB.size_of_track = disk_info_block.size_of_track;
+    mylog.debug(`+3 DISK INFO: ${JSON.stringify(plus3info)}`);
   } else {
     mylog.debug("Unknown format: " + fpsId);
     return null;
@@ -182,15 +200,15 @@ function readEDSK(data) {
       if (item && file_entry.ua < 16) {
         item.rc_sum = item.rc_sum + current_rc;
         item.file_size = Math.ceil((item.rc_sum * 128) / 1024);
-        mylog.debug(`updating: ${JSON.stringify(item)}`);
+        // mylog.debug(`updating: ${JSON.stringify(item)}`);
         file_map.set(current_filename + current_ext, item);
       } else if (!item && file_entry.ua < 16) {
         file_entry.rc_sum = current_rc;
         file_entry.file_size = Math.ceil((file_entry.rc_sum * 128) / 1024);
-        mylog.debug(`creating new: ${JSON.stringify(file_entry)}`);
+        // mylog.debug(`creating new: ${JSON.stringify(file_entry)}`);
         file_map.set(current_filename + current_ext, file_entry);
       } else if (file_entry.ua === 0xe5) {
-        mylog.debug(`DELETED: ${current_filename}.${current_ext}`);
+        // mylog.debug(`DELETED: ${current_filename}.${current_ext}`);
         file_map.delete(current_filename + current_ext);
       } else {
         mylog.warn(`Unknown UA: ${file_entry.ua}`);
@@ -228,13 +246,16 @@ function createDIRScreen(dirdata) {
     if (value.read_only) text += "RO ";
     if (value.hidden) text += "SYS ";
     if (value.archived) text += "ARC ";
-    if(line < 21) screenZX.printAt(frame0, 0, line, text);
-
-    line += 1;
+    if (line < 21) {
+      screenZX.printAt(frame0, 0, line, text);
+      line += 1;
+    }
   }
 
   const endText = disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free";
-  screenZX.printAt(frame0, 0, line+1, endText);
+  screenZX.printAt(frame0, 0, line + 1, endText);
+
+  // frame0.write("./file.png");
 
   return frame0.getBase64Async(Jimp.MIME_PNG);
 }
@@ -255,8 +276,19 @@ function readDSK(data) {
     snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
   } else if (signature === "MV - CPCEMU Disk-File\r\nDisk-Info\r\n") {
     mylog.warn(`Standard DSK format, skipping...`);
+    const disk = readEDSK(data);
     snapshot.text = `Std. CPC DSK: T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
     //return;
+  } else if (signature === "MV - CPC format Disk Image (DU54)\r") {
+    mylog.warn(`Standard DSK DU54`);
+    const disk = readEDSK(data);
+    snapshot.text = `CPC (DU54): T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
+    mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
+    snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
+  } else {
+    mylog.error(`Unknown DSK format: ${signature}`);
+
+    return null;
   }
   return snapshot;
 }
