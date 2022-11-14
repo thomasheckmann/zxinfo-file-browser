@@ -242,6 +242,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".dsk") {
   } else if (extension === ".trd") {
   } else if (extension === ".scl") {
+  } else if (extension === ".mdr") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;

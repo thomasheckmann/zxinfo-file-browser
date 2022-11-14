@@ -207,22 +207,28 @@ function printAt(image, x, y, text) {
 
   mylog.debug(`${text}`);
 
+  var my_x = x; 
   for (var i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i) - 32;
-    const fontData = chars_spectrum[c];
-    for (var r = 0; r < 8; r++) {
-      const byte = fontData[r];
-      const yc = offsetY + y * 8 + r;
-      // byte = nnnnnnnn
-      for (var b = 0; b < 8; b++) {
-        const xc = offsetX + (x + i) * 8 + b;
-        const pixel = byte & (0b1000000 >> b);
-        if (pixel) {
-          image.setPixelColor(Jimp.cssColorToHex(colors[0]), xc, yc);
-        } else {
-          image.setPixelColor(Jimp.cssColorToHex(colors[7]), xc, yc);
+    if (c < 0) {
+      // ignore, non-printable
+    } else {
+      const fontData = chars_spectrum[c];
+      for (var r = 0; r < 8; r++) {
+        const byte = fontData[r];
+        const yc = offsetY + y * 8 + r;
+        // byte = nnnnnnnn
+        for (var b = 0; b < 8; b++) {
+          const xc = offsetX + (my_x) * 8 + b;
+          const pixel = byte & (0b1000000 >> b);
+          if (pixel) {
+            image.setPixelColor(Jimp.cssColorToHex(colors[0]), xc, yc);
+          } else {
+            image.setPixelColor(Jimp.cssColorToHex(colors[7]), xc, yc);
+          }
         }
       }
+      my_x++;
     }
   }
 }
