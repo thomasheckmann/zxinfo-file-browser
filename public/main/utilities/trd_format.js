@@ -73,7 +73,7 @@ function createDIRScreen(dirdata) {
   const endText = `Free sector ${disk_info.free_sectors} Title: ${disk_info.disk_label}`;
   screenZX.printAt(image, 0, line+1, endText);
 
-  const endText2 = `${disk_info.disk_type_name} - ${disk_info.no_files} File(s)`;
+  const endText2 = `${disk_info.disk_type_name} - ${dir_info.length} File(s)`;
   screenZX.printAt(image, 0, line+2, endText2);
 
   // image.write("./file.png");
@@ -97,7 +97,9 @@ function readDir(data, disk_info) {
       file_len: entry[11] + entry[12] * 256,
       file_len_sectors: entry[13],
     };
-    directory.push(file_descriptor);
+    if(entry[0] !== 0x01) {
+      directory.push(file_descriptor);
+    }
   }
 
   return directory;
