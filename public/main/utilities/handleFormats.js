@@ -9,6 +9,7 @@ const tzxfmt = require("./tzx_format");
 const dskfmt = require("./dsk_format");
 const trdfmt = require("./trd_format");
 const sclfmt = require("./scl_format");
+const mdrfmt = require("./mdr_format");
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
@@ -105,6 +106,19 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.type = "sclfmt";
     ZXFileInfo.text = obj.text;
     sclfmt.createDIRScreen(obj.dir_scr).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".mdr")) {
+    mylog.debug(`handling MDR`);
+    obj = mdrfmt.readMDR(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "mdrfmt";
+    ZXFileInfo.text = obj.text;
+    mdrfmt.createDIRScreen(obj.media_info).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {

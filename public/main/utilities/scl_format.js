@@ -8,30 +8,30 @@ const Jimp = require("jimp");
 const screenZX = require("./handleSCR");
 
 function createDIRScreen(dirdata) {
-    const dir_info = dirdata.dir_info;
-    const disk_info = dirdata.disk_info;
-  
-    // create a SCR preview of DIR
-    let image = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
-      if (err) throw err;
-    });
-  
-    var line = 0;
-    for (var file = 0; file < dir_info.length; file++) {
-      const item = dir_info[file];
-      const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
-      if (line < 21) {
-          screenZX.printAt(image, 0, line, text);
-          line += 1;
-      }
+  const dir_info = dirdata.dir_info;
+  const disk_info = dirdata.disk_info;
+
+  // create a SCR preview of DIR
+  let image = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
+    if (err) throw err;
+  });
+
+  var line = 0;
+  for (var file = 0; file < dir_info.length; file++) {
+    const item = dir_info[file];
+    const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
+    if (line < 21) {
+      screenZX.printAt(image, 0, line, text);
+      line += 1;
     }
-    
-    const endText2 = `SCL image: ${disk_info.no_files} File(s)`;
-    screenZX.printAt(image, 0, line+1, endText2);
-  
-    // image.write("./file.png");
-    return image.getBase64Async(Jimp.MIME_PNG);
   }
+
+  const endText2 = `SCL image: ${disk_info.no_files} File(s)`;
+  screenZX.printAt(image, 0, line + 1, endText2);
+
+  // image.write("./file.png");
+  return image.getBase64Async(Jimp.MIME_PNG);
+}
 
 function detectSCL(data) {
   const mylog = log.scope("detectSCL");

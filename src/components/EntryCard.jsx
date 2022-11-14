@@ -44,8 +44,8 @@ function formatType(t) {
       return "DSK";
     case "trdfmt":
       return "TRD";
-    case "sclfmt":
-      return "SCL";
+    case "mdrfmt":
+      return "MDR";
     case "zip":
       return "ZIP";
     default:
