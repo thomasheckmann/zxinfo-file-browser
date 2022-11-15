@@ -25,14 +25,13 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 function InfiniteEntriesList(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
 
   const [items, setItems] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [index, setIndex] = useState(0);
   const [maxSize, setMaxSize] = useState(8); // number of entries to fetch at a time
   const [visibleHeight, setVisibleHeight] = useState(Math.round(window.innerHeight * 0.75));
-
 
   const nodeRef = useRef();
   const isVisible = useIsVisible(nodeRef);
@@ -89,11 +88,11 @@ function InfiniteEntriesList(props) {
       setMaxSize(maxRows * getRowSize());
 
       // adjust height, if less than one row
-      if(props.files.length < getRowSize()) {
+      if (props.files.length < getRowSize()) {
         setVisibleHeight(averageCardHeight + 120);
       }
     }
-  }, [props.files, isVisible, appSettings.sortOrderFiles]);
+  }, [props.files, isVisible, appSettings]);
 
   return (
     <Container maxWidth="xl">

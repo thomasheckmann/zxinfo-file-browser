@@ -58,17 +58,31 @@ const openFolderFile = (name) => {
 };
 
 function EntryCard(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
 
   const toggleFavorite = async (event) => {
-    console.log(appSettings.favorites);
-    console.log(appSettings);
+    if (!appSettings.favorites) {
+      var favMap = new Map();
+      favMap.set(entry.sha512, entry);
+      var obj = Object.fromEntries(favMap);
+      var jsonString = JSON.stringify(obj);
+      window.electronAPI.setFavorites("favorites", jsonString);
+    } else {
+      if (appSettings.favorites.get(entry.sha512)) {
+        appSettings.favorites.delete(entry.sha512);
+      } else {
+        appSettings.favorites.set(entry.sha512, entry);
+      }
+      var obj = Object.fromEntries(appSettings.favorites);
+      var jsonString = JSON.stringify(obj);
+      window.electronAPI.setFavorites("favorites", jsonString);
+    }
   };
 
   useEffect(() => {
-    if(!restCalled) {
+    if (!restCalled) {
       setRestCalled(true);
       const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
       axios
@@ -83,7 +97,7 @@ function EntryCard(props) {
           setEntry(props.entry);
         })
         .finally(() => {});
-      }
+    }
   }, [entry]);
 
   return (

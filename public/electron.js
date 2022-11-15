@@ -29,9 +29,6 @@ let win;
 function createWindow() {
   const mylog = log.scope("createWindow");
 
-  // mylog.debug(`sort-folders: ${store.get("sort-folders")}`);
-  // mylog.debug(`sort-files: ${store.get("sort-files")}`);
-
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   win = new BrowserWindow({
     width: 1600,
@@ -72,18 +69,32 @@ app.whenReady().then(() => {
  */
 const Store = require("electron-store");
 const store = new Store();
+const favoritesStore = new Store({ name: "favorites" });
 
 ipcMain.handle("getStoreValue", (event, key) => {
   const mylog = log.scope("getStoreValue");
   const value = store.get(key);
   mylog.debug(`key, value = {${key}, ${value}}`);
-  return store.get(key);
+  return value;
 });
 
 ipcMain.handle("setStoreValue", (event, key, value) => {
   const mylog = log.scope("setStoreValue");
   mylog.debug(`key, value = {${key}, ${value}}`);
   store.set(key, value);
+});
+
+ipcMain.handle("getFavorites", (event, key) => {
+  const mylog = log.scope("getFavorites");
+  const value = favoritesStore.get(key);
+  mylog.debug(`key, value = {${key}, ${value}}`);
+  return value;
+});
+
+ipcMain.handle("setFavorites", (event, key, value) => {
+  const mylog = log.scope("setFavorites");
+  mylog.debug(`key, value = {${key}, ${value}}`);
+  favoritesStore.set(key, value);
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
