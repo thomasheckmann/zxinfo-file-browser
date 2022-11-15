@@ -62,24 +62,35 @@ function EntryCard(props) {
   const [restCalled, setRestCalled] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
+
+  // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {
-    if (!appSettings.favorites) {
+    if (appSettings.favorites.size === 0) {
+      // first time...
       appSettings.favorites = new Map();
-      appSettings.favorites.set(entry.sha512, entry);
+      appSettings.favorites.set(entry.sha512, [entry.filepath]);
       setIsFavorite(true);
     } else {
       if (appSettings.favorites.get(entry.sha512)) {
+        // delete filepath, if array = [] - delete from map
         appSettings.favorites.delete(entry.sha512);
         setIsFavorite(false);
       } else {
-        appSettings.favorites.set(entry.sha512, entry);
+        var filesList = appSettings.favorites.get(entry.sha512);
+        if(!filesList) {
+          // new fileList
+          appSettings.favorites.set(entry.sha512, [entry.filepath]);
+        } else {
+          // add filename to list
+          appSettings.favorites.set(entry.sha512, [...filesList, entry.filepath]);
+        }
         setIsFavorite(true);
       }
-      var obj = Object.fromEntries(appSettings.favorites);
-      var jsonString = JSON.stringify(obj);
-      window.electronAPI.setFavorites("favorites", jsonString);
     }
-  };
+    var obj = Object.fromEntries(appSettings.favorites);
+    var jsonString = JSON.stringify(obj);
+    window.electronAPI.setFavorites("favorites", jsonString);
+};
 
   useEffect(() => {
     if (!restCalled) {

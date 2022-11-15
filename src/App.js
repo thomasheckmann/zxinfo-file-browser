@@ -12,7 +12,6 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { styled } from "@mui/material/styles";
-import packageJson from "../package.json";
 
 import {
   AppBar,
@@ -39,14 +38,17 @@ import {
 import MuiToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import FolderView from "./components/FileBrowser";
-import IntroText from "./Intro";
+import FolderView from "./pages/FolderView";
+import FavoritesList from "./pages/FavoritesList";
+import IntroText from "./pages/IntroText";
 
 import { Link } from "react-scroll";
 
 import ZXInfoSettings from "./common/ZXInfoSettings";
-
 import "./App.css";
+
+import {Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { FavoriteBorderOutlined } from "@mui/icons-material";
 
 const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "zip"];
 
@@ -58,7 +60,7 @@ export const ZXInfoSettingsObj = {
   // persistent app config saved to config.json
   sortOrderFiles: true,
   sortOrderFolders: true,
-  favorites: {},
+  favorites: new Map(),
 };
 
 const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
@@ -88,6 +90,9 @@ const theme = createTheme({
 });
 
 function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [startFolder, setStartFolder] = React.useState({
     root: [],
     folders: [],
@@ -185,14 +190,14 @@ function App() {
     if (startFolder.root.length === 0) {
       getStartFolder();
     }
-  }, [startFolder]);
+  }, [startFolder], isBusyWorking);
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
     const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");
     const favorites = await window.electronAPI.getFavorites("favorites");
     var favMap = new Map();
-    if(favorites) {
+    if (favorites) {
       favMap = new Map(Object.entries(JSON.parse(favorites)));
     }
     setAppSettings({ ...appSettings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, favorites: favMap });
@@ -203,14 +208,18 @@ function App() {
       loadSettings();
       setSettingsLoaded(true);
     }
-  }, [appSettings]);
+  }, [appSettings, settingsLoaded]);
 
   /**
    * if open folder dialog is nedded from child, use this as callback
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
-    setAppSettings({ ...appSettings, isBusyWorking: true });
+    if(location.pathname.startsWith("/favorites")) {
+      navigate("/");
+      return;
+    }
+    //setAppSettings({ ...appSettings});
     const foldersWithFiles = await window.electronAPI.openFolder();
     foldersWithFiles &&
       setStartFolder({
@@ -225,7 +234,7 @@ function App() {
     window.scrollTo({
       top: 0,
     });
-    setAppSettings({ ...appSettings, isBusyWorking: false });
+    //setAppSettings({ ...appSettings });
   };
 
   return (
@@ -248,8 +257,22 @@ function App() {
                     <SettingsOutlinedIcon />
                   </Tooltip>
                 </IconButton>
+                <IconButton
+                disabled ={location.pathname.startsWith("/favorites")}
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 2 }}
+                  aria-label="Favorites"
+                  onClick={() => {
+                    navigate("/favorites");
+                  }}
+                >
+                  <Tooltip title="Favorites">
+                    <FavoriteBorderOutlined />
+                  </Tooltip>
+                </IconButton>
                 <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Open Folder" onClick={handleOpenFolderFromChild}>
-                  <Tooltip title="Open Folder">
+                  <Tooltip title={location.pathname.startsWith("/favorites")?"View folder": "Open Folder"}>
                     <FolderOpenIcon />
                   </Tooltip>
                 </IconButton>
@@ -267,9 +290,9 @@ function App() {
                 </IconButton>
 
                 <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
-                  ZXInfo File Browser v{packageJson.version}
+                  ZXInfo File Browser
                   {isDev && " - " + getBreakPointName()}
-                  {isDev && " - busy(" + appSettings.isBusyWorking + ")"}
+                  {isDev && " - busy(" + isBusyWorking + ")"} - {location.pathname}
                 </Typography>
                 <ToggleButtonGroup
                   size="small"
@@ -332,11 +355,19 @@ function App() {
               </Paper>
             </Drawer>
             <Container maxWidth="xl">
-              {startFolder.folders && startFolder.folders.length > 0 ? (
-                <FolderView folders={startFolder.folders} />
-              ) : (
-                <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
-              )}
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    startFolder.folders && startFolder.folders.length > 0 ? (
+                      <FolderView folders={startFolder.folders} />
+                    ) : (
+                      <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
+                    )
+                  }
+                ></Route>
+                <Route path="/favorites" element={<FavoritesList />}></Route>
+              </Routes>
             </Container>
             <div className="footer">
               <Container>

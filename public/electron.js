@@ -87,13 +87,13 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 ipcMain.handle("getFavorites", (event, key) => {
   const mylog = log.scope("getFavorites");
   const value = favoritesStore.get(key);
-  mylog.debug(`key, value = {${key}, ${value}}`);
+  // mylog.debug(`key, value = {${key}, ${value}}`);
   return value;
 });
 
 ipcMain.handle("setFavorites", (event, key, value) => {
   const mylog = log.scope("setFavorites");
-  mylog.debug(`key, value = {${key}, ${value}}`);
+  // mylog.debug(`key, value = {${key}, ${value.filename} (${value.zxdbTitle})}`);
   favoritesStore.set(key, value);
 });
 

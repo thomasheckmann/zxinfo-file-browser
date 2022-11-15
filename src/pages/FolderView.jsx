@@ -1,6 +1,6 @@
 import React from "react";
 
-import FilesView from "./filesview";
+import FilesView from "../components/FilesView";
 
 function FolderView(props) {
   return (
