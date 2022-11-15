@@ -47,7 +47,7 @@ import { Link } from "react-scroll";
 import ZXInfoSettings from "./common/ZXInfoSettings";
 import "./App.css";
 
-import {Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 
 const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "zip"];
@@ -186,11 +186,15 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    if (startFolder.root.length === 0) {
-      getStartFolder();
-    }
-  }, [startFolder], isBusyWorking);
+  useEffect(
+    () => {
+      if (startFolder.root.length === 0) {
+        getStartFolder();
+      }
+    },
+    [startFolder],
+    isBusyWorking
+  );
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
@@ -207,6 +211,7 @@ function App() {
     if (!settingsLoaded) {
       loadSettings();
       setSettingsLoaded(true);
+      navigate("/");
     }
   }, [appSettings, settingsLoaded]);
 
@@ -215,7 +220,7 @@ function App() {
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
-    if(location.pathname.startsWith("/favorites")) {
+    if (location.pathname.startsWith("/favorites")) {
       navigate("/");
       return;
     }
@@ -243,9 +248,7 @@ function App() {
         <ThemeProvider theme={theme}>
           <CssBaseline />
 
-          <Box position="fixed" top={0} height="60px" width="100%">
-            -header-
-          </Box>
+          <Box position="fixed" top={0} height="60px" width="100%"></Box>
           <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={isBusyWorking}>
             <CircularProgress color="inherit" />
           </Backdrop>
@@ -258,7 +261,7 @@ function App() {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                disabled ={location.pathname.startsWith("/favorites")}
+                  disabled={location.pathname.startsWith("/favorites")}
                   edge="start"
                   color="inherit"
                   sx={{ mr: 2 }}
@@ -272,7 +275,7 @@ function App() {
                   </Tooltip>
                 </IconButton>
                 <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Open Folder" onClick={handleOpenFolderFromChild}>
-                  <Tooltip title={location.pathname.startsWith("/favorites")?"View folder": "Open Folder"}>
+                  <Tooltip title={location.pathname.startsWith("/favorites") ? "View folder" : "Open Folder"}>
                     <FolderOpenIcon />
                   </Tooltip>
                 </IconButton>
@@ -292,7 +295,8 @@ function App() {
                 <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
                   ZXInfo File Browser
                   {isDev && " - " + getBreakPointName()}
-                  {isDev && " - busy(" + isBusyWorking + ")"} - {location.pathname}
+                  {isDev && " - busy(" + isBusyWorking + ")"}
+                  {isDev && " - " + location.pathname}
                 </Typography>
                 <ToggleButtonGroup
                   size="small"

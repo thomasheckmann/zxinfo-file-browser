@@ -62,7 +62,6 @@ function EntryCard(props) {
   const [restCalled, setRestCalled] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-
   // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {
     if (appSettings.favorites.size === 0) {
@@ -77,7 +76,7 @@ function EntryCard(props) {
         setIsFavorite(false);
       } else {
         var filesList = appSettings.favorites.get(entry.sha512);
-        if(!filesList) {
+        if (!filesList) {
           // new fileList
           appSettings.favorites.set(entry.sha512, [entry.filepath]);
         } else {
@@ -90,7 +89,7 @@ function EntryCard(props) {
     var obj = Object.fromEntries(appSettings.favorites);
     var jsonString = JSON.stringify(obj);
     window.electronAPI.setFavorites("favorites", jsonString);
-};
+  };
 
   useEffect(() => {
     if (!restCalled) {
@@ -154,7 +153,7 @@ function EntryCard(props) {
         <CardMedia component="img" image={entry.scr} alt={entry.filename} />
         <CardContent>
           <Typography gutterBottom variant="subtitle1" component="div" noWrap>
-            {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
+          {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
           </Typography>
           <Typography gutterBottom variant="subtitle2" component="div" noWrap>
             {entry.text}
