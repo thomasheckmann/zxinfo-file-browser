@@ -81,7 +81,7 @@ function InfiniteEntriesList(props) {
   useEffect(() => {
     if (isVisible) {
       fetchMoreData();
-      const averageCardHeight = 450;
+      const averageCardHeight = 470;
       const maxHeight = window.innerHeight - 40; // total files bare
 
       // avarage rows availble in space
