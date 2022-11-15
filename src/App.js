@@ -12,6 +12,7 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { styled } from "@mui/material/styles";
+import packageJson from '../package.json';
 
 import {
   AppBar,
@@ -232,7 +233,7 @@ function App() {
               </IconButton>
 
               <Typography variant="h6" color="inherit" component="div" sx={{ flexGrow: 1 }}>
-                ZXInfo File Browser
+                ZXInfo File Browser v{packageJson.version}
                 {isDev && " - " + getBreakPointName()}
                 {isDev && " - busy(" + appSettings.isBusyWorking + ")"}
               </Typography>
