@@ -16,6 +16,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Save store value (settings), from render to main
   setStoreValue: (key, value) => ipcRenderer.invoke("setStoreValue", key, value),
 
+  // Load favorites
+  getFavorites: (args) => ipcRenderer.invoke("getFavorites", args),
+
+  // Save favorites
+  setFavorites: (key, value) => ipcRenderer.invoke("setFavorites", key, value),
+
   // Open external browser with details, from render to main
   openZXINFODetail: (args) => ipcRenderer.invoke("open-zxinfo-detail", args),
 

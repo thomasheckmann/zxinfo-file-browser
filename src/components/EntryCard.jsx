@@ -21,7 +21,6 @@ import axios from "axios";
 import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
-import { render } from "@testing-library/react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 
 function formatType(t) {
@@ -61,14 +60,40 @@ function EntryCard(props) {
   const [appSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
+
+  // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {
-    console.log(appSettings.favorites);
-    console.log(appSettings);
-  };
+    if (appSettings.favorites.size === 0) {
+      // first time...
+      appSettings.favorites = new Map();
+      appSettings.favorites.set(entry.sha512, [entry.filepath]);
+      setIsFavorite(true);
+    } else {
+      if (appSettings.favorites.get(entry.sha512)) {
+        // delete filepath, if array = [] - delete from map
+        appSettings.favorites.delete(entry.sha512);
+        setIsFavorite(false);
+      } else {
+        var filesList = appSettings.favorites.get(entry.sha512);
+        if(!filesList) {
+          // new fileList
+          appSettings.favorites.set(entry.sha512, [entry.filepath]);
+        } else {
+          // add filename to list
+          appSettings.favorites.set(entry.sha512, [...filesList, entry.filepath]);
+        }
+        setIsFavorite(true);
+      }
+    }
+    var obj = Object.fromEntries(appSettings.favorites);
+    var jsonString = JSON.stringify(obj);
+    window.electronAPI.setFavorites("favorites", jsonString);
+};
 
   useEffect(() => {
-    if(!restCalled) {
+    if (!restCalled) {
       setRestCalled(true);
       const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
       axios
@@ -78,13 +103,15 @@ function EntryCard(props) {
           item.zxdbID = response.data.entry_id;
           item.zxdbTitle = response.data.title;
           setEntry(item);
+          setIsFavorite(appSettings.favorites.get(item.sha512));
         })
         .catch((error) => {
           setEntry(props.entry);
+          setIsFavorite(appSettings.favorites.get(props.entry.sha512));
         })
         .finally(() => {});
-      }
-  }, [entry]);
+    }
+  }, [props.entry, restCalled, isFavorite, appSettings.favorites]);
 
   return (
     entry && (
@@ -139,9 +166,19 @@ function EntryCard(props) {
           </Stack>
         </CardContent>
         <CardActions disableSpacing>
-          <IconButton aria-label="add to favorites" onClick={() => toggleFavorite(this)}>
-            <FavoriteBorderOutlinedIcon />
-          </IconButton>
+          {isFavorite ? (
+            <Tooltip title="Remove from favorites">
+              <IconButton aria-label="remove from favorites" onClick={() => toggleFavorite(this)}>
+                <FavoriteOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Add to favorites">
+              <IconButton aria-label="add to favorites" onClick={() => toggleFavorite(this)}>
+                <FavoriteBorderOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </CardActions>
       </Card>
     )
