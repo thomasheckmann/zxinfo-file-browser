@@ -30,7 +30,7 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
 }
 
 const FilesView = (props) => {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
@@ -39,8 +39,8 @@ const FilesView = (props) => {
       const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
       setFiles(newList);
     });
-  }, []); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
-
+  }, [appSettings.sortOrderFiles, appSettings.fileFilters, props.foldername]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
+ 
   return (
     <Paper elevation={5} sx={{ my: 4 }} id={props.foldername}>
       <Box sx={{ display: "flex", p: 2 }}>

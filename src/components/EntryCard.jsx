@@ -21,7 +21,6 @@ import axios from "axios";
 import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
-import { render } from "@testing-library/react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 
 function formatType(t) {
@@ -58,22 +57,23 @@ const openFolderFile = (name) => {
 };
 
 function EntryCard(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const toggleFavorite = async (event) => {
     if (!appSettings.favorites) {
-      var favMap = new Map();
-      favMap.set(entry.sha512, entry);
-      var obj = Object.fromEntries(favMap);
-      var jsonString = JSON.stringify(obj);
-      window.electronAPI.setFavorites("favorites", jsonString);
+      appSettings.favorites = new Map();
+      appSettings.favorites.set(entry.sha512, entry);
+      setIsFavorite(true);
     } else {
       if (appSettings.favorites.get(entry.sha512)) {
         appSettings.favorites.delete(entry.sha512);
+        setIsFavorite(false);
       } else {
         appSettings.favorites.set(entry.sha512, entry);
+        setIsFavorite(true);
       }
       var obj = Object.fromEntries(appSettings.favorites);
       var jsonString = JSON.stringify(obj);
@@ -92,13 +92,15 @@ function EntryCard(props) {
           item.zxdbID = response.data.entry_id;
           item.zxdbTitle = response.data.title;
           setEntry(item);
+          setIsFavorite(appSettings.favorites.get(item.sha512));
         })
         .catch((error) => {
           setEntry(props.entry);
+          setIsFavorite(appSettings.favorites.get(props.entry.sha512));
         })
         .finally(() => {});
     }
-  }, [entry]);
+  }, [props.entry, restCalled, isFavorite, appSettings.favorites]);
 
   return (
     entry && (
@@ -153,9 +155,19 @@ function EntryCard(props) {
           </Stack>
         </CardContent>
         <CardActions disableSpacing>
-          <IconButton aria-label="add to favorites" onClick={() => toggleFavorite(this)}>
-            <FavoriteBorderOutlinedIcon />
-          </IconButton>
+          {isFavorite ? (
+            <Tooltip title="Remove from favorites">
+              <IconButton aria-label="remove from favorites" onClick={() => toggleFavorite(this)}>
+                <FavoriteOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Add to favorites">
+              <IconButton aria-label="add to favorites" onClick={() => toggleFavorite(this)}>
+                <FavoriteBorderOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </CardActions>
       </Card>
     )

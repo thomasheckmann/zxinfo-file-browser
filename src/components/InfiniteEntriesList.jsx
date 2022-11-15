@@ -25,7 +25,7 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 function InfiniteEntriesList(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
 
   const [items, setItems] = useState([]);
   const [hasMore, setHasMore] = useState(true);
