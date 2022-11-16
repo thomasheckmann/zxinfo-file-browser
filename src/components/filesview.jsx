@@ -10,6 +10,7 @@ import { useState } from "react";
 import InfiniteEntriesList from "./InfiniteEntriesList";
 import { useContext } from "react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
+import { isDev } from "../App";
 
 const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
 
@@ -34,13 +35,14 @@ const FilesView = (props) => {
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
+    if (isDev) console.log(`useEffect():  `);
     window.electronAPI.scanFolder(props.foldername).then((res) => {
       // filter out files based filtring
       const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
       setFiles(newList);
     });
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, props.foldername]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
- 
+
   return (
     <Paper elevation={5} sx={{ my: 4 }} id={props.foldername}>
       <Box sx={{ display: "flex", p: 2 }}>
@@ -50,7 +52,7 @@ const FilesView = (props) => {
         </Typography>
       </Box>
       <Divider variant="middle" />
-      <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+      <InfiniteEntriesList files={files} foldername={props.foldername} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
     </Paper>
   );
 };

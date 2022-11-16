@@ -63,7 +63,7 @@ export const ZXInfoSettingsObj = {
   favorites: new Map(),
 };
 
-const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
+export const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
 const ToggleButton = styled(MuiToggleButton)({
   "&.Mui-selected, &.Mui-selected:hover": {
@@ -186,15 +186,11 @@ function App() {
     }
   }
 
-  useEffect(
-    () => {
-      if (startFolder.root.length === 0) {
-        getStartFolder();
-      }
-    },
-    [startFolder],
-    isBusyWorking
-  );
+  useEffect(() => {
+    if (startFolder.root.length === 0) {
+      getStartFolder();
+    }
+  }, [startFolder, isBusyWorking]);
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");

@@ -15,6 +15,7 @@ import { useIsVisible } from "react-is-visible";
 import EntryCard from "./EntryCard";
 import { useContext } from "react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
+import { isDev } from "../App";
 
 const ItemEnd = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#ccc",
@@ -78,7 +79,9 @@ function InfiniteEntriesList(props) {
   };
 
   useEffect(() => {
-    if (isVisible) {
+    if (isDev) console.log(`useEffect(): visible: ${isVisible}, no of files: ${props.files.length}, index: ${index}`);
+    if (isVisible && props.files.length > 0) {
+      if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData()`);
       fetchMoreData();
       const averageCardHeight = 470;
       const maxHeight = window.innerHeight - 40; // total files bare
@@ -92,7 +95,7 @@ function InfiniteEntriesList(props) {
         setVisibleHeight(averageCardHeight + 120);
       }
     }
-  }, [props.files, isVisible, appSettings]);
+  }, [props.files.length, isVisible, appSettings]);
 
   return (
     <Container maxWidth="xl">
