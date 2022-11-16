@@ -41,7 +41,9 @@ function formatType(t) {
       return "TRD";
     case "mdrfmt":
       return "MDR";
-    case "zip":
+      case "pfmt":
+        return "P";
+      case "zip":
       return "ZIP";
     default:
       return t;

@@ -10,6 +10,8 @@ const dskfmt = require("./dsk_format");
 const trdfmt = require("./trd_format");
 const sclfmt = require("./scl_format");
 const mdrfmt = require("./mdr_format");
+const pfmt = require("./p_format");
+
 const screenZX = require("./handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
@@ -17,7 +19,7 @@ function getZXFormat(fileName, subFileName, data) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", ".p81", ".tap", ".tzx", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;
@@ -119,6 +121,32 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.type = "mdrfmt";
     ZXFileInfo.text = obj.text;
     mdrfmt.createDIRScreen(obj.media_info).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".p")) {
+    mylog.debug(`handling P`);
+    obj = pfmt.readP(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "pfmt";
+    ZXFileInfo.text = obj.text;
+    pfmt.createDIRScreen(obj.media_info).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".p81")) {
+    mylog.debug(`handling P81`);
+    obj = pfmt.readP81(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.type = "pfmt";
+    ZXFileInfo.text = obj.text;
+    pfmt.createDIRScreen(obj.media_info).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {

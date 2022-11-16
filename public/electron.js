@@ -98,7 +98,7 @@ ipcMain.handle("setFavorites", (event, key, value) => {
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
-const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".zip"];
+const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".zip"];
 
 /**
  *
@@ -246,14 +246,11 @@ ipcMain.handle("load-file", async (event, arg) => {
   let fileObj = handleFormats.getZXFormat(filename, null, buf);
   mylog.debug(`hash: ${fileObj.sha512}`);
 
-  if (extension === ".sna") {
-  } else if (extension === ".z80") {
-  } else if (extension === ".tap") {
-  } else if (extension === ".tzx") {
-  } else if (extension === ".dsk") {
-  } else if (extension === ".trd") {
-  } else if (extension === ".scl") {
+  if (extension === ".sna" || extension === ".z80") {
+  } else if (extension === ".tap" || extension === ".tzx") {
+  } else if (extension === ".dsk" || extension === ".trd" || extension === ".scl") {
   } else if (extension === ".mdr") {
+  } else if (extension === ".p" || extension === ".p81") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;
