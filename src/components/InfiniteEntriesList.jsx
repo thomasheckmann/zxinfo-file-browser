@@ -80,7 +80,7 @@ function InfiniteEntriesList(props) {
 
   useEffect(() => {
     if (isDev) console.log(`useEffect(): visible: ${isVisible}, no of files: ${props.files.length}, index: ${index}`);
-    if (isVisible && props.files.length > 0) {
+    if (isVisible && props.files.length > 0 && index === 0) {
       if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData()`);
       fetchMoreData();
       const averageCardHeight = 470;
