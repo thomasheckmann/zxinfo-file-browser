@@ -50,12 +50,10 @@ import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "zip"];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "zip"];
 
 export const ZXInfoSettingsObj = {
   fileFilters: defaultFileFilters,
-  showDrawerFolderLink: false,
-  showDrawerSettings: false,
 
   // persistent app config saved to config.json
   sortOrderFiles: true,
@@ -101,6 +99,8 @@ function App() {
 
   const [appSettings, setAppSettings] = React.useState(ZXInfoSettingsObj);
   const [settingsLoaded, setSettingsLoaded] = React.useState(false);
+  const [showDrawerFolderLink, setShowDrawerFolderLink] = React.useState(false);
+  const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
   const [isBusyWorking, setIsBusyWorking] = React.useState(false);
 
   /**
@@ -133,14 +133,14 @@ function App() {
     if (event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
       return;
     }
-    setAppSettings({ ...appSettings, showDrawerSettings: open });
+    setShowDrawerSettings(open);
   };
 
   /**
    * Handle Open/Close for folder link drawer
    */
   const toggleDrawerFolderLink = (open) => (event) => {
-    setAppSettings({ ...appSettings, showDrawerFolderLink: open });
+    setShowDrawerFolderLink(open);
   };
 
   const handleChangeSettingsFiles = (event) => {
@@ -312,7 +312,7 @@ function App() {
               </Toolbar>
             </AppBar>
             {/* Drawer at left, settings (to be saved for user)*/}
-            <Drawer anchor="left" open={appSettings.showDrawerSettings} onClose={toggleDrawerSettings(false)}>
+            <Drawer anchor="left" open={showDrawerSettings} onClose={toggleDrawerSettings(false)}>
               <Paper variant="outlined" sx={{ my: 0, p: 2, width: 350 }}>
                 <Typography component="h1" variant="h6">
                   Settings
@@ -339,7 +339,7 @@ function App() {
               </Paper>
             </Drawer>
             {/* Drawer at top - jump to folder */}
-            <Drawer anchor="top" variant="temporary" open={appSettings.showDrawerFolderLink} onClose={toggleDrawerFolderLink(false)}>
+            <Drawer anchor="top" variant="temporary" open={showDrawerFolderLink} onClose={toggleDrawerFolderLink(false)}>
               <Paper variant="outlined" sx={{ my: 0, p: 2 }}>
                 <Typography variant="button">List of folders, click to jump to section</Typography>
                 <Divider />
