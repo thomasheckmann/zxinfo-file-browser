@@ -67,7 +67,7 @@ function InfiniteEntriesList(props) {
     var newIndex = index;
     for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
       const result = await window.electronAPI.loadFile(props.files[newIndex]);
-      result.map((entry) => itemsToAdd.push(entry));
+      if(result) result.map((entry) => itemsToAdd.push(entry));
     }
     setIndex(newIndex);
     setItems(items.concat(itemsToAdd));

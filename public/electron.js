@@ -241,7 +241,13 @@ ipcMain.handle("load-file", async (event, arg) => {
 
   const filename = arg; // TODO: Validate input
   var extension = path.extname(filename).toLowerCase();
-  let buf = fs.readFileSync(filename);
+  let buf;
+  try {
+    buf = fs.readFileSync(filename);
+  } catch (error) {
+    mylog.error(`File NOT found: ${filename}`);
+    return null;
+  }
 
   let fileObj = handleFormats.getZXFormat(filename, null, buf);
   mylog.debug(`hash: ${fileObj.sha512}`);
