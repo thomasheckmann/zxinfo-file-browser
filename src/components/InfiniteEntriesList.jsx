@@ -105,7 +105,6 @@ function InfiniteEntriesList(props) {
       }
     } else if (isVisible && props.files.length > 0 && infSettings.index > 0) {
       if (isDev) console.log(`useEffect(): -> RESTART InfiniteList? - ${props.foldername}`);
-      setInfSettings((settings) => ({ ...settings, items: [], hasMore: true, index: 0 }));
     } else {
       if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
     }
