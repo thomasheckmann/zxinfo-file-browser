@@ -329,6 +329,7 @@ function App() {
                     <FormControlLabel
                       control={<Checkbox name="sortOrderFiles" checked={appSettings.sortOrderFiles} onChange={handleChangeSettingsFiles} />}
                       label="Sort filenames ascending"
+                      disabled={!isDev}
                     />
                   </Grid>
                   <Grid item xs={12}></Grid>
