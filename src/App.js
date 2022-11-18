@@ -143,6 +143,12 @@ function App() {
     setShowDrawerFolderLink(open);
   };
 
+  const handleChangeSettingsZip = (event) => {
+    setAppSettings({ ...appSettings, hideZip: event.target.checked });
+
+    window.electronAPI.setStoreValue("hide-zip", event.target.checked);
+  };
+
   const handleChangeSettingsFiles = (event) => {
     window.electronAPI.setStoreValue("sort-files", event.target.checked);
     setAppSettings({ ...appSettings, sortOrderFiles: event.target.checked });
@@ -195,12 +201,13 @@ function App() {
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
     const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");
+    const hideZip = await window.electronAPI.getStoreValue("hide-zip");
     const favorites = await window.electronAPI.getFavorites("favorites");
     var favMap = new Map();
     if (favorites) {
       favMap = new Map(Object.entries(JSON.parse(favorites)));
     }
-    setAppSettings({ ...appSettings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, favorites: favMap });
+    setAppSettings(settings => ({ ...settings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, hideZip: hideZip, favorites: favMap }));
   }
 
   useEffect(() => {
@@ -332,7 +339,12 @@ function App() {
                       disabled={!isDev}
                     />
                   </Grid>
-                  <Grid item xs={12}></Grid>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={<Checkbox name="hideZip" checked={appSettings.hideZip} onChange={handleChangeSettingsZip} />}
+                      label="Hide main ZIP"
+                    />
+                  </Grid>                  <Grid item xs={12}></Grid>
                   <Button variant="contained" onClick={toggleDrawerSettings(false)} sx={{ mt: 3, ml: 1 }}>
                     OK
                   </Button>
