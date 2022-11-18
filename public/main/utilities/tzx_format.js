@@ -17,6 +17,7 @@ function getWord(low, high) {
 }
 
 function getDWord(n1, n2, n3, n4) {
+  console.log(`${n1}, ${n2}, ${n3}, ${n4}`);
   return n4 * 16777216 + n3 * 65556 + n2 * 256 + n1;
 }
 
@@ -138,7 +139,7 @@ function GeneralizedDataBlock(len, data) {
   const mylog = log.scope("GeneralizedDataBlock");
   this.id = 0x19;
   this.blockName = "Generalized Data Block";
-  this.length = len;
+  this.length = getDWord(data[0x00], data[0x01], data[0x02], data[0x03]);
   this.pause = getWord(data[0x04], data[0x05]);
   this.totp = getDWord(data[0x06], data[0x07], data[0x08], data[0x09]);
   this.npp = data[0x0a];
@@ -147,8 +148,15 @@ function GeneralizedDataBlock(len, data) {
   this.npd = data[0x10];
   this.asd = data[0x11];
 
-  this.text = `totp:${this.totp}, npp:${this.npp}, asp:${this.asp}, totd:${this.totd}, npd:${this.npd}, asd:${this.asd}, Pause: ${this.pause}`;
-  this.data = data;
+  this.text = `len:${this.length}, totp:${this.totp}, npp:${this.npp}, asp:${this.asp}, totd:${this.totd}, npd:${this.npd}, asd:${this.asd}, Pause: ${this.pause}`;
+
+  if (this.totd > 0) {
+    const offSet = 0x12 + (2 * this.npp + 1) * this.asp + this.totp * 3 + (2 * this.npd + 1) * this.asd;
+    this.data = data.slice(offSet);
+    mylog.debug(`${offSet} - ${this.data[0]}, len: ${this.data.length}`);
+  }
+
+  mylog.debug(`${this.text}`);
 }
 
 // ID 20
@@ -630,6 +638,7 @@ function readTZX(data) {
       mylog.debug(`found 3 blocks, OK`);
       snapshot.text = zx81programName;
       snapshot.hwModel = "ZX81";
+      snapshot.data = zx81[2].data;
       return snapshot;
     } else {
       mylog.debug(`not 3 blocks, probaly not ZX81...`);
