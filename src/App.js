@@ -193,10 +193,11 @@ function App() {
   }
 
   useEffect(() => {
-    if (startFolder.root.length === 0) {
+    if (startFolder.root.length === 0 && settingsLoaded) {
       getStartFolder();
+      navigate("/");
     }
-  }, [startFolder, isBusyWorking]);
+  }, [startFolder, isBusyWorking, settingsLoaded]);
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
@@ -207,14 +208,18 @@ function App() {
     if (favorites) {
       favMap = new Map(Object.entries(JSON.parse(favorites)));
     }
-    setAppSettings(settings => ({ ...settings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, hideZip: hideZip, favorites: favMap }));
+    const zxinfoSCR = await window.electronAPI.getZxinfoSCR("zxinfoSCR");
+    var scrMap = new Map();
+    if (zxinfoSCR) {
+      scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
+    }
+    setAppSettings((settings) => ({ ...settings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, hideZip: hideZip, favorites: favMap, zxinfoSCR: scrMap }));
   }
 
   useEffect(() => {
     if (!settingsLoaded) {
       loadSettings();
       setSettingsLoaded(true);
-      navigate("/");
     }
   }, [appSettings, settingsLoaded]);
 
@@ -344,7 +349,8 @@ function App() {
                       control={<Checkbox name="hideZip" checked={appSettings.hideZip} onChange={handleChangeSettingsZip} />}
                       label="Hide main ZIP"
                     />
-                  </Grid>                  <Grid item xs={12}></Grid>
+                  </Grid>{" "}
+                  <Grid item xs={12}></Grid>
                   <Button variant="contained" onClick={toggleDrawerSettings(false)} sx={{ mt: 3, ml: 1 }}>
                     OK
                   </Button>
