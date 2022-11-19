@@ -12,6 +12,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
+const Jimp = require("jimp");
 
 const handleFormats = require("./main/utilities/handleFormats");
 
@@ -70,6 +71,7 @@ app.whenReady().then(() => {
 const Store = require("electron-store");
 const store = new Store();
 const favoritesStore = new Store({ name: "favorites" });
+const zxinfoSCRStore = new Store({ name: "zxinfoSCR" });
 
 ipcMain.handle("getStoreValue", (event, key) => {
   const mylog = log.scope("getStoreValue");
@@ -93,8 +95,29 @@ ipcMain.handle("getFavorites", (event, key) => {
 
 ipcMain.handle("setFavorites", (event, key, value) => {
   const mylog = log.scope("setFavorites");
-  // mylog.debug(`key, value = {${key}, ${value.filename} (${value.zxdbTitle})}`);
   favoritesStore.set(key, value);
+});
+
+ipcMain.handle("getZxinfoSCR", (event, key) => {
+  const mylog = log.scope("getzxinfoSCR");
+  const value = zxinfoSCRStore.get(key);
+  return value;
+});
+
+ipcMain.handle("setZxinfoSCR", (event, key, value) => {
+  const mylog = log.scope("setzxinfoSCR");
+  zxinfoSCRStore.set(key, value);
+});
+
+ipcMain.handle("convertSCR", (event, img) => {
+  const mylog = log.scope("convertSCR");
+  mylog.debug(`convertSCR(): ` + img);
+  // create a SCR preview of DIR
+  let mainImage = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
+    if (err) throw err;
+  });
+
+  return mainImage.getBase64Async(Jimp.MIME_PNG);
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js

@@ -22,15 +22,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Save favorites
   setFavorites: (key, value) => ipcRenderer.invoke("setFavorites", key, value),
 
+  // Load zxinfoSCRStore
+  getZxinfoSCR: (args) => ipcRenderer.invoke("getZxinfoSCR", args),
+
+  // Save zxinfoSCRStore
+  setZxinfoSCR: (key, value) => ipcRenderer.invoke("setZxinfoSCR", key, value),
+
+  // Convert SCR to 320x240 - centered (used when getting SCR from ZXInfo)
+  convertSCR: (img) => ipcRenderer.invoke("convertSCR", img),
+
   // Open external browser with details, from render to main
   openZXINFODetail: (args) => ipcRenderer.invoke("open-zxinfo-detail", args),
 
   // Locate and open folder with file, from render to main
   locateFileAndFolder: (args) => ipcRenderer.invoke("locate-file-and-folder", args),
-
-  // Notify when folder found, from main to render
-  onNotifyAboutFolder: (callback) => ipcRenderer.on("notify-about-folder", callback),
-
-  // Notify when file found, from main to render
-  onNotifyAboutFile: (callback) => ipcRenderer.on("notify-about-file", callback),
 });
