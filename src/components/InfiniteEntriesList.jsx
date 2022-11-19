@@ -27,10 +27,8 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 
 function InfiniteEntriesList(props) {
   const [appSettings] = useContext(ZXInfoSettings);
+  const [infSettings, setInfSettings] = useState({ items: [], hasMore: true, index: 0 });
 
-  const [items, setItems] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [index, setIndex] = useState(0);
   const [maxSize, setMaxSize] = useState(8); // number of entries to fetch at a time
   const [visibleHeight, setVisibleHeight] = useState(Math.round(window.innerHeight * 0.75));
 
@@ -64,25 +62,36 @@ function InfiniteEntriesList(props) {
 
   const fetchMoreData = async () => {
     var itemsToAdd = [];
-    var newIndex = index;
-    for (newIndex = index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
+    var newIndex;
+
+    for (newIndex = infSettings.index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
       const result = await window.electronAPI.loadFile(props.files[newIndex]);
-      if(result) result.map((entry) => itemsToAdd.push(entry));
+      if (result) {
+        result.map((entry) => {
+          if (appSettings.hideZip && entry.filename.toLowerCase().endsWith("zip") && !entry.subfilename) {
+            if (isDev) console.log(`fetchMoreData(): removing ZIP ${entry.filename} from list  + ${props.foldername}`);
+          } else {
+            itemsToAdd.push(entry);
+          }
+        });
+      }
     }
-    setIndex(newIndex);
-    setItems(items.concat(itemsToAdd));
     if (newIndex >= props.files.length) {
-      setHasMore(false);
+      setInfSettings((settings) => ({ ...settings, items: [...settings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
     } else {
-      setHasMore(true);
+      setInfSettings((settings) => ({ ...settings, items: [...settings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
     }
   };
 
   useEffect(() => {
-    if (isDev) console.log(`useEffect(): visible: ${isVisible}, no of files: ${props.files.length}, index: ${index}`);
-    if (isVisible && props.files.length > 0 && index === 0) {
-      if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData()`);
-      fetchMoreData();
+    if (isDev)
+      console.log(
+        `useEffect(): visible: ${isVisible} (${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`
+      );
+
+    if (isVisible && props.files.length > 0 && infSettings.index === 0) {
+      if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData() - ${props.foldername}`);
+      fetchMoreData(false);
       const averageCardHeight = 470;
       const maxHeight = window.innerHeight - 40; // total files bare
 
@@ -94,6 +103,10 @@ function InfiniteEntriesList(props) {
       if (props.files.length < getRowSize()) {
         setVisibleHeight(averageCardHeight + 120);
       }
+    } else if (isVisible && props.files.length > 0 && infSettings.index > 0) {
+      if (isDev) console.log(`useEffect(): -> RESTART InfiniteList? - ${props.foldername}`);
+    } else {
+      if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
     }
   }, [props.files.length, isVisible, appSettings]);
 
@@ -101,9 +114,9 @@ function InfiniteEntriesList(props) {
     <Container maxWidth="xl">
       <div ref={nodeRef} id={"scrollableDiv" + props.foldername} style={{ height: visibleHeight, overflow: "auto" }}>
         <InfiniteScroll
-          dataLength={items.length}
+          dataLength={infSettings.items.length}
           next={fetchMoreData}
-          hasMore={hasMore}
+          hasMore={infSettings.hasMore}
           loader={
             <Grid xs={12}>
               <Box sx={{ width: "100%" }}>
@@ -115,12 +128,12 @@ function InfiniteEntriesList(props) {
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
             <Grid xs={12}>
-              <ItemEnd>Total number of entries: {items.length}</ItemEnd>
+              <ItemEnd>Total number of entries: {infSettings.items.length}</ItemEnd>
             </Grid>
           }
         >
           <Grid container spacing={2} sx={{ my: 2 }}>
-            {items.map((item, index) => (
+            {infSettings.items.map((item, index) => (
               <Grid xs={12} sm={6} md={4} lg={3} xl={3} key={index}>
                 <EntryCard key={index} entry={item}></EntryCard>
               </Grid>

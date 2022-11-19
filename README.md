@@ -15,11 +15,14 @@ Please note all builds are unsiged, so you might need to give persmisson to run 
 
 # Features
 * Scan files local on your harddisk
-* Display files in the following formats: SNA, Z80, TAP, TZX, SLT, DSK, TRD, MDR
+* Display files in the following formats: SNA, Z80, TAP, TZX, P, P81, DSK, TRD, SCL, MDR
 * Handles files in ZIP archives (to one level)
-* Generates SCR preview and other details for various formats: SNA, Z80, TAP
+* Generates SCR preview and other details for various formats: SNA, Z80, TAP, TZX
+* Generates DISK/MDR SCR preview showing files for DSK, TRD, SCL & MDR
+* Generates ZX81 SCR preview with BASIC list for P, P81 & TZX (ZX81)
 * Integrates with ZXDB via ZXInfo API, using sha512 hash on files, to lookup title and ZXDB id
 * Direct link to detail page, if found in ZXDB, to ZXInfo.dk
+* Keep track of your favorite games with your own favorites list
 * Quick access to folders
 
 # Questions?

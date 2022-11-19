@@ -50,7 +50,7 @@ import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "zip"];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", /*"p81",*/ "zip"];
 
 export const ZXInfoSettingsObj = {
   fileFilters: defaultFileFilters,
@@ -143,6 +143,12 @@ function App() {
     setShowDrawerFolderLink(open);
   };
 
+  const handleChangeSettingsZip = (event) => {
+    setAppSettings({ ...appSettings, hideZip: event.target.checked });
+
+    window.electronAPI.setStoreValue("hide-zip", event.target.checked);
+  };
+
   const handleChangeSettingsFiles = (event) => {
     window.electronAPI.setStoreValue("sort-files", event.target.checked);
     setAppSettings({ ...appSettings, sortOrderFiles: event.target.checked });
@@ -187,27 +193,33 @@ function App() {
   }
 
   useEffect(() => {
-    if (startFolder.root.length === 0) {
+    if (startFolder.root.length === 0 && settingsLoaded) {
       getStartFolder();
+      navigate("/");
     }
-  }, [startFolder, isBusyWorking]);
+  }, [startFolder, isBusyWorking, settingsLoaded]);
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
     const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");
+    const hideZip = await window.electronAPI.getStoreValue("hide-zip");
     const favorites = await window.electronAPI.getFavorites("favorites");
     var favMap = new Map();
     if (favorites) {
       favMap = new Map(Object.entries(JSON.parse(favorites)));
     }
-    setAppSettings({ ...appSettings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, favorites: favMap });
+    const zxinfoSCR = await window.electronAPI.getZxinfoSCR("zxinfoSCR");
+    var scrMap = new Map();
+    if (zxinfoSCR) {
+      scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
+    }
+    setAppSettings((settings) => ({ ...settings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, hideZip: hideZip, favorites: favMap, zxinfoSCR: scrMap }));
   }
 
   useEffect(() => {
     if (!settingsLoaded) {
       loadSettings();
       setSettingsLoaded(true);
-      navigate("/");
     }
   }, [appSettings, settingsLoaded]);
 
@@ -329,8 +341,15 @@ function App() {
                     <FormControlLabel
                       control={<Checkbox name="sortOrderFiles" checked={appSettings.sortOrderFiles} onChange={handleChangeSettingsFiles} />}
                       label="Sort filenames ascending"
+                      disabled={!isDev}
                     />
                   </Grid>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={<Checkbox name="hideZip" checked={appSettings.hideZip} onChange={handleChangeSettingsZip} />}
+                      label="Hide main ZIP"
+                    />
+                  </Grid>{" "}
                   <Grid item xs={12}></Grid>
                   <Button variant="contained" onClick={toggleDrawerSettings(false)} sx={{ mt: 3, ml: 1 }}>
                     OK

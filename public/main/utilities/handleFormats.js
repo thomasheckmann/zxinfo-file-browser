@@ -19,7 +19,7 @@ function getZXFormat(fileName, subFileName, data) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", ".p81", ".tap", ".tzx", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", /*".p81", */".tap", ".tzx", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;

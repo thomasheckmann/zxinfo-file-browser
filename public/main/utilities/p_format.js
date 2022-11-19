@@ -59,7 +59,7 @@ function createDIRScreen(zx81) {
     if (y < 22) y = screenZX.printAtZX81(image, x, y, lineTxt) + 1;
   }
 
-  // image.write("file.png");
+  image.write("file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
 }
 
@@ -89,7 +89,7 @@ function readP81(data) {
     program_name += charset[data[i] & 0x7f];
   }
   program_name += charset[data[i] & 0x7f];
-
+  mylog.debug(`filename ended: ${i}`);
   mylog.debug(`program name: ` + program_name);
   const zx81data = readZX81(data.slice(i + 1));
   mylog.debug(JSON.stringify(zx81data));
@@ -97,9 +97,11 @@ function readP81(data) {
   var snapshot = {};
   snapshot.type = "P81";
   snapshot.hwModel = "ZX81";
-  snapshot.data = { ...zx81data, data: data.slice(128, 128 + zx81data.len) };
+//  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
+  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
+  mylog.debug(snapshot.text);
   return snapshot;
 }
 
@@ -113,7 +115,7 @@ function readP(data) {
   var snapshot = {};
   snapshot.type = "P";
   snapshot.hwModel = "ZX81";
-  snapshot.data = { ...zx81data, data: data.slice(data, zx81data.len) };
+  snapshot.data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
   return snapshot;
