@@ -36,30 +36,30 @@ class IntroText extends React.Component {
             <Typography variant="h4">ZXInfo - File - Browser</Typography>
             <Divider />
             <Typography variant="body1">
-              The easy ZX Spectrum file manager, scans local files and gives a nice overview of all your emulator file
+              The easy ZX Spectrum file browser, scans local files and gives a nice overview of all your emulator file
               spread across your harddrive. The program detects known formats, generates a nice preview as found in the
               file and also detects if the file is already known by ZXInfo API. Currently the program supports the
               following formats:
             </Typography>
             <ul>
-              <li>.sna - 48K and 128K formats</li>
-              <li>.z80 - Version 1, 2 & 3</li>
-              <li>.tap</li>
-              <li>shows, but not in details slt, dsk, trd, mdr & tzx</li>
+              <li>snapshot formats, .sna - 48K and 128K formats & .z80 - Version 1, 2 & 3</li>
+              <li>tape formats, .tap & .tzx</li>
+              <li>disk formats, .dsk, .trd & .scl</li>
+              <li>microdrive .mdr</li>
+              <li>zx81 .p and .tzx</li>
             </ul>
             <Typography variant="h4">Features</Typography>
             <Divider />
             <ul>
               <li>Scan local files</li>
-              <li>Non-Destructive - original files won't be touched</li>
-              <li>Read details from various formats: SNA, Z80, TAP</li>
-              <li>Integrates with ZXDB using ZXInfo API</li>
-              <li>Browse by file formats by filtering (sna, z80, tap)</li>
+              <li>Read details from various formats: SNA, Z80, TAP, TZX, MDR, DSK, TRD, SCL & P</li>
+              <li>Integrates with ZXDB using ZXInfo.dk & ZXInfo API, to get real title and SCR for preview</li>
+              <li>Favorites, keep track of your favorite games</li>
+              <li>Filter files shown by formats</li>
               <li>Sort by folder name and file name</li>
               <li>Quick access to folders</li>
-              <li>Future fetures</li>
+              <li>Future features</li>
               <ul>
-                <li>[Favorites, keep track of your favorite games]</li>
                 <li>[Identify duplicated files, based on hash]</li>
                 <li>[Show multiple entries for same title]</li>
               </ul>
