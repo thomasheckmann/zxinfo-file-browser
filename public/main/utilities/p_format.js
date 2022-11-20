@@ -59,7 +59,7 @@ function createDIRScreen(zx81) {
     if (y < 22) y = screenZX.printAtZX81(image, x, y, lineTxt) + 1;
   }
 
-  image.write("file.png");
+  // image.write("file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
 }
 
