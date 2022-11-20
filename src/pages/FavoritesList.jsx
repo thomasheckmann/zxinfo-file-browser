@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import FavoriteTwoToneIcon from '@mui/icons-material/FavoriteTwoTone';
+import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
+import { Container } from "@mui/system";
 
 const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
 
@@ -15,7 +16,7 @@ function FavoritesList(props) {
 
     var items = [];
     for (let [key, value] of favorites) {
-        items.push(...value);
+      items.push(...value);
     }
     let uniqueFileNames = [...new Set(items)];
 
@@ -30,7 +31,15 @@ function FavoritesList(props) {
         <Typography variant="button">My favorites</Typography>
       </Box>
       <Divider variant="middle" />
-      <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+      {files.length > 0 ? (
+        <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+      ) : (
+        <Container>
+          <Box textAlign="center" sx={{ p: 4 }}>
+            <Typography variant="h6">No favorites yet</Typography>
+          </Box>
+        </Container>
+      )}
     </Paper>
   );
 }
