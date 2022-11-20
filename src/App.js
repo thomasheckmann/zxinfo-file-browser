@@ -185,6 +185,7 @@ function App() {
           root: foldersWithFiles.root,
           folders: foldersWithFiles.folders,
           total: foldersWithFiles.total,
+          time: foldersWithFiles.time,
         });
       setIsBusyWorking(false);
     } else {
@@ -213,7 +214,14 @@ function App() {
     if (zxinfoSCR) {
       scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
     }
-    setAppSettings((settings) => ({ ...settings, sortOrderFiles: sortOrdersFiles, sortOrderFolders: sortOrderFolders, hideZip: hideZip, favorites: favMap, zxinfoSCR: scrMap }));
+    setAppSettings((settings) => ({
+      ...settings,
+      sortOrderFiles: sortOrdersFiles,
+      sortOrderFolders: sortOrderFolders,
+      hideZip: hideZip,
+      favorites: favMap,
+      zxinfoSCR: scrMap,
+    }));
   }
 
   useEffect(() => {
@@ -228,7 +236,7 @@ function App() {
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
-    if(isDev) {
+    if (isDev) {
       console.error(`handleOpenFolderFromChild() - page: ${location.pathname}`);
     }
     if (location.pathname.startsWith("/favorites")) {
@@ -242,6 +250,7 @@ function App() {
         root: foldersWithFiles.root,
         folders: foldersWithFiles.folders,
         total: foldersWithFiles.total,
+        time: foldersWithFiles.time,
       });
     if (foldersWithFiles) {
       // save start folder to app settings
@@ -394,7 +403,7 @@ function App() {
               <Container>
                 <Box sx={{ display: "flex" }}>
                   <Typography>
-                    {startFolder.total} file(s) found in {startFolder.root}
+                    {startFolder.total} file(s) found in {startFolder.root} ({startFolder.time} sec.)
                   </Typography>
                 </Box>
               </Container>

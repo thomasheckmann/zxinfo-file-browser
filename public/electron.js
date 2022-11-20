@@ -177,23 +177,22 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   mylog.info(`${event}, ${arg}`);
 
   function initFolderView(startFolder) {
+    var startTime = performance.now()
+
     const foldersWithFiles = scanDirectory(startFolder, new Map());
     const files = new Map([...foldersWithFiles.folders]);
-    var result = [];
+    var result = [...files.keys()];
 
     let totalFiles = 0;
-    files.forEach((value, key) => {
-      result.push(key);
+
+    files.forEach(value => {
       totalFiles += value;
     });
+    
+    var endTime = performance.now()
 
-    if (store.get("sort-folders") === true) {
-      result.sort();
-    } else if (store.get("sort-folders") === false) {
-      result.sort().reverse();
-    }
-
-    return { root: startFolder, folders: result, total: totalFiles };
+    mylog.info(`time: ${(endTime - startTime)/1000} sec.`);
+    return { root: startFolder, folders: result, total: totalFiles, time: ((endTime - startTime)/1000).toFixed(2) };
   }
 
   if (arg && fs.existsSync(arg)) {
