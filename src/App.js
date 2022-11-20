@@ -288,7 +288,7 @@ function App() {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={startFolder.folders.length < 2}
+                  disabled={startFolder.folders.length < 2 || location.pathname.startsWith("/favorites")}
                   edge="start"
                   color="inherit"
                   sx={{ mr: 2 }}
