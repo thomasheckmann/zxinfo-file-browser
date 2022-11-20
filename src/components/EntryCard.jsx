@@ -161,9 +161,9 @@ function EntryCard(props) {
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
     }
     setEntry({ ...entry, scr: selectedSCR });
-    var obj = Object.fromEntries(appSettings.zxinfoSCR);
-    var jsonString = JSON.stringify(obj);
-    window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString);
+    var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
+    var jsonString1 = JSON.stringify(obj1);
+    window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
   }, [selectedSCR]);
 
   return (

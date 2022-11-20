@@ -67,7 +67,7 @@ function InfiniteEntriesList(props) {
     for (newIndex = infSettings.index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
       const result = await window.electronAPI.loadFile(props.files[newIndex]);
       if (result) {
-        result.map((entry) => {
+        result.forEach(function (entry) {
           if (appSettings.hideZip && entry.filename.toLowerCase().endsWith("zip") && !entry.subfilename) {
             if (isDev) console.log(`fetchMoreData(): removing ZIP ${entry.filename} from list  + ${props.foldername}`);
           } else {
