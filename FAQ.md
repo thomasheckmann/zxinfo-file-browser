@@ -1,5 +1,14 @@
 # FAQ - frequently asked questions
 
+## My Mac reports the app as damaged?
+Try 
+
+```
+cd <location of zxinfo-file-browser.app>
+xattr -c zxinfo-file-browser.app
+open zxinfo-file-browser.app
+```
+
 ## Why does SCR preview looks like random data?
 
 For snapshot files SNA and Z80, the screen memory is part of the data - but for tape files TAP and TZX, there is no way to identify a screen 100%. For these files, the app tries at best to find a suitable SCR preview.
