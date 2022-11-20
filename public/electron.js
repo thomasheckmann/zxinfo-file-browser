@@ -21,8 +21,8 @@ const AdmZip = require("adm-zip");
 const log = require("electron-log");
 
 // use error, warn, info for production
-log.transports.console.level = isDev ? "silly" : "info";
-log.transports.file.level = isDev ? "silly" : "info";
+log.transports.console.level = isDev ? "info" : "info";
+log.transports.file.level = isDev ? "info" : "info";
 log.transports.file.getFile().clear();
 
 let win;
@@ -36,21 +36,19 @@ function createWindow() {
     height: 900,
     title: `ZXInfo - file manager v${app.getVersion()}`,
     webPreferences: {
-      autoHideMenuBar: true,
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
   });
-
-  win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
-
   // Open the DevTools.
   if (isDev) {
     mylog.debug("opening DevTools");
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
   }
+
+  win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
 }
 
 app.whenReady().then(() => {
@@ -69,6 +67,7 @@ app.whenReady().then(() => {
  * Uses settings
  */
 const Store = require("electron-store");
+
 const store = new Store();
 const favoritesStore = new Store({ name: "favorites" });
 const zxinfoSCRStore = new Store({ name: "zxinfoSCR" });
@@ -175,7 +174,7 @@ function scanDirectory(dirPath, obj) {
  */
 ipcMain.handle("dialog:openFolder", async (event, arg) => {
   const mylog = log.scope("dialog:openFolder");
-  mylog.debug(`${event}, ${arg}`);
+  mylog.info(`${event}, ${arg}`);
 
   function initFolderView(startFolder) {
     const foldersWithFiles = scanDirectory(startFolder, new Map());

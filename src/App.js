@@ -193,7 +193,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (startFolder.root.length === 0 && settingsLoaded) {
+    if (startFolder.root.length === 0 && settingsLoaded && !isBusyWorking) {
       getStartFolder();
       navigate("/");
     }
@@ -228,6 +228,9 @@ function App() {
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
+    if(isDev) {
+      console.error(`handleOpenFolderFromChild() - page: ${location.pathname}`);
+    }
     if (location.pathname.startsWith("/favorites")) {
       navigate("/");
       return;
@@ -247,7 +250,6 @@ function App() {
     window.scrollTo({
       top: 0,
     });
-    //setAppSettings({ ...appSettings });
   };
 
   return (
