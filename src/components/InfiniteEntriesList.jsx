@@ -111,15 +111,15 @@ function InfiniteEntriesList(props) {
   }, [props.files.length, isVisible]);
 
   return (
-    <Container maxWidth="xl">
-      <div ref={nodeRef} id={"scrollableDiv" + props.foldername} style={{ height: visibleHeight, overflow: "auto" }}>
+    <Container maxWidth="xl" sx={{py: 2, mx: 0}} id={"scrollableDiv" + props.foldername} >
+      <div ref={nodeRef} style={{ height: visibleHeight, overflow: "auto" }}>
         <InfiniteScroll
           dataLength={infSettings.items.length}
           next={fetchMoreData}
           hasMore={infSettings.hasMore}
           loader={
             <Grid xs={12}>
-              <Box sx={{ width: "100%" }}>
+              <Box>
                 <LinearProgress />
               </Box>
             </Grid>
@@ -132,7 +132,7 @@ function InfiniteEntriesList(props) {
             </Grid>
           }
         >
-          <Grid container spacing={2} sx={{ my: 2 }}>
+          <Grid container spacing={2} sx={{ mx: 0, my: 0 }}>
             {infSettings.items.map((item, index) => (
               <Grid xs={12} sm={6} md={4} lg={3} xl={3} key={index}>
                 <EntryCard key={index} entry={item}></EntryCard>
