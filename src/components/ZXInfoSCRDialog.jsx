@@ -16,6 +16,7 @@ import {
   ImageListItem,
   ImageListItemBar,
   ThemeProvider,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -76,23 +77,36 @@ export default function ZXInfoSCRDialog(props) {
         })
         .finally(() => {});
     }
-  }, [zxdb]);
+  }, [zxdb, open]);
 
   return (
     <ThemeProvider theme={theme}>
       <Dialog onClose={handleClose} open={open} scroll={"paper"}>
-        <DialogTitle align="center" sx={{color: "#ffffff", bgcolor: "#000000"}}>
+        <DialogTitle align="center" sx={{ color: "#ffffff", bgcolor: "#000000" }}>
           Select primary screen for
           <br />
           {zxdb.title}
         </DialogTitle>
         <DialogContent dividers={true}>
           <Container>
+            {screens.length === 0 && (
+              <Box textAlign="center" sx={{ p: 4 }}>
+                <Typography variant="h6">No screens found on ZXInfo.dk</Typography>
+              </Box>
+            )}
             <ImageList>
               {screens.map((item) => (
                 <ImageListItem key={item.url} onClick={() => handleListItemClick(item.url)}>
                   <img width={256} src={`${item.url}`} alt={item.title} loading="lazy" />
-                  <ImageListItemBar title={item.title} subtitle={<span>{item.release}: {item.type}</span>} position="below" />
+                  <ImageListItemBar
+                    title={item.title}
+                    subtitle={
+                      <span>
+                        {item.release}: {item.type}
+                      </span>
+                    }
+                    position="below"
+                  />
                 </ImageListItem>
               ))}
             </ImageList>
@@ -100,7 +114,15 @@ export default function ZXInfoSCRDialog(props) {
         </DialogContent>
         <DialogActions>
           <Box textAlign="center" sx={{ p: 4 }}>
-            <Button variant="contained" onClick={() => handleListItemClick(null)}>Restore</Button>
+            {screens.length === 0 ? (
+              <Button variant="contained" onClick={() => handleClose(null)}>
+                Close
+              </Button>
+            ) : (
+              <Button variant="contained" onClick={() => handleListItemClick(null)}>
+                Restore
+              </Button>
+            )}
           </Box>
         </DialogActions>
       </Dialog>
