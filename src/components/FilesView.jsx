@@ -44,8 +44,8 @@ const FilesView = (props) => {
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, props.foldername]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
-    <Paper elevation={5} sx={{ my: 4 }} id={props.foldername}>
-      <Box sx={{ display: "flex", p: 2 }}>
+    <Paper elevation={8} sx={{ my: 4 }} id={props.foldername}>
+      <Box sx={{ display: "flex", py: 3, px: 2}}>
         <FolderTwoToneIcon />
         <Typography variant="button">
           {props.foldername} - ({files.length})
