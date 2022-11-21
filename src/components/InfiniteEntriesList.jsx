@@ -18,11 +18,11 @@ import ZXInfoSettings from "../common/ZXInfoSettings";
 import { isDev } from "../App";
 
 const ItemEnd = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#ccc",
-  ...theme.typography.body2,
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#008000",
+  ...theme.typography.button,
   padding: theme.spacing(1),
   textAlign: "center",
-  color: theme.palette.text.secondary,
+  color: theme.palette.text.primary,
 }));
 
 function InfiniteEntriesList(props) {
@@ -128,7 +128,7 @@ function InfiniteEntriesList(props) {
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
             <Grid xs={12}>
-              <ItemEnd>Total number of entries: {infSettings.items.length}</ItemEnd>
+              <ItemEnd >Total number of entries: {infSettings.items.length}</ItemEnd>
             </Grid>
           }
         >

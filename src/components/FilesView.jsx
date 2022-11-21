@@ -44,14 +44,13 @@ const FilesView = (props) => {
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, props.foldername]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
-    <Paper elevation={8} sx={{ my: 4 }} id={props.foldername}>
-      <Box sx={{ display: "flex", py: 3, px: 2}}>
+    <Paper elevation={5} sx={{ height: "vh", my: 4 }} id={props.foldername}>
+      <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
         <FolderTwoToneIcon />
         <Typography variant="button">
           {props.foldername} - ({files.length})
         </Typography>
       </Box>
-      <Divider variant="middle" />
       <InfiniteEntriesList files={files} foldername={props.foldername} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
     </Paper>
   );

@@ -26,11 +26,10 @@ function FavoritesList(props) {
 
   return (
     <Paper elevation={5} sx={{ height: "vh", my: 4 }}>
-      <Box sx={{ display: "flex", p: 2 }}>
+      <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2}}>
         <FavoriteTwoToneIcon />
         <Typography variant="button">My favorites</Typography>
       </Box>
-      <Divider variant="middle" />
       {files.length > 0 ? (
         <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
       ) : (
