@@ -8,8 +8,8 @@ Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa f
 Download latest build for macOS, Windows and Linx on [release page](https://github.com/thomasheckmann/zxinfo-file-browser/releases)
 Please note all builds are unsiged, so you might need to give persmisson to run - depending on what OS you are running.
 
-* zxinfo-file-browser-Vnn-arm64.dmg - macOS on M1
-* zxinfo-file-browser-Vnn.dmg - macOS on Intel
+* zxinfo-file-browser-Vnn-arm64-mac.zip - macOS on Apple Silicon
+* zxinfo-file-browser-Vnn-mac.zip - macOS on Intel
 * zxinfo-file-browser-Vnn.exe - Windows
 * zxinfo-file-browser-Vnn.AppImage - Linux
 
