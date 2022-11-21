@@ -418,13 +418,13 @@ function HardwareBlock(len, data) {
   this.length = data[0];
   this.hw = [];
 
-  mylog.debug(`Number of entries: ${this.length}`);
+  mylog.info(`Number of entries: ${this.length}`);
   const hwData = data.slice(1);
   for (var i = 0; i < this.length; i++) {
     const hardwareType = hwData[i * 3];
     const hardwareId = hwData[i * 3 + 1];
     const hardwareInfo = hwData[i * 3 + 2];
-    mylog.debug(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
+    mylog.info(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
     if (HWINFO.get(hardwareInfo)) {
       this.hw.push(HWTYPE.get(hardwareType).hardware[hardwareId]);
     }
@@ -559,8 +559,8 @@ function processTZXData(data) {
         break;
       case 0x33: // ID 33 - Hardware type
         length = data[i] * 3 + 1;
-        mylog.debug(`ID 33 - Hardware type: length=${length}`);
-        block = new HardwareBlock(length, data.slice(i + 2, i + length));
+        mylog.info(`ID 33 - Hardware type: length=${length}`);
+        block = new HardwareBlock(length, data.slice(i, i + length));
         break;
       case 0x35: // ID 35 - Custom info block
         length = 9999;
