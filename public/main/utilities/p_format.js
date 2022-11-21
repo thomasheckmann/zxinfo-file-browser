@@ -101,7 +101,7 @@ function readP81(data) {
   snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
-  mylog.debug(snapshot.text);
+  mylog.info(`readP() - OK ${snapshot.text}`);
   return snapshot;
 }
 
@@ -118,6 +118,7 @@ function readP(data) {
   snapshot.data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
+  mylog.info(`readP() - OK ${snapshot.text}`);
   return snapshot;
 }
 
