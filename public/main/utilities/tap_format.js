@@ -31,13 +31,13 @@ function readTAP(data) {
     const dataBlock = data.subarray(index, index + blockLength);
     if (dataBlock[0] === 0) {
       mylog.debug(`found header block at index: ${index}`);
-      const block = util.createHeader(dataBlock);
+      const block = util.createHeader(dataBlock, index);
       if (block.error) {
         snapshot.error = block.error;
       }
       tap.push(block);
     } else if (dataBlock[0] === 255) {
-      const block = util.createData(dataBlock);
+      const block = util.createData(dataBlock, index);
       block.type = "...data";
       if (block.error) {
         snapshot.error = block.error;
@@ -45,41 +45,55 @@ function readTAP(data) {
       mylog.debug(`found data block at index: ${index}, length=${block.data.length}`);
       tap.push(block);
     } else {
-      mylog.warn(`found unknown block at index: ${index} - ${dataBlock[0]}`);
+      mylog.warn(`index: ${index} - Unknown block (${dataBlock[0]})`);
+      snapshot.error = `index: ${index} - Unknown block (${dataBlock[0]})`;
     }
     index += blockLength; // skip data block
   }
 
   // iterate tap[] - find first code block starting at 16384 OR with lengh og 6912
-  mylog.debug(`tap structure length: ${tap.length}`);
-  snapshot.text = tap[0].type + ": " + tap[0].name;
-  for (let index = 0; index < tap.length; index++) {
-    const element = tap[index];
-    mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
-    if (element.type === "Code") {
-      if (element.startAddress === 16384) {
-        mylog.debug(`Found code starting at 16384...(screen area)`);
-        snapshot.scrdata = tap[index + 1].data;
-        snapshot.border = 7;
-        break;
-      } else if (element.len === 6912) {
-        mylog.debug(`Found code with length 6912...(screen length)`);
-        snapshot.scrdata = tap[index + 1].data;
-        snapshot.border = 7;
-        break;
-      } else if (element.len > 6912) {
-        mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
-        snapshot.scrdata = tap[index + 1].data;
-        snapshot.border = 7;
-        break;
-      }
-    } else if (snapshot.scrdata === null && element.type === "...data") {
-      // headerless data with length 6912 or bigger than 32768
-      mylog.debug(`data block: ${element.data.length}`);
-      if (element.data.length > 32767 || element.data.length === 6912) {
-        mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
-        snapshot.scrdata = element.data;
-        snapshot.border = 7;
+  mylog.info(`tap structure length: ${tap.length}`);
+
+  if (tap.length === 0) {
+    snapshot.error = "TAP lenght 0, invalid";
+  } else {
+    snapshot.text = tap[0].type + ": " + tap[0].name;
+    for (let index = 0; index < tap.length; index++) {
+      const element = tap[index];
+      mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
+      if (element.type === "Code") {
+        if (element.startAddress === 16384) {
+          mylog.debug(`Found code starting at 16384...(screen area)`);
+          snapshot.scrdata = tap[index + 1].data;
+          snapshot.border = 7;
+          break;
+        } else if (element.len === 6912) {
+          mylog.debug(`Found code with length 6912...(screen length)`);
+          if(snapshot.scrdata = tap[index + 1]) {
+            snapshot.scrdata = tap[index + 1].data;
+            snapshot.border = 7;
+          } else {
+            snapshot.border = 2;
+          }
+          break;
+        } else if (element.len > 6912) {
+          mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
+          if(snapshot.scrdata = tap[index + 1]) {
+            snapshot.scrdata = tap[index + 1].data;
+            snapshot.border = 7;
+          } else {
+            snapshot.border = 2;
+          }
+          break;
+        }
+      } else if (snapshot.scrdata === null && element.type === "...data") {
+        // headerless data with length 6912 or bigger than 32768
+        mylog.debug(`data block: ${element.data.length}`);
+        if (element.data.length > 32767 || element.data.length === 6912) {
+          mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
+          snapshot.scrdata = element.data;
+          snapshot.border = 7;
+        }
       }
     }
 
