@@ -1,16 +1,21 @@
 {
   "name": "zxinfo-file-browser",
   "version": "1.0.5",
-  "description": "ZX Spectrum emulator file browser powered by the web",
+  "description": "ZX Spectrum & ZX81 emulator file browser powered by the web",
   "author": "thomas.kolbeck@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thomasheckmann/zxinfo-file-browser/issues"
+  },
   "main": "public/electron.js",
   "private": true,
   "build": {
     "appId": "zxinfo.filebrowser.app",
     "mac": {
       "icon": "./public/icons/icon.png",
+      "category": "public.app-category.utilities",
       "target": {
-        "target": "default",
+        "target": "zip",
         "arch": [
           "x64",
           "arm64"
@@ -31,6 +36,10 @@
     "linux": {
       "icon": "./public/icons/icon.png"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomasheckmann/zxinfo-file-browser.git"
   },
   "workspaces": [
     "src/*"
@@ -73,8 +82,10 @@
     "react-eject": "react-scripts eject",
     "electron-build": "electron-builder -mwl",
     "electron-build-mac": "electron-builder -m",
+    "electron-build-win": "electron-builder -w",
     "build": "npm run react-build && npm run electron-build",
     "build-mac": "npm run react-build && npm run electron-build-mac",
+    "build-win": "npm run react-build && npm run electron-build-win",
     "start": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://localhost:3000 && electron .'"
   },
   "eslintConfig": {
@@ -96,7 +107,7 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^7.5.0",
+    "concurrently": "^7.6.0",
     "electron": "^21.3.0",
     "electron-builder": "^23.6.0",
     "electron-devtools-installer": "^3.2.0",
