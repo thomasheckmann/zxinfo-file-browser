@@ -17,7 +17,6 @@ function getWord(low, high) {
 }
 
 function getDWord(n1, n2, n3, n4) {
-  console.log(`${n1}, ${n2}, ${n3}, ${n4}`);
   return n4 * 16777216 + n3 * 65556 + n2 * 256 + n1;
 }
 

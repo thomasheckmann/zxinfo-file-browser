@@ -50,8 +50,6 @@ export default function ZXInfoSCRDialog(props) {
 
   useEffect(() => {
     if (open) {
-      console.log(`useEffect(): I am open! ${JSON.stringify(props)}`);
-
       const dataURL = `https://api.zxinfo.dk/v3/games/${zxdb.zxdbID}?mode=tiny`;
       if (isDev) console.log(`API: ${dataURL}`);
       axios
