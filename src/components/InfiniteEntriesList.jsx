@@ -108,7 +108,7 @@ function InfiniteEntriesList(props) {
     } else {
       if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
     }
-  }, [props.files.length, isVisible, appSettings.hideZip]);
+  }, [props.files.length, isVisible]);
 
   return (
     <Container maxWidth="xl">
