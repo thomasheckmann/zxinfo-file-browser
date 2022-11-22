@@ -15,17 +15,20 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { Alert, Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
 import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
-import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
+import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 
-import DownloadingTwoToneIcon from "@mui/icons-material/DownloadingTwoTone";
+import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflineTwoTone";
+import WarningTwoToneIcon from "@mui/icons-material/WarningTwoTone";
 
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 import ZXInfoSettings from "../common/ZXInfoSettings";
+
+import FileErrorDialog from "./FileErrorDialog";
 
 function formatType(t) {
   switch (t) {
@@ -67,16 +70,28 @@ function EntryCard(props) {
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Fetch SCR from ZXInfo API
   const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
   const [selectedSCR, setSelectedSCR] = useState("");
 
   const handleSCRDialogClose = (value) => {
+    setSelectedSCR((selectedSCR) => value);
     setSCRDialogOpen(false);
-    setSelectedSCR(value);
   };
 
   const handleSCRDialogOpen = () => {
     setSCRDialogOpen(true);
+  };
+
+  // File Error box
+  const [isFileErrorDialogOpen, setFileErrorDialogOpen] = useState(false);
+
+  const handleFileErrorDialogClose = (value) => {
+    setFileErrorDialogOpen(false);
+  };
+  const handleFileErrorDialogOpen = () => {
+    setFileErrorDialogOpen(true);
   };
 
   // Map (sha512 -> [array of filenames])
@@ -127,6 +142,7 @@ function EntryCard(props) {
           setIsFavorite(appSettings.favorites.get(item.sha512));
         })
         .catch((error) => {
+          // Not found
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
           if (zxdbSCR) {
             setEntry({ ...props.entry, scr: zxdbSCR });
@@ -145,10 +161,10 @@ function EntryCard(props) {
       if (appSettings.zxinfoSCR.size > 0) {
         appSettings.zxinfoSCR.delete(props.entry.sha512);
       }
-      setEntry((entry) => ({ ...entry, scr: props.entry.scr }));
       var obj = Object.fromEntries(appSettings.zxinfoSCR);
       var jsonString = JSON.stringify(obj);
       window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString);
+      setEntry(entry => ({ ...entry, scr: props.entry.scr }));
       return;
     }
 
@@ -160,7 +176,7 @@ function EntryCard(props) {
     } else {
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
     }
-    setEntry({ ...entry, scr: selectedSCR });
+    setEntry(entry => ({ ...entry, scr: selectedSCR }));
     var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
     var jsonString1 = JSON.stringify(obj1);
     window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
@@ -175,7 +191,8 @@ function EntryCard(props) {
           selectedValue={selectedSCR}
           onClose={handleSCRDialogClose}
         ></ZXInfoSCRDialog>
-        <Card raised elevation={5}>
+        <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>
+        <Card raised elevation={4}>
           <CardHeader
             sx={{
               backgroundColor: entry.type === "zip" ? "#606060" : "#808080",
@@ -210,14 +227,13 @@ function EntryCard(props) {
             subheaderTypographyProps={{ noWrap: true }}
             subheader={entry.subfilename}
           />
-          {entry.error ? <Alert severity="warning">{entry.error}</Alert> : ""}
           <CardMedia component="img" image={entry.scr} alt={entry.filename} />
           <CardContent>
             <Typography gutterBottom variant="subtitle1" component="div" noWrap>
               {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
             </Typography>
             <Typography gutterBottom variant="subtitle2" component="div" noWrap>
-              {entry.text}
+              {entry.text}&nbsp;
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center">
               {entry.version && <Chip label={entry.version} />}
@@ -230,6 +246,7 @@ function EntryCard(props) {
                   onClick={(id) => openLink(entry.zxdbID)}
                 />
               )}
+              <Chip sx={{bgcolor: "#ffffff"}}/>
             </Stack>
           </CardContent>
           <CardActions disableSpacing>
@@ -242,7 +259,7 @@ function EntryCard(props) {
             ) : (
               <Tooltip title="Add to favorites">
                 <IconButton aria-label="add to favorites" onClick={() => toggleFavorite(this)}>
-                  <FavoriteBorderOutlinedIcon />
+                  <FavoriteTwoToneIcon />
                 </IconButton>
               </Tooltip>
             )}
@@ -250,7 +267,14 @@ function EntryCard(props) {
             {entry.zxdbID && (
               <Tooltip title="Get SCR fron ZXInfo" onClick={() => handleSCRDialogOpen(this)}>
                 <IconButton arial-label="get scr from zxinfo">
-                  <DownloadingTwoToneIcon />
+                  <DownloadForOfflineTwoToneIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            {entry.error && entry.error.length > 0 && (
+              <Tooltip title="See file issues" onClick={() => handleFileErrorDialogOpen(this)}>
+                <IconButton arial-label="see file issues">
+                  <WarningTwoToneIcon sx={{color: "#ff0000"}}/>
                 </IconButton>
               </Tooltip>
             )}

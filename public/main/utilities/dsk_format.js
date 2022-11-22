@@ -264,8 +264,7 @@ function readDSK(data) {
   const mylog = log.scope("readDSK");
   mylog.debug(`input: ${data.length}`);
 
-  var snapshot = {};
-  snapshot.type = "DSK";
+  var snapshot = { type: "DSK", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
   const signature = String.fromCharCode.apply(null, data.slice(0, 34));
   if (signature === "EXTENDED CPC DSK File\r\nDisk-Info\r\n") {

@@ -109,7 +109,7 @@ function readTRD(data) {
   const mylog = log.scope("readTRD");
   mylog.debug(`input: ${data.length}`);
 
-  var snapshot = {};
+  var snapshot = { type: "TRD", error: [], scrdata: null, data: [] };
   snapshot.type = "TRD";
   snapshot.scrdata = null;
 

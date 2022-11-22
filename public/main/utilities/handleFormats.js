@@ -38,7 +38,7 @@ function getZXFormat(fileName, subFileName, data) {
     type: null,
     sha512: sum.digest("hex"),
     scr: null,
-    error: null,
+    error: [],
   };
 
   let extension;
@@ -75,10 +75,10 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.version = obj.type;
     ZXFileInfo.type = "tzxfmt";
     ZXFileInfo.text = obj.text;
+    const orgType = obj.type;
     if(obj.hwModel === "ZX81") {
       obj = pfmt.readP81(obj.data);
-      ZXFileInfo.version = obj.type;
-      ZXFileInfo.type = "pfmt";
+      ZXFileInfo.version = orgType;
       ZXFileInfo.text = obj.text;
       pfmt.createDIRScreen(obj.data).then((res) => {
         if (res.buffer) {
@@ -190,8 +190,8 @@ function getZXFormat(fileName, subFileName, data) {
 
   if (obj.error) {
     ZXFileInfo.error = obj.error;
-    ZXFileInfo.scr = "./images/no_image.png";
-    return ZXFileInfo;
+    // ZXFileInfo.scr = "./images/no_image.png";
+    // return ZXFileInfo;
   }
 
   if (obj.scrdata) {

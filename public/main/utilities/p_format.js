@@ -94,14 +94,14 @@ function readP81(data) {
   const zx81data = readZX81(data.slice(i + 1));
   mylog.debug(JSON.stringify(zx81data));
 
-  var snapshot = {};
+  var snapshot = { type: "P81", error: [], scrdata: null, data: [] };
   snapshot.type = "P81";
   snapshot.hwModel = "ZX81";
 //  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
   snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
-  mylog.debug(snapshot.text);
+  mylog.info(`readP() - OK ${snapshot.text}`);
   return snapshot;
 }
 
@@ -112,12 +112,13 @@ function readP(data) {
   const zx81data = readZX81(data);
   mylog.debug(JSON.stringify(zx81data));
 
-  var snapshot = {};
+  var snapshot = { type: "P", error: [], scrdata: null, data: [] };
   snapshot.type = "P";
   snapshot.hwModel = "ZX81";
   snapshot.data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
+  mylog.info(`readP() - OK ${snapshot.text}`);
   return snapshot;
 }
 

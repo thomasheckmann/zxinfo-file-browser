@@ -92,7 +92,7 @@ function readZ80(data) {
   const mylog = log.scope("readZ80");
   mylog.debug(`input: ${data.length}`);
 
-  var snapshot = {};
+  var snapshot = { error: [], scrdata: null, data: [] };
   var version = 1;
   var compressed = false;
 

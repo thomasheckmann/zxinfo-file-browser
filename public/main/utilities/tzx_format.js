@@ -55,6 +55,7 @@ function StandardSpeedDataBlock(len, data) {
     this.block.type = "...data";
   } else {
     mylog.warn(`found unknown block: ${this.data[0]}`);
+    this.block.error = {type: "warning", message: `found unknown block: ${this.data[0]}`};
     this.block = { flag: this.data[0], data: null, error: `found unknown block: ${this.data[0]}` };
   }
 }
@@ -418,13 +419,13 @@ function HardwareBlock(len, data) {
   this.length = data[0];
   this.hw = [];
 
-  mylog.debug(`Number of entries: ${this.length}`);
+  mylog.info(`Number of entries: ${this.length}`);
   const hwData = data.slice(1);
   for (var i = 0; i < this.length; i++) {
     const hardwareType = hwData[i * 3];
     const hardwareId = hwData[i * 3 + 1];
     const hardwareInfo = hwData[i * 3 + 2];
-    mylog.debug(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
+    mylog.info(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
     if (HWINFO.get(hardwareInfo)) {
       this.hw.push(HWTYPE.get(hardwareType).hardware[hardwareId]);
     }
@@ -559,17 +560,17 @@ function processTZXData(data) {
         break;
       case 0x33: // ID 33 - Hardware type
         length = data[i] * 3 + 1;
-        mylog.debug(`ID 33 - Hardware type: length=${length}`);
-        block = new HardwareBlock(length, data.slice(i + 2, i + length));
+        mylog.info(`ID 33 - Hardware type: length=${length}`);
+        block = new HardwareBlock(length, data.slice(i, i + length));
         break;
       case 0x35: // ID 35 - Custom info block
         length = 9999;
         mylog.debug(`ID 35 - Custom info block: length=${length}`);
         mylog.error("Unhandled... abort...");
         break;
-
       default:
-        mylog.error(`UNKNOWN BLOCK ID: 0x${id.toString(16)}`);
+        mylog.error(`Unknown block ID: 0x${id.toString(16)}`);
+        block.error = {type: "error", message: `Unknown block ID: 0x${id.toString(16)}`}
         i = 100000000000;
         break;
     }
@@ -597,16 +598,18 @@ function readTZX(data) {
 
   mylog.debug(`TZX version: ${TZXMajorVersion}.${TZXMinorVersion}`);
 
-  var snapshot = { type: null, error: null, scrdata: null, data: [] };
+  var snapshot = { type: null, error: [], scrdata: null, data: [] };
   snapshot.type = `TZX ${TZXMajorVersion}.${TZXMinorVersion}`;
-
-  //var tzx = new TZXObject(TZXMajorVersion, TZXMinorVersion);
 
   const tzxData = processTZXData(data);
 
   snapshot.hwModel;
-  // create pseudo TAP structure & find hwinfo
+  // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
+    if (d && d.error) {
+      snapshot.error.push(d.error);
+    }
+
     if (d && d.id === 0x10) {
       mylog.debug("Adding Standard Block to tape....");
       return d.block;
