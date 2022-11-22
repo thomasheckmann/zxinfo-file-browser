@@ -44,17 +44,17 @@ function createHeader(data, index) {
         dataBlock.startAddress = headerBlock[13] + headerBlock[14] * 256;
         // param 2
         if (headerBlock[15] + headerBlock[16] * 256 !== 32768) {
-          dataBlock.error = `index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}`;
+          dataBlock.error = { type: "warning", message: `index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}` };
           mylog.warn(`index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}`);
         }
         break;
       default:
         dataBlock.type = null;
-        dataBlock.error = `${index}: Invalid headertype ${headerBlock[0]}, should be (0, 1, 2, 3)`;
+        dataBlock.error = { type: "error", message: `${index}: Invalid headertype ${headerBlock[0]}, should be (0, 1, 2, 3)` };
         break;
     }
   } else {
-    dataBlock.error = `${index}: Not a header block: flag = ${flagByte}`;
+    dataBlock.error = { type: "error", message: `${index}: Not a header block: flag = ${flagByte}` };
     mylog.warn(`${index}: Not a header block: flag = ${flagByte}`);
   }
 
@@ -77,7 +77,7 @@ function createData(data, index) {
     dataBlock.data = data.subarray(1, data.length - 1);
     mylog.debug(`data length: ` + dataBlock.data.length);
   } else {
-    dataBlock.error = `${index}: Not a data block: ${flagByte}`;
+    dataBlock.error = { type: "error", message: `${index}: Not a data block: ${flagByte}` };
     mylog.warn(`${index}: Not a data block: ${flagByte}`);
   }
 
@@ -100,5 +100,5 @@ function createRAWData(data) {
 module.exports = {
   createHeader: createHeader,
   createData: createData,
-  createRAWData: createRAWData
+  createRAWData: createRAWData,
 };

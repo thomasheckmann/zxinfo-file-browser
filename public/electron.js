@@ -177,7 +177,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   mylog.info(`${event}, ${arg}`);
 
   function initFolderView(startFolder) {
-    var startTime = performance.now()
+    var startTime = performance.now();
 
     const foldersWithFiles = scanDirectory(startFolder, new Map());
     const files = new Map([...foldersWithFiles.folders]);
@@ -185,14 +185,14 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
 
     let totalFiles = 0;
 
-    files.forEach(value => {
+    files.forEach((value) => {
       totalFiles += value;
     });
-    
-    var endTime = performance.now()
 
-    mylog.info(`time: ${(endTime - startTime)/1000} sec.`);
-    return { root: startFolder, folders: result, total: totalFiles, time: ((endTime - startTime)/1000).toFixed(2) };
+    var endTime = performance.now();
+
+    mylog.info(`time: ${(endTime - startTime) / 1000} sec.`);
+    return { root: startFolder, folders: result, total: totalFiles, time: ((endTime - startTime) / 1000).toFixed(2) };
   }
 
   if (arg && fs.existsSync(arg)) {
@@ -287,19 +287,23 @@ ipcMain.handle("load-file", async (event, arg) => {
       mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
       zipEntries.forEach(async function (zipEntry) {
         if (!zipEntry.isDirectory) {
-          let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
-          if (zxObj !== null) {
-            mylog.debug(`addind zip entry (${zipEntry.name}) to list...`);
-            zipCount++;
-            result.push(zxObj);
-          } else {
-            mylog.warn(`${zipEntry.name} - not recognized, skipping...`);
+          try {
+            let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
+            if (zxObj !== null) {
+              mylog.debug(`addind zip entry (${zipEntry.name}) to list...`);
+              zipCount++;
+              result.push(zxObj);
+            } else {
+              mylog.warn(`${zipEntry.name} - not recognized, skipping...`);
+            }
+          } catch (error) {
+            console.log(fileObj.error.push({type: "error", message: `ZIP Entry: ${zipEntry.name} - error, message = ${error}`}));
           }
         }
       });
     } catch (error) {
       mylog.error(`error reading ZIP file: ${filename}, skipping...`);
-      fileObj.error = "ZIP corrupt?";
+      fileObj.error.push({ type: "error", message: `ZIP: ${filename} - error, message = ${error}` });
       zipCount = 1;
     }
 
@@ -314,8 +318,8 @@ ipcMain.handle("load-file", async (event, arg) => {
     fileObj.scr = "./images/no_image.png";
   }
 
-  if (fileObj.error) {
-    mylog.error(`Problems loading file: ${fileObj.error}`);
+  if (fileObj.error.length > 0) {
+    mylog.error(`Problems loading file: ${JSON.stringify(fileObj.error)}`);
     return [fileObj];
   }
 

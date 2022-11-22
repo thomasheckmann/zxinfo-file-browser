@@ -38,7 +38,7 @@ function getZXFormat(fileName, subFileName, data) {
     type: null,
     sha512: sum.digest("hex"),
     scr: null,
-    error: null,
+    error: [],
   };
 
   let extension;

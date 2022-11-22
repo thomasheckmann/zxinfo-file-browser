@@ -76,8 +76,7 @@ function readSCL(data) {
   const mylog = log.scope("readSCL");
   mylog.debug(`input: ${data.length}`);
 
-  var snapshot = {};
-  snapshot.type = "SCL";
+  var snapshot = { type: "SCL", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
 
   const disk_info = detectSCL(data);

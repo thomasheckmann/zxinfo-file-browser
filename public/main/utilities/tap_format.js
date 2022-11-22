@@ -20,7 +20,8 @@ function readTAP(data) {
   mylog.debug(`input: ${data.length}`);
   mylog.debug(`processing TAP file...`);
 
-  var snapshot = { type: null, error: null, scrdata: null };
+  // error: Array of warning and error messages for this file
+  var snapshot = { type: null, error: [], scrdata: null };
   snapshot.type = "TAP";
 
   let tap = [];
@@ -33,20 +34,20 @@ function readTAP(data) {
       mylog.debug(`found header block at index: ${index}`);
       const block = util.createHeader(dataBlock, index);
       if (block.error) {
-        snapshot.error = block.error;
+        snapshot.error.push(block.error);
       }
       tap.push(block);
     } else if (dataBlock[0] === 255) {
       const block = util.createData(dataBlock, index);
       block.type = "...data";
       if (block.error) {
-        snapshot.error = block.error;
+        snapshot.error.push(block.error);
       }
       mylog.debug(`found data block at index: ${index}, length=${block.data.length}`);
       tap.push(block);
     } else {
       mylog.warn(`index: ${index} - Unknown block (${dataBlock[0]})`);
-      snapshot.error = `index: ${index} - Unknown block (${dataBlock[0]})`;
+      snapshot.error.push({type: "warning", message: `index: ${index} - Unknown block (${dataBlock[0]})`});
     }
     index += blockLength; // skip data block
   }
@@ -55,7 +56,7 @@ function readTAP(data) {
   mylog.info(`tap structure length: ${tap.length}`);
 
   if (tap.length === 0) {
-    snapshot.error = "TAP lenght 0, invalid";
+    snapshot.error.push({type: "error", message: "TAP lenght 0, invalid"});
   } else {
     snapshot.text = tap[0].type + ": " + tap[0].name;
     for (let index = 0; index < tap.length; index++) {

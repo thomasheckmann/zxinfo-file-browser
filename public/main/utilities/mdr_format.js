@@ -44,8 +44,7 @@ function readMDR(data) {
   const mylog = log.scope("readMDR");
   mylog.debug(`input: ${data.length}`);
 
-  var snapshot = {};
-  snapshot.type = "MDR";
+  var snapshot = { type: "MDR", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
 
   // A cartridge file contains 254 'sectors' of 543 bytes each
