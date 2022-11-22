@@ -22,7 +22,7 @@ function FavoritesList(props) {
 
     // remove duplicates
     setFiles(uniqueFileNames);
-  }, [appSettings.favorites]);
+  }, [appSettings.favorites.size]);
 
   return (
     <Paper elevation={5} sx={{ height: "vh", my: 4 }}>

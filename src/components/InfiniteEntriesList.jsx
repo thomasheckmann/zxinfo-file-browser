@@ -77,9 +77,9 @@ function InfiniteEntriesList(props) {
       }
     }
     if (newIndex >= props.files.length) {
-      setInfSettings((settings) => ({ ...settings, items: [...settings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
+      setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
     } else {
-      setInfSettings((settings) => ({ ...settings, items: [...settings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
+      setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
     }
   };
 
@@ -103,12 +103,12 @@ function InfiniteEntriesList(props) {
       if (props.files.length < getRowSize()) {
         setVisibleHeight(averageCardHeight + 120);
       }
-    } else if (isVisible && props.files.length > 0 && infSettings.index > 0) {
-      if (isDev) console.log(`useEffect(): -> RESTART InfiniteList? - ${props.foldername}`);
+    } else if (isVisible && props.files.length > 0 && infSettings.index > 0 && props.foldername) {
+      if (isDev) console.log(`useEffect(): -> folder section back in viewport - ${props.foldername}`);
     } else {
       if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
     }
-  }, [props.files.length, isVisible]);
+  }, [props.files, isVisible]);
 
   return (
     <Container maxWidth="xl" sx={{py: 2, mx: 0}} id={"scrollableDiv" + props.foldername} >
