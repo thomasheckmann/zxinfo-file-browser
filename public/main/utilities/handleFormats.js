@@ -190,8 +190,8 @@ function getZXFormat(fileName, subFileName, data) {
 
   if (obj.error) {
     ZXFileInfo.error = obj.error;
-    ZXFileInfo.scr = "./images/no_image.png";
-    return ZXFileInfo;
+    // ZXFileInfo.scr = "./images/no_image.png";
+    // return ZXFileInfo;
   }
 
   if (obj.scrdata) {

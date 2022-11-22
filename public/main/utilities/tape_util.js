@@ -55,6 +55,7 @@ function createHeader(data, index) {
     }
   } else {
     dataBlock.error = `${index}: Not a header block: flag = ${flagByte}`;
+    mylog.warn(`${index}: Not a header block: flag = ${flagByte}`);
   }
 
   mylog.debug(`${JSON.stringify(dataBlock)}`);
