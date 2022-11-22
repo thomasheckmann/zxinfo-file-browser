@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";

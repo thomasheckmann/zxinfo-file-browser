@@ -1,6 +1,5 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 
 import { Paper, Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";

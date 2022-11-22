@@ -75,6 +75,8 @@ function EntryCard(props) {
   const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
   const [selectedSCR, setSelectedSCR] = useState("");
 
+  const [originalScreen, setOriginalScreen] = useState();
+
   const handleSCRDialogClose = (value) => {
     setSelectedSCR((selectedSCR) => value);
     setSCRDialogOpen(false);
@@ -132,13 +134,14 @@ function EntryCard(props) {
         .get(dataURL)
         .then((response) => {
           let item = props.entry;
+          setOriginalScreen(props.entry.scr);
           item.zxdbID = response.data.entry_id;
           item.zxdbTitle = response.data.title;
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
           if (zxdbSCR) {
             item.scr = zxdbSCR;
           }
-          setEntry(item);
+          setEntry((entry) => item);
           setIsFavorite(appSettings.favorites.get(item.sha512));
         })
         .catch((error) => {
@@ -153,33 +156,33 @@ function EntryCard(props) {
         })
         .finally(() => {});
     }
-  }, [props.entry, restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR]);
+  }, [restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR]);
 
   useEffect(() => {
-    if (selectedSCR === null) {
+    var useScreen = null;
+
+    if (selectedSCR === undefined) {
+    } else if (selectedSCR === null) {
       // delete and set default
       if (appSettings.zxinfoSCR.size > 0) {
         appSettings.zxinfoSCR.delete(props.entry.sha512);
       }
-      var obj = Object.fromEntries(appSettings.zxinfoSCR);
-      var jsonString = JSON.stringify(obj);
-      window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString);
-      setEntry(entry => ({ ...entry, scr: props.entry.scr }));
-      return;
-    }
-
-    if (!selectedSCR) return;
-
-    if (appSettings.zxinfoSCR.size === 0) {
+      useScreen = originalScreen;
+    } else if (appSettings.zxinfoSCR.size === 0) {
       appSettings.zxinfoSCR = new Map();
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
-    } else {
+      useScreen = selectedSCR;
+    } else if (appSettings.zxinfoSCR.size > 0 && entry){
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
+      useScreen = selectedSCR;
     }
-    setEntry(entry => ({ ...entry, scr: selectedSCR }));
-    var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
-    var jsonString1 = JSON.stringify(obj1);
-    window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
+
+    if(useScreen && entry) {
+      setEntry((entry) => ({ ...entry, scr: useScreen }));
+      var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
+      var jsonString1 = JSON.stringify(obj1);
+      window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
+    }
   }, [selectedSCR]);
 
   return (
@@ -246,7 +249,7 @@ function EntryCard(props) {
                   onClick={(id) => openLink(entry.zxdbID)}
                 />
               )}
-              <Chip sx={{bgcolor: "#ffffff"}}/>
+              <Chip sx={{ bgcolor: "#ffffff" }} />
             </Stack>
           </CardContent>
           <CardActions disableSpacing>
@@ -274,7 +277,7 @@ function EntryCard(props) {
             {entry.error && entry.error.length > 0 && (
               <Tooltip title="See file issues" onClick={() => handleFileErrorDialogOpen(this)}>
                 <IconButton arial-label="see file issues">
-                  <WarningTwoToneIcon sx={{color: "#ff0000"}}/>
+                  <WarningTwoToneIcon sx={{ color: "#ff0000" }} />
                 </IconButton>
               </Tooltip>
             )}
