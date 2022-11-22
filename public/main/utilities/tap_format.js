@@ -47,7 +47,7 @@ function readTAP(data) {
       tap.push(block);
     } else {
       mylog.warn(`index: ${index} - Unknown block (${dataBlock[0]})`);
-      snapshot.error.push({type: "warning", message: `index: ${index} - Unknown block (${dataBlock[0]})`});
+      snapshot.error.push({ type: "warning", message: `index: ${index} - Unknown block (${dataBlock[0]})` });
     }
     index += blockLength; // skip data block
   }
@@ -56,7 +56,7 @@ function readTAP(data) {
   mylog.info(`tap structure length: ${tap.length}`);
 
   if (tap.length === 0) {
-    snapshot.error.push({type: "error", message: "TAP lenght 0, invalid"});
+    snapshot.error.push({ type: "error", message: "TAP lenght 0, invalid" });
   } else {
     snapshot.text = tap[0].type + ": " + tap[0].name;
     for (let index = 0; index < tap.length; index++) {
@@ -70,7 +70,7 @@ function readTAP(data) {
           break;
         } else if (element.len === 6912) {
           mylog.info(`Found code with length 6912...(screen length)`);
-          if(tap[index + 1]) {
+          if (tap[index + 1]) {
             snapshot.scrdata = tap[index + 1].data;
             snapshot.border = 7;
           } else {
@@ -79,7 +79,7 @@ function readTAP(data) {
           break;
         } else if (element.len > 6912) {
           mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
-          if(tap[index + 1]) {
+          if (tap[index + 1]) {
             snapshot.scrdata = tap[index + 1].data;
             snapshot.border = 7;
           } else {
@@ -101,6 +101,11 @@ function readTAP(data) {
     snapshot.data = tap;
   }
 
+  const errors = snapshot.error;
+  snapshot.error = [];
+  errors.forEach((e) => {
+    snapshot.error.push(...e);
+  });
   return snapshot;
 }
 
