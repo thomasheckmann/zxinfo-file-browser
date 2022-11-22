@@ -84,6 +84,11 @@ function InfiniteEntriesList(props) {
   };
 
   useEffect(() => {
+    if (isDev) console.log(`useEffect(): props.files changed... try to reset List`);
+
+  }, [props.files.length])
+
+  useEffect(() => {
     if (isDev)
       console.log(
         `useEffect(): visible: ${isVisible} (${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`

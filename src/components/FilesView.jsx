@@ -34,7 +34,7 @@ const FilesView = (props) => {
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
-    if (isDev) console.log(`useEffect():  `);
+    if (isDev) console.log(`useEffect():  sorting and filtering...`);
     window.electronAPI.scanFolder(props.foldername).then((res) => {
       // filter out files based filtring
       const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
