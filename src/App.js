@@ -16,6 +16,7 @@ import { styled } from "@mui/material/styles";
 import {
   AppBar,
   Backdrop,
+  Badge,
   Box,
   Button,
   Checkbox,
@@ -289,8 +290,9 @@ function App() {
                     navigate("/favorites");
                   }}
                 >
-                  <Tooltip title="Favorites">
-                    <FavoriteBorderOutlined />
+                  <Tooltip title="Favorites"><Badge color="secondary" badgeContent={appSettings.favorites.size} showZero>
+
+                    <FavoriteBorderOutlined /></Badge>
                   </Tooltip>
                 </IconButton>
                 <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Open Folder" onClick={handleOpenFolderFromChild}>
