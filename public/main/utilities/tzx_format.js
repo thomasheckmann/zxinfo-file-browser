@@ -40,6 +40,7 @@ function TZXObject(major, minor) {
 function StandardSpeedDataBlock(len, data) {
   const mylog = log.scope("StandardSpeedDataBlock");
   this.id = 0x10;
+  this.block = { error: []};
   this.blockName = "Standard Speed Data Block";
   this.length = getWord(data[0x02], data[0x03]);
   this.pause = getWord(data[0], data[1]);
@@ -49,14 +50,14 @@ function StandardSpeedDataBlock(len, data) {
   this.text = `Type: ${this.blockType}, Pause: ${this.pause}, Block len: ${len}`;
   mylog.debug(`Data length: ${this.length}`);
   if (this.data[0] === 0) {
-    this.block = util.createHeader(this.data);
+    this.block = util.createHeader(this.data, this.id);
   } else if (this.data[0] === 255) {
-    this.block = util.createData(this.data);
+    this.block = util.createData(this.data, this.id);
     this.block.type = "...data";
   } else {
     mylog.warn(`found unknown block: ${this.data[0]}`);
-    this.block.error = {type: "warning", message: `found unknown block: ${this.data[0]}`};
-    this.block = { flag: this.data[0], data: null, error: `found unknown block: ${this.data[0]}` };
+    this.block = { flag: this.data[0], data: null, error: []};
+    this.block.error.push({ type: "warning", message: `found unknown block: ${this.data[0]}` }) ;
   }
 }
 
@@ -570,7 +571,7 @@ function processTZXData(data) {
         break;
       default:
         mylog.error(`Unknown block ID: 0x${id.toString(16)}`);
-        block.error = {type: "error", message: `Unknown block ID: 0x${id.toString(16)}`}
+        block.error = { type: "error", message: `Unknown block ID: 0x${id.toString(16)}` };
         i = 100000000000;
         break;
     }
@@ -606,8 +607,11 @@ function readTZX(data) {
   snapshot.hwModel;
   // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
-    if (d && d.error) {
-      snapshot.error.push(d.error);
+    if (d && d.block) {
+      const block = d.block;
+      if(block.error && block.error.length > 0) {
+        snapshot.error.push(...block.error);
+      }
     }
 
     if (d && d.id === 0x10) {
