@@ -66,7 +66,7 @@ const openFolderFile = (name) => {
 };
 
 function EntryCard(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -100,22 +100,28 @@ function EntryCard(props) {
   const toggleFavorite = async (event) => {
     if (appSettings.favorites.size === 0) {
       // first time...
-      appSettings.favorites = new Map();
-      appSettings.favorites.set(entry.sha512, [entry.filepath]);
+      const newFav = new Map();
+      setAppSettings({...appSettings, favorites: newFav});
       setIsFavorite(true);
     } else {
       if (appSettings.favorites.get(entry.sha512)) {
         // delete filepath, if array = [] - delete from map
-        appSettings.favorites.delete(entry.sha512);
+        const newFav = appSettings.favorites;
+        newFav.delete(entry.sha512);
+        setAppSettings({...appSettings, favorites: newFav});
         setIsFavorite(false);
       } else {
         var filesList = appSettings.favorites.get(entry.sha512);
         if (!filesList) {
           // new fileList
-          appSettings.favorites.set(entry.sha512, [entry.filepath]);
+          const newFav = appSettings.favorites;
+          newFav.set(entry.sha512, [entry.filepath]);
+          setAppSettings({...appSettings, favorites: newFav});
         } else {
           // add filename to list
-          appSettings.favorites.set(entry.sha512, [...filesList, entry.filepath]);
+          const newFav = appSettings.favorites;
+          newFav.set(entry.sha512, [...filesList, entry.filepath]);
+          setAppSettings({...appSettings, favorites: newFav});
         }
         setIsFavorite(true);
       }
