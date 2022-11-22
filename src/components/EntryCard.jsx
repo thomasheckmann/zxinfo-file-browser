@@ -76,8 +76,8 @@ function EntryCard(props) {
   const [selectedSCR, setSelectedSCR] = useState("");
 
   const handleSCRDialogClose = (value) => {
-    setSCRDialogOpen(false);
     setSelectedSCR((selectedSCR) => value);
+    setSCRDialogOpen(false);
   };
 
   const handleSCRDialogOpen = () => {
@@ -161,10 +161,10 @@ function EntryCard(props) {
       if (appSettings.zxinfoSCR.size > 0) {
         appSettings.zxinfoSCR.delete(props.entry.sha512);
       }
-      setEntry((entry) => ({ ...entry, scr: props.entry.scr }));
       var obj = Object.fromEntries(appSettings.zxinfoSCR);
       var jsonString = JSON.stringify(obj);
       window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString);
+      setEntry(entry => ({ ...entry, scr: props.entry.scr }));
       return;
     }
 
@@ -176,7 +176,7 @@ function EntryCard(props) {
     } else {
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
     }
-    setEntry({ ...entry, scr: selectedSCR });
+    setEntry(entry => ({ ...entry, scr: selectedSCR }));
     var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
     var jsonString1 = JSON.stringify(obj1);
     window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
@@ -192,7 +192,7 @@ function EntryCard(props) {
           onClose={handleSCRDialogClose}
         ></ZXInfoSCRDialog>
         <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>
-        <Card raised elevation={5}>
+        <Card raised elevation={4}>
           <CardHeader
             sx={{
               backgroundColor: entry.type === "zip" ? "#606060" : "#808080",
@@ -233,7 +233,7 @@ function EntryCard(props) {
               {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
             </Typography>
             <Typography gutterBottom variant="subtitle2" component="div" noWrap>
-              {entry.text}
+              {entry.text}&nbsp;
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center">
               {entry.version && <Chip label={entry.version} />}
@@ -246,6 +246,7 @@ function EntryCard(props) {
                   onClick={(id) => openLink(entry.zxdbID)}
                 />
               )}
+              <Chip sx={{bgcolor: "#ffffff"}}/>
             </Stack>
           </CardContent>
           <CardActions disableSpacing>

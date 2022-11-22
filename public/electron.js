@@ -303,7 +303,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       });
     } catch (error) {
       mylog.error(`error reading ZIP file: ${filename}, skipping...`);
-      fileObj.error.push({ type: "error", message: `ZIP: ${filename} - error, message = ${error}` });
+      fileObj.error.push({ type: "error", message: `ZIP error, message = ${error}` });
       zipCount = 1;
     }
 

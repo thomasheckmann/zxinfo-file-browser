@@ -75,10 +75,10 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.version = obj.type;
     ZXFileInfo.type = "tzxfmt";
     ZXFileInfo.text = obj.text;
+    const orgType = obj.type;
     if(obj.hwModel === "ZX81") {
       obj = pfmt.readP81(obj.data);
-      ZXFileInfo.version = obj.type;
-      ZXFileInfo.type = "pfmt";
+      ZXFileInfo.version = orgType;
       ZXFileInfo.text = obj.text;
       pfmt.createDIRScreen(obj.data).then((res) => {
         if (res.buffer) {
