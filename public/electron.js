@@ -297,7 +297,8 @@ ipcMain.handle("load-file", async (event, arg) => {
               mylog.warn(`${zipEntry.name} - not recognized, skipping...`);
             }
           } catch (error) {
-            console.log(fileObj.error.push({type: "error", message: `ZIP Entry: ${zipEntry.name} - error, message = ${error}`}));
+            fileObj.error.push({ type: "error", message: `ZIP Entry: ${zipEntry.name} - error, message = ${error}` });
+            mylog.error(fileObj.error.push({ type: "error", message: `ZIP Entry: ${zipEntry.name} - error, message = ${error}` }));
           }
         }
       });
