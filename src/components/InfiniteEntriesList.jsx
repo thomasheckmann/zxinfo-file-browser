@@ -97,7 +97,7 @@ function InfiniteEntriesList(props) {
     if (isVisible && props.files.length > 0 && infSettings.index === 0) {
       if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData() - ${props.foldername}`);
       fetchMoreData(false);
-      const averageCardHeight = 470;
+      const averageCardHeight = 500;
       const maxHeight = window.innerHeight - 40; // total files bare
 
       // avarage rows availble in space
