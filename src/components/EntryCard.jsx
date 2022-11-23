@@ -98,7 +98,6 @@ function EntryCard(props) {
 
   // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {
-    console.log(appSettings.favorites.size);
     if (appSettings.favorites.size === 0) {
       // first time...
       const newFav = new Map();
