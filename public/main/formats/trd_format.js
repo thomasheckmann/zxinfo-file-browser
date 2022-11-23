@@ -6,7 +6,7 @@
  */
 const log = require("electron-log");
 const Jimp = require("jimp");
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 const disk_type_names = new Map([
   [0x16, "80 tracks, double side"],

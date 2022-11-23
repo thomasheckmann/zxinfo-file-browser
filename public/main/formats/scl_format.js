@@ -5,16 +5,20 @@
  */
 const log = require("electron-log");
 const Jimp = require("jimp");
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 function createDIRScreen(dirdata) {
-  const dir_info = dirdata.dir_info;
-  const disk_info = dirdata.disk_info;
-
   // create a SCR preview of DIR
   let image = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
     if (err) throw err;
   });
+
+  if(dirdata === undefined) {
+    return image.getBase64Async(Jimp.MIME_PNG); // corrupt disk
+  }
+
+  const dir_info = dirdata.dir_info;
+  const disk_info = dirdata.disk_info;
 
   var line = 0;
   for (var file = 0; file < dir_info.length; file++) {
@@ -39,11 +43,13 @@ function detectSCL(data) {
   const disk_info = {
     signature: String.fromCharCode.apply(null, data.slice(0, 8)),
     no_files: data[8],
+    error: [],
   };
 
   if (disk_info.signature !== "SINCLAIR") {
-    mylog.error(`UNKNOWN SCL format: ${disk_info.signature}`);
-    return null;
+    mylog.error(`Unknown SCL format: ${disk_info.signature}`);
+    disk_info.error.push({type: "error", message:`Unknown SCL format: ${disk_info.signature}`});
+    return disk_info;
   }
 
   mylog.debug(disk_info);
@@ -80,6 +86,10 @@ function readSCL(data) {
   snapshot.scrdata = null;
 
   const disk_info = detectSCL(data);
+  if(disk_info.error.length > 0) {
+    snapshot.error = disk_info.error;
+    return snapshot;
+  }
 
   const dir_info = readDir(data, disk_info);
 

@@ -28,3 +28,5 @@ yarn-error.log*
 *testdata*
 
 /src/components.*
+test_cases/output.log
+test_cases/output.old.log

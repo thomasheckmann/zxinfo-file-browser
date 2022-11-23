@@ -1,6 +1,6 @@
 const log = require("electron-log");
 const Jimp = require("jimp");
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 function cleanString(filename) {
   const mylog = log.scope("cleanString");
@@ -52,7 +52,8 @@ function readMDR(data) {
   var no_of_used_blocks = 0;
   var media_info = { title: null, freespace: 0, catalog: null };
 
-  for (var i = 0; i < 254; i++) {
+  var i;
+  for (i = 0; i < 254 && ((i * 543)< (data.length - 29)); i++) {
     const offset = i * 543;
 
     const block = data.slice(offset, offset + 543);
@@ -92,6 +93,10 @@ function readMDR(data) {
     }
   }
 
+  if(i < 254) {
+    snapshot.error.push({type: "warning", message: `Number of sectors (${i}) < 254`});
+    mylog.warn(`Number of sectors (${i}) < 254`);
+  }
   const freeSpace = (254 * 512) / 1024 - Math.ceil((no_of_used_blocks * 512) / 1024);
   const sortedCatalo = new Map([...file_map].sort());
   media_info.catalog = sortedCatalo;

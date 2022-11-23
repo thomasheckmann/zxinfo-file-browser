@@ -1,7 +1,7 @@
 const Jimp = require("jimp");
 
 const log = require("electron-log");
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 const CPCEMU_INFO_OFFSET = 0x100;
 const CPCEMU_TRACK_OFFSET = 0x100;
@@ -98,6 +98,7 @@ function readEDSK(data) {
     number_of_sides: data[0x031], // 1 or 2
     size_of_track: data[0x032] + data[0x33] * 256,
     size_of_tracks: [data[0x034]], // high bytes of track sizes for all tracks
+    error: [],
   };
 
   mylog.debug(`DISK INFO BLOCK`);
@@ -124,6 +125,12 @@ function readEDSK(data) {
   // 16-byte record on track 0, head 0, physical sector 1
   mylog.debug("Reading 16 byte record to detect additional +3 disk info");
   const sector0 = read_track_info(data, 0, DPB);
+
+  if(sector0.track_num === undefined && sector0.head_num === undefined && sector0.head_num === undefined && sector0.sector_size === undefined) {
+    disk_info_block.error.push({type: "error", message: `Error reading sector 0`});
+    mylog.warn(`Error reading sector 0`);
+    return disk_info_block;
+  }
   const fpsId = sector0.sector_info_table[0].sector_id;
 
   mylog.debug(`First physical sector id: ${fpsId} (0x${fpsId.toString(16)})`);
@@ -147,8 +154,9 @@ function readEDSK(data) {
     DPB.size_of_track = disk_info_block.size_of_track;
     mylog.debug(`+3 DISK INFO: ${JSON.stringify(plus3info)}`);
   } else {
-    mylog.debug("Unknown format: " + fpsId);
-    return null;
+    disk_info_block.error.push({type: "warning", message: `Unknown format: ${fpsId}`});
+    mylog.warn(`Unknown format: ${fpsId}`);
+    return disk_info_block;
   }
 
   const dir_sector = DPB.off; // first non-reserved track
@@ -211,7 +219,7 @@ function readEDSK(data) {
         // mylog.debug(`DELETED: ${current_filename}.${current_ext}`);
         file_map.delete(current_filename + current_ext);
       } else {
-        mylog.warn(`Unknown UA: ${file_entry.ua}`);
+        mylog.warn(`Unknown UA: ${file_entry.ua} for file: ${current_filename}${current_ext}`);
       }
     }
   }
@@ -233,12 +241,17 @@ function createDIRScreen(dirdata) {
   const offsetX = 32,
     offsetY = 24;
 
-  const dirMap = dirdata.entries;
-  const disk = dirdata.disk_info;
   // create a SCR preview of DIR
   let frame0 = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
     if (err) throw err;
   });
+
+  if(dirdata === undefined||dirdata.entries === undefined) {
+    return frame0.getBase64Async(Jimp.MIME_PNG); // corrupt disk
+  }
+
+  const dirMap = dirdata.entries;
+  const disk = dirdata.disk_info;
 
   var line = 0;
   for (let [key, value] of dirMap) {
@@ -270,24 +283,33 @@ function readDSK(data) {
   if (signature === "EXTENDED CPC DSK File\r\nDisk-Info\r\n") {
     mylog.debug(`Extended DSK format...`);
     const disk = readEDSK(data);
+    snapshot.error = disk.error;
     snapshot.text = `Ext. CPC DSK: T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
     mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
     snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
   } else if (signature === "MV - CPCEMU Disk-File\r\nDisk-Info\r\n") {
     mylog.warn(`Standard DSK format, skipping...`);
     const disk = readEDSK(data);
-    snapshot.text = `Std. CPC DSK: T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-    //return;
+    snapshot.error = disk.error;
+    snapshot.error.push({type: "warning", message: `Format not implemented yet`})
+    snapshot.text = `(N/A) Std. CPC DSK: T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
   } else if (signature === "MV - CPC format Disk Image (DU54)\r") {
     mylog.warn(`Standard DSK DU54`);
     const disk = readEDSK(data);
+    snapshot.error = disk.error;
     snapshot.text = `CPC (DU54): T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
     mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
     snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
+  } else if (signature.startsWith("MV - CPCEMU /")) {
+    mylog.warn(`Standard DSK DU54, skipping`);
+    const disk = readEDSK(data);
+    snapshot.error = disk.error;
+    snapshot.error.push({type: "warning", message: `Format not implemented yet`})
+    snapshot.text = `(N/A) Std. CPC DSK: T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
   } else {
+    snapshot.error.push({type: "warning", message: `Unknown DSK format: ${signature}`});
     mylog.error(`Unknown DSK format: ${signature}`);
 
-    return null;
   }
   return snapshot;
 }

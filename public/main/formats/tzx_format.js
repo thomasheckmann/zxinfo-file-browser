@@ -40,7 +40,7 @@ function TZXObject(major, minor) {
 function StandardSpeedDataBlock(len, data) {
   const mylog = log.scope("StandardSpeedDataBlock");
   this.id = 0x10;
-  this.block = { error: []};
+  this.block = { error: [] };
   this.blockName = "Standard Speed Data Block";
   this.length = getWord(data[0x02], data[0x03]);
   this.pause = getWord(data[0], data[1]);
@@ -56,8 +56,8 @@ function StandardSpeedDataBlock(len, data) {
     this.block.type = "...data";
   } else {
     mylog.warn(`found unknown block: ${this.data[0]}`);
-    this.block = { flag: this.data[0], data: null, error: []};
-    this.block.error.push({ type: "warning", message: `found unknown block: ${this.data[0]}` }) ;
+    this.block = { flag: this.data[0], data: null, error: [] };
+    this.block.error.push({ type: "warning", message: `found unknown block: ${this.data[0]}` });
   }
 }
 
@@ -447,7 +447,7 @@ function processTZXData(data) {
   while (i < data.length) {
     const id = data[i++];
     var length = 0;
-    var block;
+    var block = { error: [] };
     switch (id) {
       case 0x10: // ID 10 - Standard Speed Data Block
         length = getWord(data[i + 2], data[i + 3]) + 4;
@@ -508,6 +508,7 @@ function processTZXData(data) {
         length = 9999;
         mylog.debug(`ID 18 - CSW recording block: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Jump to block` });
         break;
       case 0x24: // ID 24 - Loop start
         length = 2;
@@ -523,11 +524,13 @@ function processTZXData(data) {
         length = 9999;
         mylog.debug(`ID 26 - Call sequence: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Call sequence` });
         break;
       case 0x27: // ID 27 - Return from sequence
         length = 9999;
         mylog.debug(`ID 27 - Return from sequence: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Return from sequence` });
         break;
       case 0x28: // ID 28 - Select block
         length = getWord(data[i + 0x00], data[i + 0x01]) + 2;
@@ -538,11 +541,13 @@ function processTZXData(data) {
         length = 9999;
         mylog.debug(`ID 2A - Stop the tape if in 48K mode: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Stop the tape if in 48K mode` });
         break;
       case 0x2b: // ID 2B - Set signal level
         length = 9999;
         mylog.debug(`ID 2B - Set signal level: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Set signal level` });
         break;
       case 0x30: // ID 30 - Text description
         length = data[i] + 1;
@@ -553,6 +558,7 @@ function processTZXData(data) {
         length = 9999;
         mylog.debug(`ID 31 - Message block: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Message block` });
         break;
       case 0x32: // ID 32 - Archive info
         length = getWord(data[i], data[i + 1]) + 2;
@@ -568,10 +574,11 @@ function processTZXData(data) {
         length = 9999;
         mylog.debug(`ID 35 - Custom info block: length=${length}`);
         mylog.error("Unhandled... abort...");
+        block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Custom info block` });
         break;
       default:
         mylog.error(`Unknown block ID: 0x${id.toString(16)}`);
-        block.error = { type: "error", message: `Unknown block ID: 0x${id.toString(16)}` };
+        block.error.push({ type: "error", message: `Unknown block ID: 0x${id.toString(16)}` });
         i = 100000000000;
         break;
     }
@@ -607,9 +614,12 @@ function readTZX(data) {
   snapshot.hwModel;
   // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
+    if(d.error) {
+      snapshot.error.push(...d.error);
+    }
     if (d && d.block) {
       const block = d.block;
-      if(block.error && block.error.length > 0) {
+      if (block.error && block.error.length > 0) {
         snapshot.error.push(...block.error);
       }
     }

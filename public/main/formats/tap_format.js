@@ -104,7 +104,9 @@ function readTAP(data) {
   const errors = snapshot.error;
   snapshot.error = [];
   errors.forEach((e) => {
-    snapshot.error.push(...e);
+    if (e.length > 0) {
+      snapshot.error.push(...e);
+    }
   });
   return snapshot;
 }

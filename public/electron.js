@@ -14,7 +14,7 @@ const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
 
-const handleFormats = require("./main/utilities/handleFormats");
+const handleFormats = require("./main/formats/handleFormats");
 
 const AdmZip = require("adm-zip");
 

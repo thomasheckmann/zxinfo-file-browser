@@ -44,6 +44,7 @@ function readV1(data, compressed) {
     return readCompressed(mem, 49152);
   } else {
     mylog.warn(`version NOT supported yet!`);
+    return null;
   }
 
   return zxram;
@@ -149,8 +150,12 @@ function readZ80(data) {
   const hwMode = data[34];
   if (version === 1) {
     const zxram = readV1(data, compressed);
-    snapshot.data = zxram;
-    snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
+    if(zxram) {
+      snapshot.data = zxram;
+      snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
+    } else {
+      snapshot.error.push({type: "warning", message: "Cant read snapshot, maybe compressed?"});
+    }
   } else if (version === 2) {
     const zxram = readV2(data, compressed);
     snapshot.data = zxram;
@@ -174,6 +179,7 @@ function readZ80(data) {
       default:
         snapshot.hwModel = null;
         mylog.error(`unknown hw model: ${hwMode}`);
+        snapshot.error.push({type: "warning", message: `unknown hw model: ${hwMode}`})
         break;
     }
   } else if (version === 3) {

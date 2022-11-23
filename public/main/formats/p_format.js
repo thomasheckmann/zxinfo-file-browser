@@ -5,7 +5,7 @@
  */
 const log = require("electron-log");
 const Jimp = require("jimp");
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 const charset = ' ??????????"`$:?()><=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

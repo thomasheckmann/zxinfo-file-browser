@@ -12,7 +12,7 @@ const sclfmt = require("./scl_format");
 const mdrfmt = require("./mdr_format");
 const pfmt = require("./p_format");
 
-const screenZX = require("./handleSCR");
+const screenZX = require("../utilities/handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
   const mylog = log.scope("getZXFormat");
