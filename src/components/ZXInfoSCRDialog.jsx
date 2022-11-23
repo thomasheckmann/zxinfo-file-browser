@@ -62,10 +62,15 @@ export default function ZXInfoSCRDialog(props) {
             const e = item[i];
             var image = {};
             if (e.title) {
+              image.title = `${e.entry_id} (${e.title})`;
+              image.type = `${e.type}`;
+              image.release = "Release: " + e.release_seq;
+              image.url = `https://zxinfo.dk/media${e.url}`;
+              imageData.push(image);
             } else {
               image.title = `${e.entry_id}`;
               image.type = `${e.type}`;
-              image.release = e.release_seq;
+              image.release = "Release: " + e.release_seq;
               image.url = `https://zxinfo.dk/media${e.url}`;
               imageData.push(image);
             }

@@ -4,6 +4,8 @@
 
 const folders = [
   "/Users/dkThAhKo/Documents/ZXRepo/TOSEC_2020/",
+  "/Users/dkThAhKo/Documents/ZXRepo/TZXVault/",
+  "/Users/dkThAhKo/Documents/ZXRepo/TZXVaultUpdate/",
   "/Users/dkThAhKo/Documents/ZXRepo/World of Spectrum June 2017 Mirror/sinclair/games/",
 ];
 const format = require("../public/main/formats/sna_format");

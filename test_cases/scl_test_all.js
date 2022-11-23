@@ -5,7 +5,7 @@
  const folders = [
     "/Users/dkThAhKo/Public/ZXTestData/WITH_ERRORS/SCL_with_errors",
     "/Users/dkThAhKo/Documents/ZXRepo/TOSEC_2020",
-    "/Users/dkThAhKo/Documents/ZXRepo/TZXVault/Spectrum/DSK",
+    "/Users/dkThAhKo/Documents/ZXRepo/TZXVault/",
     "/Users/dkThAhKo/Documents/ZXRepo/TZXVaultUpdate/Beta DIsk",
     "/Users/dkThAhKo/Documents/ZXRepo/World of Spectrum June 2017 Mirror/sinclair/games",
   ];
