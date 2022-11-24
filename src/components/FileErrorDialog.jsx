@@ -25,18 +25,19 @@ export default function FileErrorDialog(props) {
 
   return (
     <ThemeProvider theme={theme}>
-      <Dialog open={open} scroll={"paper"}>
+      <Dialog open={open} scroll={"paper"} maxWidth="sm" fullWidth>
         <DialogTitle align="center" sx={{ color: "#ffffff", bgcolor: "#000000" }}>
           Issues found with this file
         </DialogTitle>
         <DialogContent dividers={true} sx={{ p: 0, m: 0 }}>
           <Stack sx={{ width: "100%" }} spacing={2}>
             <Box textAlign="center" sx={{ width: "100%" }}>
-              {errors && errors.map((e, i) => (
-                <Alert severity={e.type} key={i}>
-                  {e.message}
-                </Alert>
-              ))}
+              {errors &&
+                errors.map((e, i) => (
+                  <Alert severity={e.type} key={i}>
+                    {e.message}
+                  </Alert>
+                ))}
             </Box>
           </Stack>
         </DialogContent>
