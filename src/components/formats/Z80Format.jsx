@@ -75,6 +75,72 @@ export default function Z80Format(props) {
             </TableCell>
             <TableCell align="left">Joystick: {joystick(item.data.flag, item.version)}</TableCell>
           </TableRow>
+          {item.data.is128K && (
+            <TableRow>
+              <TableCell component="th" scope="row">
+                Port 0x7ffd: {item.data.port_0x7ffd} ({item.data.port_0x7ffd.toString(2).padStart(8, "0")})
+              </TableCell>
+              <TableCell align="left">
+                RAM page 0xc000: {item.data.port_0x7ffd & 0b00000111}, ROM: {item.data.port_0x7ffd & 0b00010000 ? "128K EDITOR" : "48K BASIC"}
+                <br />
+                Screen: {item.data.port_0x7ffd & 0b00001000 ? "Normal" : "Shadow"}, Paging: {item.data.port_0x7ffd & 0b00100000 ? "Locked" : "Normal"}
+              </TableCell>
+            </TableRow>
+          )}
+          {(item.version === "Z80 v2" || item.version === "Z80 v3") && (
+            <React.Fragment>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Interface 1 ROM paged
+                </TableCell>
+                <TableCell align="left">{item.data.if1_paged_in ? "Yes" : "No"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Flags: {item.data.flag2.toString(2).padStart(8, "0")}
+                  <br />
+                  (Used by Z80 emulator)
+                </TableCell>
+                <TableCell align="left" valign="top">
+                  {item.data.flag2 & 0b00000001 ? "R emulation, " : ""}
+                  {item.data.flag2 & 0b00000010 ? "LDIR emulation, " : ""}
+                  {item.data.flag2 & 0b00000100 ? "AY in use, " : ""}
+                  {item.data.flag2 & 0b01000000 ? "Fuller Audio Box, " : ""}
+                  {item.data.flag2 & 0b10000000 ? "Modify hardware, " : ""}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  MGT Rom paged
+                </TableCell>
+                <TableCell align="left">{item.data.mgt_rom ? "Yes" : "No"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Multiface Rom paged
+                </TableCell>
+                <TableCell align="left">{item.data.multiface_rom ? "Yes" : "No"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Adress 0-8191
+                </TableCell>
+                <TableCell align="left">{item.data.rom_ram_8klow ? "ROM" : "RAM"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Adress 8192-16383
+                </TableCell>
+                <TableCell align="left">{item.data.rom_ram_8khigh ? "ROM" : "RAM"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  MGT type
+                </TableCell>
+                <TableCell align="left">{item.data.mgt_type === 0 ? "Disciple+Epson" : "Disciple+HP,16=Plus D"}</TableCell>
+              </TableRow>
+            </React.Fragment>
+          )}
         </TableBody>
       </Table>
     </TableContainer>
