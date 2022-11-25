@@ -237,14 +237,11 @@ function App() {
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
-    if (isDev) {
-      console.error(`handleOpenFolderFromChild() - page: ${location.pathname}`);
-    }
     if (location.pathname.startsWith("/favorites")) {
       navigate("/");
       return;
     }
-    //setAppSettings({ ...appSettings});
+
     const foldersWithFiles = await window.electronAPI.openFolder();
     foldersWithFiles &&
       setStartFolder({

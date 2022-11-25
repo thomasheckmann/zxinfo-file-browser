@@ -97,39 +97,47 @@ function readZ80(data) {
   var version = 1;
   var compressed = false;
 
-  snapshot.AF = data[0] + data[1] * 256;
-  snapshot.BC = data[2] + data[3] * 256;
-  snapshot.HL = data[4] + data[5] * 256;
-  snapshot.PC = data[6] + data[7] * 256;
+  var fileSize = data.length;
+  var regs = {};
+  regs.filesize = fileSize;
 
-  snapshot.SP = data[8] + data[9] * 256;
-  snapshot.I = data[10];
-  snapshot.R = data[11];
+  regs.AF = data[0] + data[1] * 256;
+  regs.BC = data[2] + data[3] * 256;
+  regs.HL = data[4] + data[5] * 256;
+  regs.PC = data[6] + data[7] * 256;
+
+  regs.SP = data[8] + data[9] * 256;
+  regs.I = data[10];
+  regs.R = data[11];
 
   if (data[12] === 255) {
     data[12] = 1;
   }
   snapshot.border = (data[12] >> 1) & 0b00000111;
+  regs.SAMROM = data[12] & 0b00010000;
   if (data[12] & 0b00010000) {
     mylog.warn(`SAM ROM?`);
   }
+  regs.compressed = data[12] & 0b00100000;
   if (data[12] & 0b00100000) {
     compressed = true;
     mylog.debug(`image is compressed`);
   }
-  snapshot.DE = data[13] + data[14] * 256;
-  snapshot.BCalt = data[15] + data[16] * 256;
-  snapshot.DEalt = data[17] + data[18] * 256;
-  snapshot.HLalt = data[19] + data[20] * 256;
-  snapshot.AFalt = data[21] + data[22] * 256;
-  snapshot.IY = data[23] + data[24] * 256;
-  snapshot.IX = data[25] + data[26] * 256;
-  snapshot.INT = (data[28] < 1) & data[27];
+  regs.DE = data[13] + data[14] * 256;
+  regs.BCalt = data[15] + data[16] * 256;
+  regs.DEalt = data[17] + data[18] * 256;
+  regs.HLalt = data[19] + data[20] * 256;
+  regs.AFalt = data[21] + data[22] * 256;
+  regs.IY = data[23] + data[24] * 256;
+  regs.IX = data[25] + data[26] * 256;
+  regs.INT = data[27]; // (data[28] < 1) & data[27];
 
-  snapshot.INTmode = data[29] & 0b00000011;
+  regs.INTmode = data[29] & 0b00000011;
+  regs.flag = data[29];
 
-  if (snapshot.PC === 0) {
+  if (regs.PC === 0) {
     mylog.debug(`PC=0, version 2 or 3`);
+    regs.PC = data[32] + data[33] * 256;
     const v = data[30];
     if (v === 23) {
       version = 2;
@@ -151,14 +159,14 @@ function readZ80(data) {
   if (version === 1) {
     const zxram = readV1(data, compressed);
     if(zxram) {
-      snapshot.data = zxram;
+      //snapshot.data = zxram;
       snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     } else {
       snapshot.error.push({type: "warning", message: "Cant read snapshot, maybe compressed?"});
     }
   } else if (version === 2) {
     const zxram = readV2(data, compressed);
-    snapshot.data = zxram;
+    // snapshot.data = zxram;
     snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
@@ -184,7 +192,7 @@ function readZ80(data) {
     }
   } else if (version === 3) {
     const zxram = readV2(data, compressed);
-    snapshot.data = zxram;
+    // snapshot.data = zxram;
     snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
@@ -215,6 +223,8 @@ function readZ80(data) {
     }
   }
   mylog.debug(`model: ${snapshot.hwModel}`);
+
+  snapshot.data = regs;
 
   return snapshot;
 }

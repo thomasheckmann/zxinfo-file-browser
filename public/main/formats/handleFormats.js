@@ -57,12 +57,16 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling SNA`);
     obj = snafmt.readSNA(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "snafmt";
+    ZXFileInfo.border = obj.border;
   } else if (extension.toLowerCase().endsWith(".z80")) {
     mylog.debug(`handling Z80`);
     obj = z80fmt.readZ80(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "z80fmt";
+    ZXFileInfo.border = obj.border;
   } else if (extension.toLowerCase().endsWith(".tap")) {
     mylog.debug(`handling TAP`);
     obj = tapfmt.readTAP(data);
@@ -195,7 +199,7 @@ function getZXFormat(fileName, subFileName, data) {
   }
 
   if (obj.scrdata) {
-    screenZX.createSCR(obj.scrdata, obj.border).then((res) => {
+    screenZX.createSCR(obj.scrdata, ZXFileInfo.border).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
