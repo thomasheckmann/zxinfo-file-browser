@@ -84,6 +84,8 @@ function readSCL(data) {
 
   var snapshot = { type: "SCL", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
+  var regs = {};
+  regs.filesize = data.length;
 
   const disk_info = detectSCL(data);
   if(disk_info.error.length > 0) {
@@ -95,6 +97,8 @@ function readSCL(data) {
 
   snapshot.text = `SCL - Number of files: ${disk_info.no_files}`;
   snapshot.dir_scr = { dir_info: dir_info, disk_info: disk_info };
+
+  snapshot.data = regs;
 
   return snapshot;
 }

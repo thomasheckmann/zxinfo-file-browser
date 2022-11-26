@@ -112,6 +112,8 @@ function readTRD(data) {
   var snapshot = { type: "TRD", error: [], scrdata: null, data: [] };
   snapshot.type = "TRD";
   snapshot.scrdata = null;
+  var regs = {};
+  regs.filesize = data.length;
 
   const disk_info = detectTRD(data);
 
@@ -119,6 +121,8 @@ function readTRD(data) {
 
   snapshot.text = disk_info.disk_label + " - " + disk_info.disk_type_name;
   snapshot.dir_scr = { dir_info: dir_info, disk_info: disk_info };
+
+  snapshot.data = regs;
 
   return snapshot;
 }

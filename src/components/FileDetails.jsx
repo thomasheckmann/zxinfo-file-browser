@@ -7,6 +7,8 @@ import styled from "styled-components";
 import { isDev } from "../App";
 import SNAFormat from "./formats/SNAFormat.jsx";
 import Z80Format from "./formats/Z80Format";
+import TAPFormat from "./formats/TAPFormat";
+import TZXFormat from "./formats/TZXFormat";
 
 export default function FileDetails(props) {
   const { onClose, open, item } = props;
@@ -74,7 +76,7 @@ export default function FileDetails(props) {
             setScreens(items.filter((item) => item !== null));
           })
           .catch((error) => {
-            console.log(error);
+            setEntry({});
           })
           .finally(() => {});
       }
@@ -167,6 +169,8 @@ export default function FileDetails(props) {
                   </Typography>
                   {item.type === "snafmt" && <SNAFormat item={item}></SNAFormat>}
                   {item.type === "z80fmt" && <Z80Format item={item}></Z80Format>}
+                  {item.type === "tapfmt" && <TAPFormat item={item}></TAPFormat>}
+                  {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
                 </Box>
               </Grid>
             </Grid>

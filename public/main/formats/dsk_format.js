@@ -279,6 +279,9 @@ function readDSK(data) {
 
   var snapshot = { type: "DSK", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
+  var regs = {};
+  regs.filesize = data.length;
+
   const signature = String.fromCharCode.apply(null, data.slice(0, 34));
   if (signature === "EXTENDED CPC DSK File\r\nDisk-Info\r\n") {
     mylog.debug(`Extended DSK format...`);
@@ -311,6 +314,9 @@ function readDSK(data) {
     mylog.error(`Unknown DSK format: ${signature}`);
 
   }
+ 
+  snapshot.data = regs;
+
   return snapshot;
 }
 

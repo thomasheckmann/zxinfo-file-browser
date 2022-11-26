@@ -64,7 +64,7 @@ function StandardSpeedDataBlock(len, data) {
 // ID 0x11
 function TurboSpeedDataBlock(len, data) {
   const mylog = log.scope("TurboSpeedDataBlock");
-  this.id = 0x10;
+  this.id = 0x11;
   this.blockName = "Turbo Speed Data Block";
   this.length = getWord(data[0x0f], data[0x10], data[0x11]);
   this.pause = getWord(data[0x0d], data[0x0e]);
@@ -224,7 +224,7 @@ function TextDescription(len, data) {
   this.id = 0x30;
   this.blockName = "Text Description";
   this.text = String.fromCharCode.apply(null, data);
-  this.length = len;
+  this.length = data.length;
   this.data = String.fromCharCode.apply(null, data);
   mylog.debug(this.text);
 }
@@ -609,6 +609,9 @@ function readTZX(data) {
   var snapshot = { type: null, error: [], scrdata: null, data: [] };
   snapshot.type = `TZX ${TZXMajorVersion}.${TZXMinorVersion}`;
 
+  var regs = {};
+  regs.filesize = data.length;
+
   const tzxData = processTZXData(data);
 
   snapshot.hwModel;
@@ -654,7 +657,9 @@ function readTZX(data) {
       mylog.debug(`found 3 blocks, OK`);
       snapshot.text = zx81programName;
       snapshot.hwModel = "ZX81";
-      snapshot.data = zx81[2].data;
+      snapshot.zx81 = zx81[2].data;
+      regs.tape = tzxData;
+      snapshot.data = regs;
       return snapshot;
     } else {
       mylog.debug(`not 3 blocks, probaly not ZX81...`);
@@ -697,7 +702,9 @@ function readTZX(data) {
     }
   }
 
-  snapshot.data = tap;
+  regs.tape = tzxData;
+  snapshot.data = regs;
+
   return snapshot;
 }
 
