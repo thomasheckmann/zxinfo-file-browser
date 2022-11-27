@@ -46,40 +46,39 @@ export default function FileDetails(props) {
     } else if (open && !entry) {
       if (isDev) {
         console.log(`useEffect(): OPEN, get API data for: ${item.zxdbID} - (${entry})`);
-
-        const dataURL = `https://api.zxinfo.dk/v3/games/${item.zxdbID}?mode=tiny`;
-        if (isDev) console.log(`API: ${dataURL}`);
-        axios
-          .get(dataURL)
-          .then((response) => {
-            setEntry((entry) => response.data._source);
-
-            // find first loading screen
-            const s = response.data._source.screens;
-            var loading = [];
-            var running = [];
-            if (s) {
-              s.forEach((element) => {
-                if (element.type === "Loading screen") {
-                  loading.push(element);
-                } else if (element.type === "Running screen") {
-                  running.push(element);
-                }
-              });
-            }
-
-            if (isDev) console.log(`loading: ${JSON.stringify(loading)}`);
-            if (isDev) console.log(`running: ${JSON.stringify(running)}`);
-
-            // screens [0] = first loading, [1] = first running
-            const items = [...loading.slice(0, 1), ...running.slice(0, 1), ...loading.slice(1), ...running.slice(1)];
-            setScreens(items.filter((item) => item !== null));
-          })
-          .catch((error) => {
-            setEntry({});
-          })
-          .finally(() => {});
       }
+      const dataURL = `https://api.zxinfo.dk/v3/games/${item.zxdbID}?mode=tiny`;
+      if (isDev) console.log(`API: ${dataURL}`);
+      axios
+        .get(dataURL)
+        .then((response) => {
+          setEntry((entry) => response.data._source);
+
+          // find first loading screen
+          const s = response.data._source.screens;
+          var loading = [];
+          var running = [];
+          if (s) {
+            s.forEach((element) => {
+              if (element.type === "Loading screen") {
+                loading.push(element);
+              } else if (element.type === "Running screen") {
+                running.push(element);
+              }
+            });
+          }
+
+          if (isDev) console.log(`loading: ${JSON.stringify(loading)}`);
+          if (isDev) console.log(`running: ${JSON.stringify(running)}`);
+
+          // screens [0] = first loading, [1] = first running
+          const items = [...loading.slice(0, 1), ...running.slice(0, 1), ...loading.slice(1), ...running.slice(1)];
+          setScreens(items.filter((item) => item !== null));
+        })
+        .catch((error) => {
+          setEntry({});
+        })
+        .finally(() => {});
     }
   }, [item.zxdbID]);
 

@@ -21,20 +21,16 @@ export default function Z80Format(props) {
     switch (joystick) {
       case 0:
         return "Cursor/Protek/AGF joystick";
-        break;
       case 1:
         return "Kempston joystick";
-        break;
       case 2:
         if (v === "Z80 v3") {
           return "User defined";
         } else {
           return "Sinclair 2 Left joystick";
         }
-        break;
       case 3:
         return "Sinclair 2 Right joystick";
-        break;
       default:
         break;
     }
