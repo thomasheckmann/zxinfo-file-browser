@@ -506,7 +506,7 @@ function processTZXData(data) {
         break;
       case 0x23: // ID 23 - Jump to block
         length = 9999;
-        mylog.debug(`ID 18 - CSW recording block: length=${length}`);
+        mylog.debug(`ID 23 - Jump to block: length=${length}`);
         mylog.error("Unhandled... abort...");
         block.error.push({ type: "error", message: `Unhandled block ID: 0x${id.toString(16)} - Jump to block` });
         break;

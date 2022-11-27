@@ -46,15 +46,25 @@ export default function TZXFormat(props) {
         return <div>{printTapeBlock(t.block)}</div>;
       case 0x11:
         return <div>{t.text}</div>;
-        case 0x19:
-          return <div>{t.text}</div>;
-        case 0x20:
+      case 0x12:
+        return <div>{t.text}</div>;
+      case 0x13:
+        return <div>{t.text}</div>;
+      case 0x14:
+        return <div>{t.text}</div>;
+      case 0x19:
+        return <div>{t.text}</div>;
+      case 0x20:
         return <div>{t.data === 0 ? "Stop tape" : "Pause duration:" + t.data + " ms"}</div>;
       case 0x21:
         return <div>{t.text}</div>;
       case 0x22:
         return <div></div>;
-      case 0x30:
+        case 0x24:
+          return <div>{t.text}</div>;
+          case 0x25:
+            return <div></div>;
+            case 0x30:
         return (
           <div>
             {t.text} - length: {t.length}
