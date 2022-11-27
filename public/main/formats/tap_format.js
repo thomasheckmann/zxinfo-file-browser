@@ -23,6 +23,9 @@ function readTAP(data) {
   // error: Array of warning and error messages for this file
   var snapshot = { type: null, error: [], scrdata: null };
   snapshot.type = "TAP";
+  var regs = {};
+  regs.filesize = data.length;
+
 
   let tap = [];
 
@@ -47,7 +50,7 @@ function readTAP(data) {
       tap.push(block);
     } else {
       mylog.warn(`index: ${index} - Unknown block (${dataBlock[0]})`);
-      snapshot.error.push({ type: "warning", message: `index: ${index} - Unknown block (${dataBlock[0]})` });
+      snapshot.error.push({ type: "warning", message: `index: ${index} - Unknown block type (${dataBlock[0]})` });
     }
     index += blockLength; // skip data block
   }
@@ -98,8 +101,10 @@ function readTAP(data) {
       }
     }
 
-    snapshot.data = tap;
+    regs.tape = tap;
   }
+
+  snapshot.data = regs;
 
   const errors = snapshot.error;
   snapshot.error = [];

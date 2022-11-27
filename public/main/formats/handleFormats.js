@@ -19,7 +19,7 @@ function getZXFormat(fileName, subFileName, data) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", /*".p81", */".tap", ".tzx", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", /*".p81", */ ".tap", ".tzx", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;
@@ -57,40 +57,50 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling SNA`);
     obj = snafmt.readSNA(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "snafmt";
+    ZXFileInfo.border = obj.border;
   } else if (extension.toLowerCase().endsWith(".z80")) {
     mylog.debug(`handling Z80`);
     obj = z80fmt.readZ80(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "z80fmt";
+    ZXFileInfo.border = obj.border;
   } else if (extension.toLowerCase().endsWith(".tap")) {
     mylog.debug(`handling TAP`);
     obj = tapfmt.readTAP(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "tapfmt";
     ZXFileInfo.text = obj.text;
   } else if (extension.toLowerCase().endsWith(".tzx")) {
     mylog.debug(`handling TZX`);
     obj = tzxfmt.readTZX(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "tzxfmt";
     ZXFileInfo.text = obj.text;
     const orgType = obj.type;
-    if(obj.hwModel === "ZX81") {
-      obj = pfmt.readP81(obj.data);
+    if (obj.hwModel === "ZX81") {
+      obj = pfmt.readP81(obj.zx81);
       ZXFileInfo.version = orgType;
+      // ZXFileInfo.data = obj.data;
+      ZXFileInfo.type = "tzxfmt";
       ZXFileInfo.text = obj.text;
-      pfmt.createDIRScreen(obj.data).then((res) => {
+      pfmt.createDIRScreen(obj.zx81data).then((res) => {
         if (res.buffer) {
           ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
         } else {
           ZXFileInfo.scr = res;
         }
-      });    }
+      });
+    }
   } else if (extension.toLowerCase().endsWith(".dsk")) {
     mylog.debug(`handling DSK`);
     obj = dskfmt.readDSK(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "dskfmt";
     ZXFileInfo.text = obj.text;
     dskfmt.createDIRScreen(obj.dir_scr).then((res) => {
@@ -104,6 +114,7 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling TRD`);
     obj = trdfmt.readTRD(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "trdfmt";
     ZXFileInfo.text = obj.text;
     trdfmt.createDIRScreen(obj.dir_scr).then((res) => {
@@ -117,6 +128,7 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling SCL`);
     obj = sclfmt.readSCL(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "sclfmt";
     ZXFileInfo.text = obj.text;
     sclfmt.createDIRScreen(obj.dir_scr).then((res) => {
@@ -130,6 +142,7 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling MDR`);
     obj = mdrfmt.readMDR(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "mdrfmt";
     ZXFileInfo.text = obj.text;
     mdrfmt.createDIRScreen(obj.media_info).then((res) => {
@@ -143,9 +156,10 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling P`);
     obj = pfmt.readP(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "pfmt";
     ZXFileInfo.text = obj.text;
-    pfmt.createDIRScreen(obj.data).then((res) => {
+    pfmt.createDIRScreen(obj.zx81data).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
@@ -156,9 +170,10 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.debug(`handling P81`);
     obj = pfmt.readP81(data);
     ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "pfmt";
     ZXFileInfo.text = obj.text;
-    pfmt.createDIRScreen(obj.data).then((res) => {
+    pfmt.createDIRScreen(obj.zx81data).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
@@ -173,6 +188,8 @@ function getZXFormat(fileName, subFileName, data) {
       mylog.debug(`handling ZIP`);
       obj = { version: null, type: null, scrdata: null, error: null };
       ZXFileInfo.type = "zip";
+      ZXFileInfo.data = {filesize: data.length};
+      ZXFileInfo.version = "ZIP file: " + ZXFileInfo.filename;
     }
   } else {
     obj = { version: null, type: null, error: "Unhandled file format" };
@@ -190,12 +207,10 @@ function getZXFormat(fileName, subFileName, data) {
 
   if (obj.error) {
     ZXFileInfo.error = obj.error;
-    // ZXFileInfo.scr = "./images/no_image.png";
-    // return ZXFileInfo;
   }
 
   if (obj.scrdata) {
-    screenZX.createSCR(obj.scrdata, obj.border).then((res) => {
+    screenZX.createSCR(obj.scrdata, ZXFileInfo.border).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
@@ -203,7 +218,7 @@ function getZXFormat(fileName, subFileName, data) {
       }
     });
   } else if (obj.dir_scr) {
-  } else if (!ZXFileInfo.scr){
+  } else if (!ZXFileInfo.scr) {
     ZXFileInfo.scr = "./images/no_image.png";
   }
 

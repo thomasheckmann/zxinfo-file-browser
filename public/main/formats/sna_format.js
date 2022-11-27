@@ -21,43 +21,57 @@ function readSNA(data) {
 
   var snapshot = { error: [], scrdata: null, data: [] };
 
+  var is128K = false;
   // 48K or 128K?
   var fileSize = data.length;
   if (fileSize === 49179) {
     mylog.debug(`processing SNA 48K file...`);
     snapshot.type = "SNA 48K";
+    is128K = false;
   } else if (fileSize === 131103 || fileSize === 147487) {
     mylog.debug(`processing SNA 128K file...`);
     snapshot.type = "SNA 128K";
+    is128K = true;
   } else {
-    snapshot.error.push({type: "error", message: "Corrupt or unknown SNA format"});
+    snapshot.error.push({ type: "error", message: "Corrupt or unknown SNA format" });
     mylog.warn(`Corrupt or unknown SNA format`);
     return snapshot;
   }
 
-  snapshot.I = data[0];
-  snapshot.HLalt = data[1] + data[2] * 256;
-  snapshot.DEalt = data[3] + data[4] * 256;
-  snapshot.BCalt = data[5] + data[6] * 256;
-  snapshot.AFalt = data[7] + data[8] * 256;
+  var regs = {};
+  regs.I = data[0];
+  regs.HLalt = data[1] + data[2] * 256;
+  regs.DEalt = data[3] + data[4] * 256;
+  regs.BCalt = data[5] + data[6] * 256;
+  regs.AFalt = data[7] + data[8] * 256;
 
-  snapshot.HL = data[9] + data[10] * 256;
-  snapshot.DE = data[11] + data[12] * 256;
-  snapshot.BC = data[13] + data[14] * 256;
-  snapshot.IY = data[15] + data[16] * 256;
-  snapshot.IX = data[17] + data[18] * 256;
+  regs.HL = data[9] + data[10] * 256;
+  regs.DE = data[11] + data[12] * 256;
+  regs.BC = data[13] + data[14] * 256;
+  regs.IY = data[15] + data[16] * 256;
+  regs.IX = data[17] + data[18] * 256;
 
-  snapshot.INT = data[19];
-  snapshot.R = data[20];
+  regs.INT = data[19];
+  regs.R = data[20];
 
-  snapshot.AF = data[21] + data[22] * 256;
-  snapshot.SP = data[23] + data[24] * 256;
+  regs.AF = data[21] + data[22] * 256;
+  regs.SP = data[23] + data[24] * 256;
 
-  snapshot.INTmode = data[25];
+  regs.INTmode = data[25];
+  regs.is128K = is128K;
   snapshot.border = data[26];
+  regs.border = snapshot.border;
 
-  snapshot.data = data.subarray(27);
-  snapshot.scrdata = snapshot.data.subarray(0, 6912);
+  if (is128K) {
+    regs.PC = data[49179] + data[49180] * 256;
+    regs.port_0x7ffd = data[49181];
+    regs.TRDOS = data[49182];
+  }
+
+  regs.filesize = fileSize;
+
+  snapshot.data = regs; // data.subarray(27);
+  snapshot.scrdata = data.subarray(27, 6912 + 27);
 
   return snapshot;
 }

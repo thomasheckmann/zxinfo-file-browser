@@ -49,7 +49,11 @@ function createHeader(data, index) {
         }
         break;
       default:
-        dataBlock.type = null;
+        dataBlock.type = `? (${headerBlock[0]})`;
+        dataBlock.name = String(headerBlock.subarray(1, 11));
+        dataBlock.len = headerBlock[11] + headerBlock[12] * 256;
+        dataBlock.param1 = headerBlock[13] + headerBlock[14] * 256;
+        dataBlock.param2 = headerBlock[15] + headerBlock[16] * 256;
         dataBlock.error.push({ type: "error", message: `${index}: Invalid headertype ${headerBlock[0]}, should be (0, 1, 2, 3)` });
         break;
     }
@@ -58,7 +62,7 @@ function createHeader(data, index) {
     mylog.warn(`${index}: Not a header block: flag = ${flagByte}`);
   }
 
-  mylog.debug(`${JSON.stringify(dataBlock)}`);
+  mylog.info(`${JSON.stringify(dataBlock)}`);
   return dataBlock;
 }
 

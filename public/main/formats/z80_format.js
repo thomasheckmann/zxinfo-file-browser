@@ -97,39 +97,49 @@ function readZ80(data) {
   var version = 1;
   var compressed = false;
 
-  snapshot.AF = data[0] + data[1] * 256;
-  snapshot.BC = data[2] + data[3] * 256;
-  snapshot.HL = data[4] + data[5] * 256;
-  snapshot.PC = data[6] + data[7] * 256;
+  var fileSize = data.length;
+  var regs = {};
+  regs.is128K = false;
+  regs.filesize = fileSize;
 
-  snapshot.SP = data[8] + data[9] * 256;
-  snapshot.I = data[10];
-  snapshot.R = data[11];
+  regs.AF = data[0] + data[1] * 256;
+  regs.BC = data[2] + data[3] * 256;
+  regs.HL = data[4] + data[5] * 256;
+  regs.PC = data[6] + data[7] * 256;
+
+  regs.SP = data[8] + data[9] * 256;
+  regs.I = data[10];
+  regs.R = data[11];
 
   if (data[12] === 255) {
     data[12] = 1;
   }
   snapshot.border = (data[12] >> 1) & 0b00000111;
+  regs.border = snapshot.border;
+  regs.SAMROM = data[12] & 0b00010000;
   if (data[12] & 0b00010000) {
     mylog.warn(`SAM ROM?`);
   }
+  regs.compressed = data[12] & 0b00100000;
   if (data[12] & 0b00100000) {
     compressed = true;
     mylog.debug(`image is compressed`);
   }
-  snapshot.DE = data[13] + data[14] * 256;
-  snapshot.BCalt = data[15] + data[16] * 256;
-  snapshot.DEalt = data[17] + data[18] * 256;
-  snapshot.HLalt = data[19] + data[20] * 256;
-  snapshot.AFalt = data[21] + data[22] * 256;
-  snapshot.IY = data[23] + data[24] * 256;
-  snapshot.IX = data[25] + data[26] * 256;
-  snapshot.INT = (data[28] < 1) & data[27];
+  regs.DE = data[13] + data[14] * 256;
+  regs.BCalt = data[15] + data[16] * 256;
+  regs.DEalt = data[17] + data[18] * 256;
+  regs.HLalt = data[19] + data[20] * 256;
+  regs.AFalt = data[21] + data[22] * 256;
+  regs.IY = data[23] + data[24] * 256;
+  regs.IX = data[25] + data[26] * 256;
+  regs.INT = data[27]; // (data[28] < 1) & data[27];
 
-  snapshot.INTmode = data[29] & 0b00000011;
+  regs.INTmode = data[29] & 0b00000011;
+  regs.flag = data[29];
 
-  if (snapshot.PC === 0) {
+  if (regs.PC === 0) {
     mylog.debug(`PC=0, version 2 or 3`);
+    regs.PC = data[32] + data[33] * 256;
     const v = data[30];
     if (v === 23) {
       version = 2;
@@ -149,16 +159,18 @@ function readZ80(data) {
 
   const hwMode = data[34];
   if (version === 1) {
+    snapshot.hwModel = `48k`;
+
     const zxram = readV1(data, compressed);
-    if(zxram) {
-      snapshot.data = zxram;
+    if (zxram) {
+      //snapshot.data = zxram;
       snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     } else {
-      snapshot.error.push({type: "warning", message: "Cant read snapshot, maybe compressed?"});
+      snapshot.error.push({ type: "warning", message: "Cant read snapshot, maybe compressed?" });
     }
   } else if (version === 2) {
     const zxram = readV2(data, compressed);
-    snapshot.data = zxram;
+    // snapshot.data = zxram;
     snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
@@ -176,15 +188,50 @@ function readZ80(data) {
       case 4:
         snapshot.hwModel = `128k + if.1`;
         break;
+      case 5:
+      case 6:
+        snapshot.hwModel = `-`;
+        break;
+      case 7:
+        snapshot.hwModel = `Spectrum +3`;
+        break;
+      case 8:
+        snapshot.hwModel = `Spectrum +3 (XZX-Pro)`;
+        break;
+      case 9:
+        snapshot.hwModel = `Pentagon (128K)`;
+        break;
+      case 10:
+        snapshot.hwModel = `Scorpion (256K)`;
+        break;
+      case 11:
+        snapshot.hwModel = `Didaktik-Kompakt`;
+        break;
+      case 12:
+        snapshot.hwModel = `Spectrum +2`;
+        break;
+      case 13:
+        snapshot.hwModel = `Spectrum +2A`;
+        break;
+      case 14:
+        snapshot.hwModel = `TC2048`;
+        break;
+      case 15:
+        snapshot.hwModel = `TC2068`;
+        break;
+      case 128:
+        snapshot.hwModel = `TS2068`;
+        break;
+
       default:
         snapshot.hwModel = null;
-        mylog.error(`unknown hw model: ${hwMode}`);
-        snapshot.error.push({type: "warning", message: `unknown hw model: ${hwMode}`})
+        mylog.error(`version: ${version}, unknown hw model: ${hwMode}`);
+        snapshot.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
         break;
     }
   } else if (version === 3) {
     const zxram = readV2(data, compressed);
-    snapshot.data = zxram;
+    // snapshot.data = zxram;
     snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
@@ -208,13 +255,70 @@ function readZ80(data) {
       case 6:
         snapshot.hwModel = `128k + M.G.T.`;
         break;
-      default:
+        case 7:
+          snapshot.hwModel = `Spectrum +3`;
+          break;
+        case 8:
+          snapshot.hwModel = `Spectrum +3 (XZX-Pro)`;
+          break;
+        case 9:
+          snapshot.hwModel = `Pentagon (128K)`;
+          break;
+        case 10:
+          snapshot.hwModel = `Scorpion (256K)`;
+          break;
+        case 11:
+          snapshot.hwModel = `Didaktik-Kompakt`;
+          break;
+        case 12:
+          snapshot.hwModel = `Spectrum +2`;
+          break;
+        case 13:
+          snapshot.hwModel = `Spectrum +2A`;
+          break;
+        case 14:
+          snapshot.hwModel = `TC2048`;
+          break;
+        case 15:
+          snapshot.hwModel = `TC2068`;
+          break;
+        case 128:
+          snapshot.hwModel = `TS2068`;
+          break;
+        default:
         snapshot.hwModel = null;
-        mylog.error(`unknown hw model: ${hwMode}`);
+        mylog.error(`version: ${version}, unknown hw model: ${hwMode}`);
+        snapshot.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
         break;
     }
   }
-  mylog.debug(`model: ${snapshot.hwModel}`);
+
+  mylog.debug(`Version: ${version}, Hardware model: ${snapshot.hwModel}`);
+  if (version === 2 || version === 3) {
+    // some version 2 & 3 specific info
+    if (snapshot.hwModel.includes("128k")|| snapshot.hwModel.includes("+2")|| snapshot.hwModel.includes("+2A")|| snapshot.hwModel.includes("+3")) {
+      // 128k model
+      regs.port_0x7ffd = data[35];
+      regs.is128K = true;
+    }
+    regs.if1_paged_in = data[36];
+    regs.flag2 = data[37];
+    regs.port_0xfffd = data[38];
+    regs.soundchip_regs = data.slice(39, 39 + 16);
+    regs.tstate_low = data[55] + data[56] * 256;
+    regs.tstate_high = data[57];
+    regs.mgt_rom = data[59];
+    regs.multiface_rom = data[60];
+    regs.rom_ram_8klow = data[61];
+    regs.rom_ram_8khigh = data[62];
+    regs.mgt_type = data[83];
+
+    if (version === 3) {
+      regs.port_0x1ffd = data[86];
+    }
+  }
+
+  snapshot.data = regs;
 
   return snapshot;
 }

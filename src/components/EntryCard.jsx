@@ -24,11 +24,13 @@ import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 
 import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflineTwoTone";
 import WarningTwoToneIcon from "@mui/icons-material/WarningTwoTone";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 
 import FileErrorDialog from "./FileErrorDialog";
+import FileDetailsDialog from "./FileDetails";
 
 function formatType(t) {
   switch (t) {
@@ -74,7 +76,6 @@ function EntryCard(props) {
   // Fetch SCR from ZXInfo API
   const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
   const [selectedSCR, setSelectedSCR] = useState("");
-
   const [originalScreen, setOriginalScreen] = useState();
 
   const handleSCRDialogClose = (value) => {
@@ -96,20 +97,31 @@ function EntryCard(props) {
     setFileErrorDialogOpen(true);
   };
 
+  // File Details dialog
+  const [isFileDetailsDialogOpen, setFileDetailsDialogOpen] = useState(false);
+
+  const handleFileDetailsDialogClose = (value) => {
+    setFileDetailsDialogOpen(false);
+  };
+
+  const handleFileDetailsDialogOpen = () => {
+    setFileDetailsDialogOpen(true);
+  };
+
   // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {
     if (appSettings.favorites.size === 0) {
       // first time...
       const newFav = new Map();
       newFav.set(entry.sha512, [entry.filepath]);
-      setAppSettings({...appSettings, favorites: newFav});
+      setAppSettings({ ...appSettings, favorites: newFav });
       setIsFavorite(true);
     } else {
       if (appSettings.favorites.get(entry.sha512)) {
         // delete filepath, if array = [] - delete from map
         const newFav = appSettings.favorites;
         newFav.delete(entry.sha512);
-        setAppSettings({...appSettings, favorites: newFav});
+        setAppSettings({ ...appSettings, favorites: newFav });
         setIsFavorite(false);
       } else {
         var filesList = appSettings.favorites.get(entry.sha512);
@@ -117,12 +129,12 @@ function EntryCard(props) {
           // new fileList
           const newFav = appSettings.favorites;
           newFav.set(entry.sha512, [entry.filepath]);
-          setAppSettings({...appSettings, favorites: newFav});
+          setAppSettings({ ...appSettings, favorites: newFav });
         } else {
           // add filename to list
           const newFav = appSettings.favorites;
           newFav.set(entry.sha512, [...filesList, entry.filepath]);
-          setAppSettings({...appSettings, favorites: newFav});
+          setAppSettings({ ...appSettings, favorites: newFav });
         }
         setIsFavorite(true);
       }
@@ -179,12 +191,12 @@ function EntryCard(props) {
       appSettings.zxinfoSCR = new Map();
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
       useScreen = selectedSCR;
-    } else if (appSettings.zxinfoSCR.size > 0 && entry){
+    } else if (appSettings.zxinfoSCR.size > 0 && entry) {
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
       useScreen = selectedSCR;
     }
 
-    if(useScreen && entry) {
+    if (useScreen && entry) {
       setEntry((entry) => ({ ...entry, scr: useScreen }));
       var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
       var jsonString1 = JSON.stringify(obj1);
@@ -201,7 +213,8 @@ function EntryCard(props) {
           selectedValue={selectedSCR}
           onClose={handleSCRDialogClose}
         ></ZXInfoSCRDialog>
-        <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>
+        {isFileErrorDialogOpen && <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>}
+        {isFileDetailsDialogOpen && <FileDetailsDialog open={isFileDetailsDialogOpen} onClose={handleFileDetailsDialogClose} item={entry}></FileDetailsDialog>}
         <Card raised elevation={4}>
           <CardHeader
             sx={{
@@ -285,6 +298,13 @@ function EntryCard(props) {
               <Tooltip title="See file issues" onClick={() => handleFileErrorDialogOpen(this)}>
                 <IconButton arial-label="see file issues">
                   <WarningTwoToneIcon sx={{ color: "#ff0000" }} />
+                </IconButton>
+              </Tooltip>
+            )}
+            {true && (
+              <Tooltip title="See file details" onClick={() => handleFileDetailsDialogOpen(this)} sx={{ marginLeft: "auto" }}>
+                <IconButton arial-label="see file details">
+                  <InfoOutlinedIcon sx={{ color: "#000000" }} />
                 </IconButton>
               </Tooltip>
             )}

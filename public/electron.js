@@ -285,6 +285,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       var zip = new AdmZip(filename);
       var zipEntries = zip.getEntries();
       mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
+      
       zipEntries.forEach(async function (zipEntry) {
         if (!zipEntry.isDirectory) {
           try {

@@ -47,6 +47,9 @@ function readMDR(data) {
   var snapshot = { type: "MDR", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;
 
+  var regs = {};
+  regs.filesize = data.length;
+
   // A cartridge file contains 254 'sectors' of 543 bytes each
   var file_map = new Map();
   var no_of_used_blocks = 0;
@@ -107,6 +110,9 @@ function readMDR(data) {
   snapshot.media_info = media_info;
   snapshot.text = `${media_info.title}, sectors: ${no_of_used_blocks} / 254 - Free: ${freeSpace}K`;
   mylog.debug(media_info);
+
+  snapshot.data = regs;
+
   return snapshot;
 }
 
