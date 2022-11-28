@@ -262,12 +262,13 @@ function EntryCard(props) {
               {entry.version && <Chip label={entry.version} />}
               {entry.hwmodel && <Chip label={entry.hwmodel} />}
               {entry.zxdbID && (
+                <Tooltip title="More details at ZXInfo.dk">
                 <Chip
                   label={entry.zxdbID}
                   variant="outlined"
                   sx={{ color: appSettings.zxinfoSCR.get(props.entry.sha512) ? "#12a802" : "#000000" }}
                   onClick={(id) => openLink(entry.zxdbID)}
-                />
+                /></Tooltip>
               )}
               <Chip sx={{ bgcolor: "#ffffff" }} />
             </Stack>
