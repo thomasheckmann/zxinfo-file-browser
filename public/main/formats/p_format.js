@@ -77,7 +77,7 @@ function listBasic(image, zx81, showFullList) {
   mylog.debug(`final line: ${y}`);
   // resize image 24 pixels top and bottom, y * 8 lines
 
-  if(y > 22) {
+  if(showFullList) {
     image.crop(0, 0, 320, 24+y*8+24);
   }
   // image.write("file.png");

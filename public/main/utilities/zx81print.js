@@ -338,7 +338,6 @@ function printZX81(image, x, y, text, showFullList, inREMline) {
       var mapped = cmap_zx81[charVal];
       if (mapped) {
         if ((i === 5 || inREMline) && mapped[0] === " ") {
-          mylog.debug(`first keyword on line, skip leading space..."${mapped}"}`);
           mapped = mapped.slice(1);
         } else if (inREMline && charVal === 192) {
           mapped = '""';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
+import { Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 
 import { isDev } from "../../App";
 
@@ -10,8 +10,7 @@ export default function PFormat(props) {
   useEffect(() => {
     window.electronAPI.createZX81List(item.data.zx81data).then((img) => {
       setListningScr(img);
-    }) ;
-
+    });
   }, [item]);
 
   return (
@@ -30,7 +29,7 @@ export default function PFormat(props) {
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">
-              <img src={listningScr} alt="BASIC List"/>
+              {listningScr ? <img src={listningScr} alt="BASIC List" /> : <Skeleton width={320} height={240}></Skeleton>}
             </TableCell>
           </TableRow>
         </TableBody>
