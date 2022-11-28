@@ -81,7 +81,6 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "tzxfmt";
     ZXFileInfo.text = obj.text;
-    console.log(ZXFileInfo);
     const orgType = obj.type;
     if (obj.hwModel === "ZX81") {
       obj = pfmt.readP81(obj.zx81);

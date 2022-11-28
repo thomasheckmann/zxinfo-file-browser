@@ -11,7 +11,7 @@ const screenZX = require("../utilities/zx81print");
 const charset = ' ??????????"`$:?()><=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 function createBASICListAsScr(data) {
-  let image = new Jimp(320, 512, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
+  let image = new Jimp(320, 50000, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
     if (err) throw err;
   });
   return listBasic(image, data, true);
@@ -42,11 +42,10 @@ function listBasic(image, zx81, showFullList) {
     cnt += 2;
     cnt += lineLen;
 
-    const inREMline = mem[i + 4] === 0xea;
-
     // create lineno
     var lineNoTXT = ("    " + lineNo).slice(-4) + " ";
     var lineTxt = "";
+    mylog.debug(`Line: ${lineNoTXT}, length: ${lineLen}`);
     for (var l = 0; l < lineNoTXT.length; l++) {
       if (lineNoTXT.charCodeAt(l) === 32) {
         lineTxt += String.fromCharCode(0); // space
@@ -55,16 +54,15 @@ function listBasic(image, zx81, showFullList) {
       }
     }
 
+    const inREMline = mem[i + 4] === 0xea;
     for (var v = 0; v < lineLen - 1; v++) {
       // omit final newline
       const c = mem[i + 4 + v];
-      if (inREMline) {
+      if (inREMline && c !== 126) {
         lineTxt += String.fromCharCode(c);
       } else if (c === 126) {
         // number
         v += 5;
-      } else if (c === 118) {
-        // newline
       } else {
         // just print
         lineTxt += String.fromCharCode(c);
@@ -72,10 +70,16 @@ function listBasic(image, zx81, showFullList) {
     }
 
     if ((!showFullList && y < 22) || showFullList) {
-      y = screenZX.printZX81(image, x, y, lineTxt, showFullList) + 1;
+      y = screenZX.printZX81(image, x, y, lineTxt, showFullList, inREMline) + 1;
     }
   }
 
+  mylog.debug(`final line: ${y}`);
+  // resize image 24 pixels top and bottom, y * 8 lines
+
+  if(y > 22) {
+    image.crop(0, 0, 320, 24+y*8+24);
+  }
   // image.write("file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
 }

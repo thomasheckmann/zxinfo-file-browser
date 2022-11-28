@@ -67,9 +67,9 @@ const cmap_zx81 = [
   "X",
   "Y",
   "Z",
-  "RND ",
+  "RND",
   "INKEY$",
-  "PI ",
+  "PI",
   null,
   null,
   null,
@@ -228,37 +228,37 @@ const cmap_zx81 = [
   " THEN ",
   " TO ",
   " STEP ",
-  "LPRINT ",
-  "LLIST ",
-  "STOP ",
-  "SLOW ",
-  "FAST ",
-  "NEW ",
-  "SCROLL ",
-  "CONT ",
-  "DIM ",
-  "REM ",
-  "FOR ",
-  "GOTO ",
-  "GOSUB ",
-  "INPUT ",
-  "LOAD ",
-  "LIST ",
-  "LET ",
-  "PAUSE ",
-  "NEXT ",
-  "POKE ",
-  "PRINT ",
-  "PLOT ",
-  "RUN ",
-  "SAVE ",
-  "RAND ",
-  "IF ",
-  "CLS ",
-  "UNPLOT ",
-  "CLEAR ",
-  "RETURN ",
-  "COPY ",
+  " LPRINT ",
+  " LLIST ",
+  " STOP ",
+  " SLOW ",
+  " FAST ",
+  " NEW ",
+  " SCROLL ",
+  " CONT ",
+  " DIM ",
+  " REM ",
+  " FOR ",
+  " GOTO ",
+  " GOSUB ",
+  " INPUT ",
+  " LOAD ",
+  " LIST ",
+  " LET ",
+  " PAUSE ",
+  " NEXT ",
+  " POKE ",
+  " PRINT ",
+  " PLOT ",
+  " RUN ",
+  " SAVE ",
+  " RAND ",
+  " IF ",
+  " CLS ",
+  " UNPLOT ",
+  " CLEAR ",
+  " RETURN ",
+  " COPY ",
 ];
 
 // maps ASCII to ZX81
@@ -319,8 +319,8 @@ const ascii_zx81 = new Map([
   ["Z", 0x3f],
 ]);
 
-function printZX81(image, x, y, text, showFullList) {
-  const mylog = log.scope("printAtZX81");
+function printZX81(image, x, y, text, showFullList, inREMline) {
+  const mylog = log.scope("printZX81");
 
   // convert to "printable", bit 7 = 1, inverse -
   var zx81string = "";
@@ -335,8 +335,17 @@ function printZX81(image, x, y, text, showFullList) {
       zx81string += String.fromCharCode(charVal - 64);
     } else {
       // lookup
-      const mapped = cmap_zx81[charVal];
+      var mapped = cmap_zx81[charVal];
       if (mapped) {
+        if ((i === 5 || inREMline) && mapped[0] === " ") {
+          mylog.debug(`first keyword on line, skip leading space..."${mapped}"}`);
+          mapped = mapped.slice(1);
+        } else if (inREMline && charVal === 192) {
+          mapped = '""';
+        } else if (inREMline && (charVal === 216 || charVal === 221)) {
+          // add trailing space to ** and <>
+          mapped += " ";
+        }
         // map from ASCII to ZX81
         for (var ii = 0; ii < mapped.length; ii++) {
           zx81string += String.fromCharCode(ascii_zx81.get(mapped[ii]));
@@ -346,7 +355,7 @@ function printZX81(image, x, y, text, showFullList) {
       }
     }
   }
-  return screenZX.printAtZX81(image, x, y, zx81string, showFullList ? 999999: 22);
+  return screenZX.printAtZX81(image, x, y, zx81string, showFullList ? 999999 : 22);
 }
 
 exports.printZX81 = printZX81;

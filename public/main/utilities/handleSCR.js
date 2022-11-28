@@ -382,7 +382,6 @@ function _printAt(image, x, y, text, model, maxLine) {
 
 function printAtZX81(image, x, y, text, maxLine) {
   const mylog = log.scope("printAtZX81");
-  mylog.debug(`x, y = (${x}, ${y}), maxLine = ${maxLine}`);
   return _printAt(image, x, y, text, "ZX81", maxLine);
 }
 
