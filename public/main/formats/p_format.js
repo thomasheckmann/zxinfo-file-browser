@@ -5,25 +5,35 @@
  */
 const log = require("electron-log");
 const Jimp = require("jimp");
-const screenZX = require("../utilities/handleSCR");
+const screenZX = require("../utilities/zx81print");
+//const screenZX = require("../utilities/handleSCR");
 
 const charset = ' ??????????"`$:?()><=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-function createDIRScreen(zx81) {
-  const mylog = log.scope("createDIRScreen");
-  mylog.debug(`input: ${zx81.data.length}`);
+function createBASICListAsScr(data) {
+  let image = new Jimp(320, 512, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
+    if (err) throw err;
+  });
+  return listBasic(image, data, true);
+}
 
-  // create a SCR preview of DIR
+function createPreviewSCR(data) {
   let image = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
     if (err) throw err;
   });
+  return listBasic(image, data, false);
+}
+
+function listBasic(image, zx81, showFullList) {
+  const mylog = log.scope("createDIRScreen");
+  mylog.debug(`input: ${zx81.data.length}`);
+  mylog.debug(`full list: ${showFullList}`);
 
   // create BASIC listning
   var x = 0;
   var y = 0; // start upper left
   const mem = zx81.data;
   var cnt = 16509; // start of BASIC in memory
-  // var i = 116;
   while (cnt < zx81.d_file) {
     const i = cnt - 16509 + 116;
     const lineNo = mem[i] * 256 + mem[i + 1];
@@ -45,18 +55,25 @@ function createDIRScreen(zx81) {
       }
     }
 
-    for (var v = 0; v < lineLen-1; v++) { // omit final newline
+    for (var v = 0; v < lineLen - 1; v++) {
+      // omit final newline
       const c = mem[i + 4 + v];
       if (inREMline) {
         lineTxt += String.fromCharCode(c);
-      } else if (c === 126) { // number
+      } else if (c === 126) {
+        // number
         v += 5;
-      } else if (c === 118) { // newline
-      } else { // just print
+      } else if (c === 118) {
+        // newline
+      } else {
+        // just print
         lineTxt += String.fromCharCode(c);
       }
     }
-    if (y < 22) y = screenZX.printAtZX81(image, x, y, lineTxt) + 1;
+
+    if ((!showFullList && y < 22) || showFullList) {
+      y = screenZX.printZX81(image, x, y, lineTxt, showFullList) + 1;
+    }
   }
 
   // image.write("file.png");
@@ -100,8 +117,8 @@ function readP81(data) {
 
   snapshot.type = "P81";
   snapshot.hwModel = "ZX81";
-//  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
-  snapshot.zx81data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
+  //  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
+  regs.zx81data = { ...zx81data, data: data.slice(i + 1, i + 1 + zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
   mylog.info(`readP() - OK ${snapshot.text}`);
@@ -124,7 +141,7 @@ function readP(data) {
 
   snapshot.type = "P";
   snapshot.hwModel = "ZX81";
-  snapshot.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
+  regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
   mylog.info(`readP() - OK ${snapshot.text}`);
@@ -136,4 +153,5 @@ function readP(data) {
 
 exports.readP = readP;
 exports.readP81 = readP81;
-exports.createDIRScreen = createDIRScreen;
+exports.createPreviewSCR = createPreviewSCR;
+exports.createBASICListAsScr = createBASICListAsScr;

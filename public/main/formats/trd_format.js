@@ -64,17 +64,17 @@ function createDIRScreen(dirdata) {
     const item = dir_info[file];
     const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
     if (line < 21) {
-        screenZX.printAt(image, 0, line, text);
+        screenZX.printAtSpectrum(image, 0, line, text, 22);
         line += 1;
     }
   }
 
 
   const endText = `Free sector ${disk_info.free_sectors} Title: ${disk_info.disk_label}`;
-  screenZX.printAt(image, 0, line+1, endText);
+  screenZX.printAtSpectrum(image, 0, line+1, endText, 22);
 
   const endText2 = `${disk_info.disk_type_name} - ${dir_info.length} File(s)`;
-  screenZX.printAt(image, 0, line+2, endText2);
+  screenZX.printAtSpectrum(image, 0, line+2, endText2, 22);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);

@@ -25,13 +25,13 @@ function createDIRScreen(dirdata) {
     const item = dir_info[file];
     const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
     if (line < 21) {
-      screenZX.printAt(image, 0, line, text);
+      screenZX.printAtSpectrum(image, 0, line, text,22);
       line += 1;
     }
   }
 
   const endText2 = `SCL image: ${disk_info.no_files} File(s)`;
-  screenZX.printAt(image, 0, line + 1, endText2);
+  screenZX.printAtSpectrum(image, 0, line + 1, endText2, 22);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);

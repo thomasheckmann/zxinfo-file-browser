@@ -29,7 +29,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setZxinfoSCR: (key, value) => ipcRenderer.invoke("setZxinfoSCR", key, value),
 
   // Convert SCR to 320x240 - centered (used when getting SCR from ZXInfo)
+  // NOT USED
   convertSCR: (img) => ipcRenderer.invoke("convertSCR", img),
+
+  createZX81List: (data) => ipcRenderer.invoke("create-zx81-basic-list", data),
 
   // Open external browser with details, from render to main
   openZXINFODetail: (args) => ipcRenderer.invoke("open-zxinfo-detail", args),

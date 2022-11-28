@@ -260,13 +260,13 @@ function createDIRScreen(dirdata) {
     if (value.hidden) text += "SYS ";
     if (value.archived) text += "ARC ";
     if (line < 21) {
-      screenZX.printAt(frame0, 0, line, text);
+      screenZX.printAtSpectrum(frame0, 0, line, text, 22);
       line += 1;
     }
   }
 
   const endText = disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free";
-  screenZX.printAt(frame0, 0, line + 1, endText);
+  screenZX.printAtSpectrum(frame0, 0, line + 1, endText, 22);
 
   // frame0.write("./file.png");
 
