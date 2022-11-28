@@ -34,7 +34,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1600,
     height: 900,
-    title: `ZXInfo - file manager v${app.getVersion()}`,
+    title: `ZXInfo - file browser v${app.getVersion()}`,
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution

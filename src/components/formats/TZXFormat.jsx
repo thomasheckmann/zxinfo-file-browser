@@ -60,11 +60,11 @@ export default function TZXFormat(props) {
         return <div>{t.text}</div>;
       case 0x22:
         return <div></div>;
-        case 0x24:
-          return <div>{t.text}</div>;
-          case 0x25:
-            return <div></div>;
-            case 0x30:
+      case 0x24:
+        return <div>{t.text}</div>;
+      case 0x25:
+        return <div></div>;
+      case 0x30:
         return (
           <div>
             {t.text} - length: {t.length}
