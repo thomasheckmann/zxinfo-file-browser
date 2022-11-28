@@ -81,14 +81,16 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "tzxfmt";
     ZXFileInfo.text = obj.text;
+    console.log(ZXFileInfo);
     const orgType = obj.type;
     if (obj.hwModel === "ZX81") {
       obj = pfmt.readP81(obj.zx81);
       ZXFileInfo.version = orgType;
-      // ZXFileInfo.data = obj.data;
+      // keep filesize and data.tape from TZX, but add zx81data
+      ZXFileInfo.data.zx81data = obj.data.zx81data;
       ZXFileInfo.type = "tzxfmt";
       ZXFileInfo.text = obj.text;
-      pfmt.createDIRScreen(obj.zx81data).then((res) => {
+      pfmt.createPreviewSCR(obj.data.zx81data).then((res) => {
         if (res.buffer) {
           ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
         } else {
@@ -159,7 +161,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "pfmt";
     ZXFileInfo.text = obj.text;
-    pfmt.createDIRScreen(obj.zx81data).then((res) => {
+    pfmt.createPreviewSCR(obj.data.zx81data).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
@@ -173,7 +175,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "pfmt";
     ZXFileInfo.text = obj.text;
-    pfmt.createDIRScreen(obj.zx81data).then((res) => {
+    pfmt.createPreviewSCR(obj.data.zx81data).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
       } else {
@@ -188,7 +190,7 @@ function getZXFormat(fileName, subFileName, data) {
       mylog.debug(`handling ZIP`);
       obj = { version: null, type: null, scrdata: null, error: null };
       ZXFileInfo.type = "zip";
-      ZXFileInfo.data = {filesize: data.length};
+      ZXFileInfo.data = { filesize: data.length };
       ZXFileInfo.version = "ZIP file: " + ZXFileInfo.filename;
     }
   } else {

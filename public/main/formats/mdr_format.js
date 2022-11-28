@@ -22,19 +22,19 @@ function createDIRScreen(dirdata) {
     if (err) throw err;
   });
 
-  screenZX.printAt(image, 0, 0, cartridge_name);
+  screenZX.printAtSpectrum(image, 0, 0, cartridge_name, 22);
 
   var line = 2;
   for (let [key, value] of catalog) {
     var text = `${value.filename} - ${Math.ceil(value.size / 1024)}K `;
     if (line < 20) {
-      screenZX.printAt(image, 0, line, text);
+      screenZX.printAtSpectrum(image, 0, line, text, 22);
       line += 1;
     }
   }
 
   const endText2 = `${freespace}`;
-  screenZX.printAt(image, 0, line + 1, endText2);
+  screenZX.printAtSpectrum(image, 0, line + 1, endText2, 22);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);

@@ -1,5 +1,6 @@
 import React from "react";
 import { Alert, List, ListItem, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from "@mui/material";
+import PFormat from "./PFormat";
 
 export default function TZXFormat(props) {
   const { item } = props;
@@ -117,6 +118,7 @@ export default function TZXFormat(props) {
               </TableCell>
             </TableRow>
           ))}
+          {item.data.zx81data && <PFormat item={item}></PFormat>}
         </TableBody>
       </Table>
     </TableContainer>

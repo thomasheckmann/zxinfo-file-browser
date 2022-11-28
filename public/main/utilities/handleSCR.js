@@ -241,324 +241,6 @@ const chars_zx81 = [
   [255, 129, 251, 247, 239, 223, 129, 255],
 ];
 
-// Mapping to ASCII
-const cmap_zx81 = [
-  " ",
-  "{1}",
-  "{2}",
-  "{3}",
-  "{4}",
-  "{5}",
-  "{6}",
-  "{7}",
-  "{8}",
-  "{9}",
-  "{10}",
-  '"',
-  "£",
-  "$",
-  ":",
-  "?",
-  "(",
-  ")",
-  ">",
-  "<",
-  "=",
-  "+",
-  "-",
-  "*",
-  "/",
-  ";",
-  ",",
-  ".",
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "M",
-  "N",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z",
-  "RND ",
-  "INKEY$",
-  "PI ",
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  null,
-  "#",
-  "|1|",
-  "|2|",
-  "|3|",
-  "|4|",
-  "|5|",
-  "|6|",
-  "|7|",
-  "|8|",
-  "|9|",
-  "|10|",
-  '"',
-  "£",
-  "$",
-  ":",
-  "?",
-  "(",
-  ")",
-  ">",
-  "<",
-  "=",
-  "+",
-  "-",
-  "*",
-  "/",
-  ";",
-  ",",
-  ".",
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-  "k",
-  "l",
-  "m",
-  "n",
-  "o",
-  "p",
-  "q",
-  "r",
-  "s",
-  "t",
-  "u",
-  "v",
-  "w",
-  "x",
-  "y",
-  "z",
-  '"',
-  "AT ",
-  "TAB ",
-  null,
-  "CODE ",
-  "VAL ",
-  "LEN ",
-  "SIN ",
-  "COS ",
-  "TAN ",
-  "ASN ",
-  "ACS ",
-  "ATN ",
-  "LN ",
-  "EXP ",
-  "INT ",
-  "SQR ",
-  "SGN ",
-  "ABS ",
-  "PEEK ",
-  "USR ",
-  "STR$ ",
-  "CHR$ ",
-  "NOT ",
-  "**",
-  " OR ",
-  " AND ",
-  "<=",
-  ">=",
-  "<>",
-  " THEN ",
-  " TO ",
-  " STEP ",
-  "LPRINT ",
-  "LLIST ",
-  "STOP ",
-  "SLOW ",
-  "FAST ",
-  "NEW ",
-  "SCROLL ",
-  "CONT ",
-  "DIM ",
-  "REM ",
-  "FOR ",
-  "GOTO ",
-  "GOSUB ",
-  "INPUT ",
-  "LOAD ",
-  "LIST ",
-  "LET ",
-  "PAUSE ",
-  "NEXT ",
-  "POKE ",
-  "PRINT ",
-  "PLOT ",
-  "RUN ",
-  "SAVE ",
-  "RAND ",
-  "IF ",
-  "CLS ",
-  "UNPLOT ",
-  "CLEAR ",
-  "RETURN ",
-  "COPY ",
-];
-
-// maps ASCII to ZX81
-const ascii_zx81 = new Map([
-  [' ', 0x00],
-  ['"', 0x0b],
-  ['£', 0x0c],
-  ['$', 0x0d],
-  [':', 0x0e],
-  ['?', 0x0f],
-  ['(', 0x10],
-  [')', 0x11],
-  ['>', 0x12],
-  ['<', 0x13],
-  ['=', 0x14],
-  ['+', 0x15],
-  ['-', 0x16],
-  ['*', 0x17],
-  ['/', 0x18],
-  [';', 0x19],
-  [',', 0x1a],
-  ['.', 0x1b],
-  ['0', 0x1c],
-  ['1', 0x1d],
-  ['2', 0x1e],
-  ['3', 0x1f],
-  ['4', 0x20],
-  ['5', 0x21],
-  ['6', 0x22],
-  ['7', 0x23],
-  ['8', 0x24],
-  ['9', 0x25],
-  ['A', 0x26],
-  ['B', 0x27],
-  ['C', 0x28],
-  ['D', 0x29],
-  ['E', 0x2a],
-  ['F', 0x2b],
-  ['G', 0x2c],
-  ['H', 0x2d],
-  ['I', 0x2e],
-  ['J', 0x2f],
-  ['K', 0x30],
-  ['L', 0x31],
-  ['M', 0x32],
-  ['N', 0x33],
-  ['O', 0x34],
-  ['P', 0x35],
-  ['Q', 0x36],
-  ['R', 0x37],
-  ['S', 0x38],
-  ['T', 0x39],
-  ['U', 0x3a],
-  ['V', 0x3b],
-  ['W', 0x3c],
-  ['X', 0x3d],
-  ['Y', 0x3e],
-  ['Z', 0x3f],
-]);
-
 // 76543210
 // FBPPPIII
 // Flash: approx. every 0.64 sec.
@@ -653,8 +335,8 @@ function createSCR(data, border) {
   }
 }
 
-function _printAt(image, x, y, text, model) {
-  const mylog = log.scope("_printAt");
+function _printAt(image, x, y, text, model, maxLine) {
+  const mylog = log.scope(`_printAtX`);
 
   var charset;
   var charOffset = 32;
@@ -672,7 +354,7 @@ function _printAt(image, x, y, text, model) {
     const c = text.charCodeAt(i) - charOffset;
     if (c < 0) {
       // ignore, non-printable
-    } else if (my_y < 22) {
+    } else if (my_y < maxLine) {
       const fontData = charset[c];
       for (var r = 0; r < 8; r++) {
         const byte = fontData[r];
@@ -698,44 +380,20 @@ function _printAt(image, x, y, text, model) {
   return my_y;
 }
 
-function printAtZX81(image, x, y, text) {
+function printAtZX81(image, x, y, text, maxLine) {
   const mylog = log.scope("printAtZX81");
-
-  // convert to "printable", bit 7 = 1, inverse -
-  var zx81string = "";
-  for (var i = 0; i < text.length; i++) {
-    const charVal = text.charCodeAt(i);
-
-    if (charVal < 64) {
-      // The character set has 64 unique glyphs present at code points 0–63
-      zx81string += text[i];
-    } else if (127 < charVal && charVal < 192) {
-      // inverse video; corresponding to code points 128–191
-      zx81string += String.fromCharCode(charVal - 64);
-    } else {
-      // lookup
-      const mapped = cmap_zx81[charVal];
-      if (mapped) {
-        // map from ASCII to ZX81
-        for(var ii = 0; ii < mapped.length; ii++) {
-          zx81string+=String.fromCharCode(ascii_zx81.get(mapped[ii]));
-        }
-      }
-      else {
-        zx81string += String.fromCharCode(15); // ?  question mark
-      }
-    }
-  }
-  return _printAt(image, x, y, zx81string, "ZX81");
+  mylog.debug(`x, y = (${x}, ${y}), maxLine = ${maxLine}`);
+  return _printAt(image, x, y, text, "ZX81", maxLine);
 }
 
-function printAt(image, x, y, text) {
-  const mylog = log.scope("printAt");
+function printAtSpectrum(image, x, y, text, maxLine) {
+  const mylog = log.scope("printAtSpectrum");
+  mylog.debug(`x, y = (${x}, ${y}), maxLine = ${maxLine}`);
 
   mylog.debug(`${text}`);
-  return _printAt(image, x, y, text, "SPECTRUM");
+  return _printAt(image, x, y, text, "SPECTRUM", maxLine);
 }
 
 exports.createSCR = createSCR;
-exports.printAt = printAt;
+exports.printAtSpectrum = printAtSpectrum;
 exports.printAtZX81 = printAtZX81;

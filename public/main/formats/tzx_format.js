@@ -617,7 +617,7 @@ function readTZX(data) {
   snapshot.hwModel;
   // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
-    if(d.error) {
+    if (d.error) {
       snapshot.error.push(...d.error);
     }
     if (d && d.block) {

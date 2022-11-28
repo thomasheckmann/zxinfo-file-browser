@@ -15,6 +15,7 @@ const fs = require("fs");
 const Jimp = require("jimp");
 
 const handleFormats = require("./main/formats/handleFormats");
+const pfmt = require("./main/formats/p_format");
 
 const AdmZip = require("adm-zip");
 
@@ -22,7 +23,7 @@ const log = require("electron-log");
 
 // use error, warn, info for production
 log.transports.console.level = isDev ? "info" : "info";
-log.transports.file.level = isDev ? "info" : "info";
+log.transports.file.level = isDev ? "debug" : "info";
 log.transports.file.getFile().clear();
 
 let win;
@@ -117,6 +118,17 @@ ipcMain.handle("convertSCR", (event, img) => {
   });
 
   return mainImage.getBase64Async(Jimp.MIME_PNG);
+});
+
+ipcMain.handle("create-zx81-basic-list", async (event, data) => {
+  const mylog = log.scope("create-zx81-basic-list");
+
+  const res = await pfmt.createBASICListAsScr(data);
+  if (res.buffer) {
+    return "data:image/gif;base64," + res.buffer.toString("base64");
+  } else {
+    return res;
+  }
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
@@ -285,7 +297,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       var zip = new AdmZip(filename);
       var zipEntries = zip.getEntries();
       mylog.info(`ZIP file detected, ${zipEntries.length} entries`);
-      
+
       zipEntries.forEach(async function (zipEntry) {
         if (!zipEntry.isDirectory) {
           try {
