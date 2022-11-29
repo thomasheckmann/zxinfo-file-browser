@@ -22,7 +22,7 @@ const AdmZip = require("adm-zip");
 const log = require("electron-log");
 
 // use error, warn, info for production
-log.transports.console.level = isDev ? "info" : "info";
+log.transports.console.level = isDev ? "info" :  "info";
 log.transports.file.level = isDev ? "debug" : "info";
 log.transports.file.getFile().clear();
 
@@ -132,7 +132,7 @@ ipcMain.handle("create-zx81-basic-list", async (event, data) => {
 });
 
 // supportedExts must be synced with startFolder.fileFilters in App.js
-const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".zip"];
+const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".zip"];
 
 /**
  *
@@ -289,7 +289,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".tap" || extension === ".tzx") {
   } else if (extension === ".dsk" || extension === ".trd" || extension === ".scl") {
   } else if (extension === ".mdr") {
-  } else if (extension === ".p" || extension === ".p81") {
+  } else if (extension === ".p" || extension === ".p81"|| extension === ".81") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;

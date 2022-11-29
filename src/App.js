@@ -51,7 +51,7 @@ import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "zip"];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "81", "zip"];
 
 export const ZXInfoSettingsObj = {
   fileFilters: defaultFileFilters,

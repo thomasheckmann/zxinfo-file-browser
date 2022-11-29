@@ -19,7 +19,7 @@ function getZXFormat(fileName, subFileName, data) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".p", ".p81", ".tap", ".tzx", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;
@@ -170,6 +170,20 @@ function getZXFormat(fileName, subFileName, data) {
   } else if (extension.toLowerCase().endsWith(".p81")) {
     mylog.debug(`handling P81`);
     obj = pfmt.readP81(data);
+    ZXFileInfo.version = obj.type;
+    ZXFileInfo.data = obj.data;
+    ZXFileInfo.type = "pfmt";
+    ZXFileInfo.text = obj.text;
+    pfmt.createPreviewSCR(obj.data.zx81data).then((res) => {
+      if (res.buffer) {
+        ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
+      } else {
+        ZXFileInfo.scr = res;
+      }
+    });
+  } else if (extension.toLowerCase().endsWith(".81")) {
+    mylog.debug(`handling 81`);
+    obj = pfmt.readP(data);
     ZXFileInfo.version = obj.type;
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "pfmt";
