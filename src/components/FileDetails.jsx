@@ -11,6 +11,11 @@ import TAPFormat from "./formats/TAPFormat";
 import TZXFormat from "./formats/TZXFormat";
 import PFormat from "./formats/PFormat";
 
+const Item = styled(Paper)( {
+  textAlign: "left",
+});
+
+
 export default function FileDetails(props) {
   const { onClose, open, item } = props;
 
@@ -30,10 +35,6 @@ export default function FileDetails(props) {
       },
     },
   });
-
-  const Item = styled(Paper)(({ theme }) => ({
-    textAlign: "left",
-  }));
 
   const handleClose = () => {
     onClose();
@@ -68,9 +69,6 @@ export default function FileDetails(props) {
               }
             });
           }
-
-          if (isDev) console.log(`loading: ${JSON.stringify(loading)}`);
-          if (isDev) console.log(`running: ${JSON.stringify(running)}`);
 
           // screens [0] = first loading, [1] = first running
           const items = [...loading.slice(0, 1), ...running.slice(0, 1), ...loading.slice(1), ...running.slice(1)];
