@@ -165,8 +165,8 @@ export default function FileDetails(props) {
                   <Typography variant="h6">
                     Details for {item.version} - (file size: {item.data.filesize})
                   </Typography>
-                  {item.type === "snafmt" && <SNAFormat item={item}></SNAFormat>}
-                  {item.type === "z80fmt" && <Z80Format item={item}></Z80Format>}
+                  {item.type === "snafmt" && item.data.length && <SNAFormat item={item}></SNAFormat>}
+                  {item.type === "z80fmt" && item.data.length && <Z80Format item={item}></Z80Format>}
                   {item.type === "tapfmt" && <TAPFormat item={item}></TAPFormat>}
                   {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
                   {item.type === "pfmt" && <PFormat item={item}></PFormat>}

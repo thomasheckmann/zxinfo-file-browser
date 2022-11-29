@@ -184,8 +184,8 @@ function scanDirectory(dirPath, obj) {
  * Returns an arrray with names of folders containing known files or null, if user cancels dialog
  *
  */
-ipcMain.handle("dialog:openFolder", async (event, arg) => {
-  const mylog = log.scope("dialog:openFolder");
+ipcMain.handle("open-folder-dialog", async (event, arg) => {
+  const mylog = log.scope("open-folder-dialog");
   mylog.info(`${event}, ${arg}`);
 
   function initFolderView(startFolder) {
@@ -221,7 +221,7 @@ ipcMain.handle("dialog:openFolder", async (event, arg) => {
   });
 
   if (canceled) {
-    mylog.debug(`handle('dialog:openFolder'): CANCEL`);
+    mylog.debug(`handle('open-folder-dialog'): CANCEL`);
     return null;
   } else {
     return initFolderView(filePaths[0]);

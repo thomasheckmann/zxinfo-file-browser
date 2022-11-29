@@ -1,6 +1,7 @@
 import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import Registers from "./Registers";
+import { useEffect } from "react";
 
 export default function SNAFormat(props) {
   const { item } = props;
@@ -19,7 +20,7 @@ export default function SNAFormat(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          <Registers regs={item.data}></Registers>
+          {item.data && <Registers regs={item.data}></Registers>}
           {item.data.is128K && (
             <React.Fragment>
               <TableRow>
