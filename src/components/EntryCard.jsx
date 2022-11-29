@@ -147,7 +147,7 @@ function EntryCard(props) {
   useEffect(() => {
     if (!restCalled) {
       setRestCalled(true);
-
+    
       const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
       axios
         .get(dataURL)
@@ -156,6 +156,8 @@ function EntryCard(props) {
           setOriginalScreen(props.entry.scr);
           item.zxdbID = response.data.entry_id;
           item.zxdbTitle = response.data.title;
+
+          // look up SCR if user selected
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
           if (zxdbSCR) {
             item.scr = zxdbSCR;

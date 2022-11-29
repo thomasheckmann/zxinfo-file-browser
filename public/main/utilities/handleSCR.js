@@ -352,7 +352,6 @@ function _printAt(image, x, y, text, model, maxLine) {
   var my_y = y;
   for (var i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i) - charOffset;
-    mylog.debug(`printing: ${c}`);
     if (c < 0 || c > 95) {
       // ignore, non-printable
     } else if (my_y < maxLine) {
