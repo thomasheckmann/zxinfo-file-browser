@@ -89,7 +89,7 @@ function readZX81(data) {
   mylog.debug(`input: ${data.length}`);
 
   const zx81_sys_vars = {
-    versn: data[0], // 0 for ZX81 basic
+    versn: data[0], // 0 for ZX81 basic, 1 or 255
     e_ppc: data[1] + data[2] * 256,
     d_file: data[3] + data[4] * 256,
     vars: data[7] + data[8] * 256,
