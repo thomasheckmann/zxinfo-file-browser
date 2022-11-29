@@ -1,7 +1,6 @@
 import React from "react";
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import Registers from "./Registers";
-import { useEffect } from "react";
 
 export default function SNAFormat(props) {
   const { item } = props;

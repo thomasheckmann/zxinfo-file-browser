@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 
-import { isDev } from "../../App";
-
 export default function PFormat(props) {
   const { item } = props;
   const [listningScr, setListningScr] = useState();
