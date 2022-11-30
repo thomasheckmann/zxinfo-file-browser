@@ -179,6 +179,7 @@ function EntryCard(props) {
     }
   }, [restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR]);
 
+  // handle user selected SCR
   useEffect(() => {
     var useScreen = null;
 
@@ -263,6 +264,7 @@ function EntryCard(props) {
             <Stack direction="row" spacing={1} alignItems="center">
               {entry.version && <Chip label={entry.version} />}
               {entry.hwmodel && <Chip label={entry.hwmodel} />}
+              {entry.protection && <Chip label={entry.protection} />}
               {entry.zxdbID && (
                 <Tooltip title="More details at ZXInfo.dk">
                 <Chip
