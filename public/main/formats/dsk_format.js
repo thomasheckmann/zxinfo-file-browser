@@ -70,13 +70,17 @@ function read_track_info(data, track, DPB) {
 function valid_filename(filename) {
   const mylog = log.scope("valid_filename");
   // returns true, if filename contains only valid ASCII characters 32 - 127
+  var valid = true;
+  var hexString = "";
   for (var i = 0; i < filename.length; i++) {
+    hexString += filename.charCodeAt(i).toString(16) + ",";
     if (filename.charCodeAt(i) < 32 || filename.charCodeAt(i) > 127) {
-      mylog.debug(`ops, illegal character: ${filename.charCodeAt(i)}`);
-      return false;
+      // mylog.debug(`ops, illegal character: ${filename.charCodeAt(i)}`);
+      valid = false;
     }
   }
-  return true;
+  // mylog.debug(`text: ${hexString}`);
+  return valid;
 }
 
 // removes 7th bit of chars in string
@@ -88,12 +92,90 @@ function cleanString(filename) {
     if (char < 32 || char > 127) char = 63;
     cleanedFilename = cleanedFilename + String.fromCharCode(char);
   }
-  mylog.debug(`cleaned: ${cleanedFilename}`);
+  // mylog.debug(`cleaned: ${cleanedFilename}`);
   return cleanedFilename;
 }
 
+const DPB_CPC_SYSTEM = {
+  spt: 0x24, // Number of 128-byte records per track
+  bsh: 0x03, // Block shift. 3 => 1k, 4 => 2k, 5 => 4k...
+  blm: 0x07, // Block mask. 7 => 1k, 0Fh => 2k, 1Fh => 4k...
+  exm: 0x00, // Extent mask, see later
+  dsm: 0xaa, // (no. of blocks on the disc)-1
+  drm: 0x3f, // (no. of directory entries)-1
+  al0: 0xc0, // Directory allocation bitmap, first byte
+  al1: 0x00, // Directory allocation bitmap, second byte
+  cks: 0x10, // Checksum vector size, 0 or 8000h for a fixed disc.
+  off: 0x02, // Offset, number of reserved tracks
+  psh: 0x02, // Physical sector shift, 0 => 128-byte sectors, 1 => 256-byte sectors  2 => 512-byte sectors...
+  phm: 0x03, // Physical sector mask,  0 => 128-byte sectors, 1 => 256-byte sectors, 3 => 512-byte sectors...
+};
+
+const DPB_CPC_DATA = {
+  spt: 0x24, // Number of 128-byte records per track
+  bsh: 0x03, // Block shift. 3 => 1k, 4 => 2k, 5 => 4k...
+  blm: 0x07, // Block mask. 7 => 1k, 0Fh => 2k, 1Fh => 4k...
+  exm: 0x00, // Extent mask, see later
+  dsm: 0xb3, // (no. of blocks on the disc)-1
+  drm: 0x3f, // (no. of directory entries)-1
+  al0: 0xc0, // Directory allocation bitmap, first byte
+  al1: 0x00, // Directory allocation bitmap, second byte
+  cks: 0x10, // Checksum vector size, 0 or 8000h for a fixed disc.
+  off: 0x00, // Offset, number of reserved tracks
+  psh: 0x02, // Physical sector shift, 0 => 128-byte sectors, 1 => 256-byte sectors  2 => 512-byte sectors...
+  phm: 0x03, // Physical sector mask,  0 => 128-byte sectors, 1 => 256-byte sectors, 3 => 512-byte sectors...
+};
+
+const DPB_PCW_SPECTRUM = {
+  spt: 0x24, // Number of 128-byte records per track
+  bsh: 0x03, // Block shift. 3 => 1k, 4 => 2k, 5 => 4k...
+  blm: 0x07, // Block mask. 7 => 1k, 0Fh => 2k, 1Fh => 4k...
+  exm: 0x00, // Extent mask, see later
+  dsm: 0xae, // (no. of blocks on the disc)-1
+  drm: 0x3f, // (no. of directory entries)-1
+  al0: 0xc0, // Directory allocation bitmap, first byte
+  al1: 0x00, // Directory allocation bitmap, second byte
+  cks: 0x10, // Checksum vector size, 0 or 8000h for a fixed disc.
+  off: 0x01, // Offset, number of reserved tracks
+  psh: 0x02, // Physical sector shift, 0 => 128-byte sectors, 1 => 256-byte sectors  2 => 512-byte sectors...
+  phm: 0x03, // Physical sector mask,  0 => 128-byte sectors, 1 => 256-byte sectors, 3 => 512-byte sectors...
+};
+
+/**
+ *
+ * @param {*} format
+ * From +3 DOS DD_SEL_FORMAT, format required:
+ * 0 => PCW format, type 0
+ * 1 => System format
+ * 2 => Data only format
+ * 3 => PCW format, double sided, double track
+ */
+function DD_SEL_FORMAT(format) {
+  const mylog = log.scope("DD_SEL_FORMAT");
+
+  mylog.debug(`Requsting disk format: ${format}`);
+
+  switch (format) {
+    case 0:
+      mylog.debug(`PCW 180k/Spectrum`);
+      return DPB_PCW_SPECTRUM;
+    case 1:
+      mylog.debug(`CPC System`);
+      return DPB_CPC_SYSTEM;
+    case 2:
+      mylog.debug(`CPC Data`);
+      return DPB_CPC_DATA;
+    case 3:
+      mylog.debug(`PCW DDDT not supported...`);
+      return DPB_PCW_SPECTRUM;
+    default:
+      mylog.error(`Unknown format: ${format}`);
+      return DPB_PCW_SPECTRUM;
+  }
+}
+
 // init disk
-function readEDSK(data) {
+function readEDSK(data, isExtended) {
   const mylog = log.scope("readEDSK");
   const disk_info_block = {
     signature: String.fromCharCode.apply(null, data.slice(0, 0x22)),
@@ -101,30 +183,18 @@ function readEDSK(data) {
     cpc_format: null,
     number_of_tracks: data[0x30], // 40, 42, 80
     number_of_sides: data[0x031], // 1 or 2
-    size_of_track: data[0x032] + data[0x33] * 256,
+    size_of_track: data[0x032] + data[0x33] * 256, // 0 if Ext?
     size_of_tracks: [data[0x034]], // high bytes of track sizes for all tracks
     error: [],
   };
 
-  mylog.debug(`DISK INFO BLOCK`);
+  mylog.debug(`DISK INFO BLOCK - As identified in signature`);
   mylog.debug(`${JSON.stringify(disk_info_block)}`);
 
-  // find directory
-  // Assume +3/PCW DPB
-  var DPB = {
-    // PCW/Spectrum system
-    spt: 0x24, // Number of 128-byte records per track
-    bsh: 0x03, // Block shift. 3 => 1k, 4 => 2k, 5 => 4k...
-    blm: 0x07, // Block mask. 7 => 1k, 0Fh => 2k, 1Fh => 4k...
-    exm: 0x00, // Extent mask, see later
-    dsm: 0xae, // (no. of blocks on the disc)-1
-    drm: 0x3f, // (no. of directory entries)-1
-    al0: 0xc0, // Directory allocation bitmap, first byte
-    al1: 0x00, // Directory allocation bitmap, second byte
-    off: 0x01, // Offset, number of reserved tracks
-    psh: 0x02, // Physical sector shift, 0 => 128-byte sectors, 1 => 256-byte sectors  2 => 512-byte sectors...
-    phm: 0x03, // Physical sector mask,  0 => 128-byte sectors, 1 => 256-byte sectors, 3 => 512-byte sectors...
-  };
+  // https://retrocomputing.stackexchange.com/questions/14575/how-do-i-know-where-the-file-directory-is-stored-on-a-spectrum-3-disk-layout
+  mylog.debug(`Detecting DISK format... (Based on +3 DOS LOGIN function)`);
+
+  var DPB = DD_SEL_FORMAT(0);
 
   // detect additional +3 disk info
   // 16-byte record on track 0, head 0, physical sector 1
@@ -136,57 +206,60 @@ function readEDSK(data) {
     mylog.warn(`Error reading sector 0`);
     return disk_info_block;
   }
-  const fpsId = sector0.sector_info_table[0].sector_id;
 
+  const fpsId = sector0.sector_info_table[0].sector_id; // DD_READ_ID
   mylog.debug(`First physical sector id: ${fpsId} (0x${fpsId.toString(16)})`);
-  if (fpsId >= 0xc0 && fpsId <= 0xff) {
-    // CPM_DATA_DISK
-    mylog.debug("CPC Data format");
-    disk_info_block.cpc_format = "CPC Data format";
-    DPB.dsm = 0xb3;
-    DPB.off = 0x00;
-  } else if (fpsId === 0x41) {
-    // CPM_DATA_DISK
-    mylog.debug("CPC System format");
-    disk_info_block.cpc_format = "CPC System format";
-    DPB.dsm = 0xaa;
-    DPB.off = 0x02;
-  } else if (fpsId === 0xe5) {
-    // If all bytes of the spec are 0E5h, it should be assumed that the disc is a 173k PCW/Spectrum +3 disc
-    mylog.debug("PCW/Spectrum +3");
-    disk_info_block.cpc_format = "PCW/Spectrum +3";
-    DPB.dsm = 0xae;
-    const plus3info = {
-      format: sector0.sector_data[0][0],
-      sideness: sector0.sector_data[0][1],
-      tracks: sector0.sector_data[0][2],
-      sectors: sector0.sector_data[0][3],
-      psh: sector0.sector_data[0][4],
-      off: sector0.sector_data[0][5],
-      bsh: sector0.sector_data[0][6],
-      no_of_dir_blocks: sector0.sector_data[0][7],
-    };
-    DPB.size_of_track = plus3info.size_of_track;
-    DPB.off = plus3info.off;
-    mylog.debug(`+3 DISK INFO: ${JSON.stringify(plus3info)}`);
-  } else {
-    // This can be read on part 27 of the +3 manual:
-    mylog.debug(`Non stadard format: fpsId: ${fpsId}`);
-    disk_info_block.cpc_format = "CPC Format";
-    const disk_specification = {
-      format: sector0.sector_data[0][0],
-      sideness: sector0.sector_data[0][1],
-      tracks: sector0.sector_data[0][2],
-      sectors: sector0.sector_data[0][3],
-      psh: sector0.sector_data[0][4],
-      off: sector0.sector_data[0][5],
-      bsh: sector0.sector_data[0][6],
-      no_of_dir_blocks: sector0.sector_data[0][7],
-    };
-    DPB.size_of_track = disk_specification.size_of_track;
-    DPB.off = disk_specification.off;
 
-    mylog.debug(`Disk Specifications: ${JSON.stringify(disk_specification)}`);
+  mylog.debug(`Looking at top two bits`);
+  if ((fpsId & 0b11000000) >> 6 === 0b01) {
+    mylog.debug(`ID is 40h-7Fh) then the disc is in CPC system format`);
+    disk_info_block.cpc_format = "CPC System format";
+    DPB = DD_SEL_FORMAT(1);
+  } else if ((fpsId & 0b11000000) >> 6 === 0b11) {
+    mylog.debug(`ID is 0C0h-0FFh) then the disc is in CPC data format`);
+    disk_info_block.cpc_format = "CPC Data format";
+    DPB = DD_SEL_FORMAT(2);
+  } else {
+    mylog.debug(`NOT CPC System/Data - Looking at boot sector`);
+    const bootSector = sector0.sector_data[0].slice(0, 10);
+    // examine 10 first bytes from cylinder 0, head 0, sector 1
+    var hexString = "";
+    for (var i = 0; i < bootSector.length; i++) {
+      hexString += "0x" + bootSector[i].toString(16) + ",";
+    }
+    mylog.debug(`Boot Sector: ${hexString}`);
+
+    // If all bytes of the spec are 0E5h, it should be assumed that the disc is a 173k PCW/Spectrum +3 disc
+    var all_0xe5 = true;
+    for(var i = 0; i < bootSector.length; i++) {
+      all_0xe5 = all_0xe5 && (bootSector[i] === 0xe5);
+    }
+
+    if (all_0xe5) {
+      // If all bytes of the spec are 0E5h, it should be assumed that the disc is a 173k PCW/Spectrum +3 disc
+      mylog.debug("PCW/Spectrum +3");
+      disk_info_block.cpc_format = "PCW/Spectrum +3";
+      DPB = DD_SEL_FORMAT(0);
+    } else {
+      disk_info_block.cpc_format = "PCW";
+      DPB = DD_SEL_FORMAT(sector0.sector_data[0][0]);
+
+      const disk_specs = {
+        format: sector0.sector_data[0][0],
+        sideness: sector0.sector_data[0][1],
+        tracks: sector0.sector_data[0][2],
+        sectors: sector0.sector_data[0][3],
+        psh: sector0.sector_data[0][4],
+        off: sector0.sector_data[0][5],
+        bsh: sector0.sector_data[0][6],
+        no_of_dir_blocks: sector0.sector_data[0][7],
+      };
+      DPB.psh = disk_specs.psh;
+      DPB.off = disk_specs.off;
+      DPB.bsh = disk_specs.bsh;
+      disk_info_block.number_of_tracks = disk_specs.tracks;
+      mylog.debug(`Specs from boot record: ${JSON.stringify(disk_specs)}`);
+    }
   }
 
   const dir_sector = DPB.off; // first non-reserved track
@@ -223,24 +296,26 @@ function readEDSK(data) {
     for (var j = 16; j < 32; j++) {
       al = al + (entry.charCodeAt(j) + ", ");
     }
-    mylog.debug(
-      `${file_entry.ua}, ${file_entry.filename}.${file_entry.ext} ex=${entry.charCodeAt(12)}, s1=${entry.charCodeAt(13)}, s2=${entry.charCodeAt(
-        14
-      )}, rc=${entry.charCodeAt(15)} - ${file_entry.read_only ? "read_only" : ""} ${file_entry.hidden > 0 ? "hidden" : ""} ${
-        file_entry.archived ? "archived" : ""
-      }`
-    );
-    mylog.debug(`\t\tAL: ${al}`);
+    if (file_entry.ua < 16) {
+      mylog.debug(
+        `${file_entry.ua}, ${file_entry.filename}.${file_entry.ext} ex=${entry.charCodeAt(12)}, s1=${entry.charCodeAt(13)}, s2=${entry.charCodeAt(
+          14
+        )}, rc=${entry.charCodeAt(15)} - ${file_entry.read_only ? "read_only" : ""} ${file_entry.hidden > 0 ? "hidden" : ""} ${
+          file_entry.archived ? "archived" : ""
+        }`
+      );
+      mylog.debug(`\t\tAL: ${al}`);
+    }
     // MOSTLY USED FOR DEBUG
 
     var item = file_map.get(current_filename + current_ext);
     if (valid_filename(entry.slice(1, 9))) {
-      if (item && file_entry.ua < 16) {
+      if (item && file_entry.ua === 0) {
         item.rc_sum = item.rc_sum + current_rc;
         item.file_size = Math.ceil((item.rc_sum * 128) / (128 << DPB.bsh));
         // mylog.debug(`updating: ${JSON.stringify(item)}`);
         file_map.set(current_filename + current_ext, item);
-      } else if (!item && file_entry.ua < 16) {
+      } else if (!item && file_entry.ua === 0) {
         file_entry.rc_sum = current_rc;
         file_entry.file_size = Math.ceil((file_entry.rc_sum * 128) / (128 << DPB.bsh));
         // mylog.debug(`creating new: ${JSON.stringify(file_entry)}`);
@@ -312,45 +387,20 @@ function readDSK(data) {
   var regs = {};
   regs.filesize = data.length;
 
+  var isExtended = false;
   const signature = String.fromCharCode.apply(null, data.slice(0, 34));
   if (signature === "EXTENDED CPC DSK File\r\nDisk-Info\r\n") {
     mylog.debug(`Extended DSK format...`);
-    const disk = readEDSK(data);
-    snapshot.error = disk.error;
-    snapshot.text = `Ext. CPC DSK (${disk.cpc_format}) T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-    mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
-    snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-    mylog.info(snapshot.text);
-    mylog.info([...disk.dir.keys()]);
-  } else if (signature === "MV - CPCEMU Disk-File\r\nDisk-Info\r\n") {
-    mylog.warn(`Standard CPC DSK`);
-    const disk = readEDSK(data);
-    snapshot.error = disk.error;
-    snapshot.text = `Std. CPC DSK (${disk.cpc_format}) T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-    mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
-    snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-    mylog.info(snapshot.text);
-    mylog.info([...disk.dir.keys()]);
-  } else if (signature === "MV - CPC format Disk Image (DU54)\r") {
-    mylog.warn(`Standard DSK DU54`);
-    const disk = readEDSK(data);
-    snapshot.error = disk.error;
-    snapshot.text = `CPC (DU54): T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-    mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
-    snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-  } else if (signature.startsWith("MV - CPCEMU /")) {
-    mylog.warn(`CPC DSK`);
-    const disk = readEDSK(data);
-    snapshot.error = disk.error;
-    snapshot.text = `CPC DSK (${disk.cpc_format}) T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-    mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
-    snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-    mylog.info(snapshot.text);
-    mylog.info([...disk.dir.keys()]);
-  } else {
-    snapshot.error.push({ type: "warning", message: `Unknown DSK format: ${signature}` });
-    mylog.error(`Unknown DSK format: ${signature}`);
+    isExtended = true;
   }
+
+  const disk = readEDSK(data, isExtended);
+  snapshot.error = disk.error;
+  snapshot.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
+  mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
+  snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
+  mylog.info(snapshot.text);
+  mylog.debug([...disk.dir.keys()]);
 
   snapshot.data = regs;
 

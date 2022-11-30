@@ -31,7 +31,7 @@ function createDIRScreen(dirdata) {
   }
 
   const endText2 = `SCL image: ${disk_info.no_files} File(s)`;
-  screenZX.printAtSpectrum(image, 0, line + 1, endText2, 22);
+  screenZX.printAtSpectrum(image, 0, line + 1, endText2, 999999);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);

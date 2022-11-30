@@ -74,7 +74,7 @@ function createDIRScreen(dirdata) {
   screenZX.printAtSpectrum(image, 0, line+1, endText, 22);
 
   const endText2 = `${disk_info.disk_type_name} - ${dir_info.length} File(s)`;
-  screenZX.printAtSpectrum(image, 0, line+2, endText2, 22);
+  screenZX.printAtSpectrum(image, 0, line+2, endText2, 999999);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
