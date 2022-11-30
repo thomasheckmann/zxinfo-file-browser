@@ -104,6 +104,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "dskfmt";
     ZXFileInfo.text = obj.text;
+    ZXFileInfo.protection = obj.protection;
     dskfmt.createDIRScreen(obj.dir_scr).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");

@@ -34,7 +34,7 @@ function read_track_info(data, track, DPB) {
     sector_data: [], // num_sectors * (sector_size * 256b)
   };
 
-  mylog.debug(
+  mylog.info(
     `Track Info: track: ${track_info.track_num}, side: ${track_info.head_num}, sector size: ${track_info.sector_size} (x 256b), no. of sectors: ${track_info.num_sectors}, filler: ${track_info.filler_byte}`
   );
   // READ SECTOR INFORMATION LIST
@@ -157,16 +157,16 @@ function DD_SEL_FORMAT(format) {
 
   switch (format) {
     case 0:
-      mylog.debug(`PCW 180k/Spectrum`);
+      mylog.info(`PCW 180k/Spectrum`);
       return DPB_PCW_SPECTRUM;
     case 1:
-      mylog.debug(`CPC System`);
+      mylog.info(`CPC System`);
       return DPB_CPC_SYSTEM;
     case 2:
-      mylog.debug(`CPC Data`);
+      mylog.info(`CPC Data`);
       return DPB_CPC_DATA;
     case 3:
-      mylog.debug(`PCW DDDT not supported...`);
+      mylog.info(`PCW DDDT not supported...`);
       return DPB_PCW_SPECTRUM;
     default:
       mylog.error(`Unknown format: ${format}`);
@@ -188,7 +188,7 @@ function readEDSK(data, isExtended) {
     error: [],
   };
 
-  mylog.debug(`DISK INFO BLOCK - As identified in signature`);
+  mylog.debug(`DISK INFO BLOCK - As identified in DSK file signature`);
   mylog.debug(`${JSON.stringify(disk_info_block)}`);
 
   // https://retrocomputing.stackexchange.com/questions/14575/how-do-i-know-where-the-file-directory-is-stored-on-a-spectrum-3-disk-layout
@@ -202,6 +202,10 @@ function readEDSK(data, isExtended) {
   const sector0 = read_track_info(data, 0, DPB);
 
   if (sector0.track_num === undefined && sector0.head_num === undefined && sector0.head_num === undefined && sector0.sector_size === undefined) {
+    disk_info_block.error.push({ type: "error", message: `Error reading sector 0` });
+    mylog.warn(`Error reading sector 0`);
+    return disk_info_block;
+  } else if (sector0.sector_info_table.length === 0) {
     disk_info_block.error.push({ type: "error", message: `Error reading sector 0` });
     mylog.warn(`Error reading sector 0`);
     return disk_info_block;
@@ -231,8 +235,8 @@ function readEDSK(data, isExtended) {
 
     // If all bytes of the spec are 0E5h, it should be assumed that the disc is a 173k PCW/Spectrum +3 disc
     var all_0xe5 = true;
-    for(var i = 0; i < bootSector.length; i++) {
-      all_0xe5 = all_0xe5 && (bootSector[i] === 0xe5);
+    for (var i = 0; i < bootSector.length; i++) {
+      all_0xe5 = all_0xe5 && bootSector[i] === 0xe5;
     }
 
     if (all_0xe5) {
@@ -258,7 +262,7 @@ function readEDSK(data, isExtended) {
       DPB.off = disk_specs.off;
       DPB.bsh = disk_specs.bsh;
       disk_info_block.number_of_tracks = disk_specs.tracks;
-      mylog.debug(`Specs from boot record: ${JSON.stringify(disk_specs)}`);
+      mylog.info(`Specs from boot record: ${JSON.stringify(disk_specs)}`);
     }
   }
 
@@ -324,7 +328,7 @@ function readEDSK(data, isExtended) {
         // mylog.debug(`DELETED: ${current_filename}.${current_ext}`);
         file_map.delete(current_filename + current_ext);
       } else {
-        mylog.warn(`Unknown UA: ${file_entry.ua} for file: ${current_filename}${current_ext}`);
+        mylog.debug(`Unknown UA: ${file_entry.ua} for file: ${current_filename}${current_ext}`);
       }
     }
   }
@@ -339,7 +343,98 @@ function readEDSK(data, isExtended) {
   disk_info_block.total_size = DPB.dsm - ((DPB.drm + 1) * 32) / 2048; // (DPB.drm * 32) / 1024; dsm = 1024K blocks
   disk_info_block.total_size_free = disk_info_block.total_size - disk_info_block.total_size_used;
   disk_info_block.dir = new Map([...file_map].sort());
+
+  const protection = detectProtectionSystem(data, DPB, disk_info_block.no_of_tracks);
+
+  disk_info_block.protection = protection;
+
   return disk_info_block;
+}
+
+function detectProtectionSystem(data, DPB, no_of_tracks) {
+  const mylog = log.scope("detectProtectionSystem");
+
+  mylog.debug(`Trying to detect if copy protection used...`);
+
+  var result = "";
+  // Alkatraz copy-protection
+  const track0 = read_track_info(data, 0, DPB);
+
+  // track0.sector_data[0] ... data[no_of_sectors]
+  // header: String.fromCharCode.apply(null, data.slice(offset_track, offset_track + 0x0c)),
+
+  // convert track data to "String"
+  var track0asString = "";
+  for (var t = 0; t < track0.sector_data.length; t++) {
+    track0asString += track0.sector_data[t].toString();
+  }
+  const track1 = read_track_info(data, 1, DPB);
+
+  // Alkatraz copy-protection
+  if (track0asString.includes(" THE ALKATRAZ PROTECTION SYSTEM   (C) 1987  Appleby Associates")) {
+    mylog.info(`Protection Detected: Alkatraz +3 (signed)`);
+    result = "Alkatraz +3";
+  }
+
+  // Paul Owens
+  if(track0.num_sectors === 9 && no_of_tracks > 10 && track1.num_sectors === 0) {
+    mylog.info(`trying to detech Paul Owens...`);
+  }
+  
+  // Speedlock +3 1987
+  if (track0asString.includes("SPEEDLOCK +3 DISC PROTECTION SYSTEM COPYRIGHT 1987 SPEEDLOCK ASSOCIATES")) {
+    mylog.info(`Protection Detected: Speedlock +3 1987 (signed)`);
+    result = "Speedlock +3 1987";
+  }
+  if (
+    track0.num_sectors === 9 &&
+    track1.num_sectors === 5 &&
+    (128 << track1.sector_info_table[0].sector_size === 1024) &&
+    track0.sector_info_table[6].FDC_status_reg2 === 64 &&
+    track0.sector_info_table[8].FDC_status_reg2 === 0
+  ) {
+    mylog.info(`Protection Detected: Speedlock +3 1987 (unsigned)`);
+    result = "Speedlock +3 1987 (u)";
+  }
+
+  // Speedlock +3 1988
+  if (track0asString.includes("SPEEDLOCK +3 DISC PROTECTION SYSTEM COPYRIGHT 1988 SPEEDLOCK ASSOCIATES")) {
+    mylog.info(`Protection Detected: Speedlock +3 1988 (signed)`);
+    result = "Speedlock +3 1988";
+  }
+  if (
+    track0.num_sectors === 9 &&
+    track1.num_sectors === 5 &&
+    (128 << track1.sector_info_table[0].sector_size === 1024) &&
+    track0.sector_info_table[6].FDC_status_reg2 === 64 &&
+    track0.sector_info_table[8].FDC_status_reg2 === 64
+  ) {
+    mylog.info(`Protection Detected: Speedlock +3 1988 (unsigned)`);
+    result = "Speedlock +3 1988 (u)";
+  }
+
+  // Speedlock 1988
+  if (track0asString.includes("SPEEDLOCK DISC PROTECTION SYSTEMS (C) 1988 SPEEDLOCK ASSOCIATES")) {
+    mylog.info(`Protection Detected: Speedlock 1988 (signed)`);
+    result = "Speedlock 1988";
+  }
+
+  // Speedlock 1989
+  if (track0asString.includes("SPEEDLOCK DISC PROTECTION SYSTEMS (C) 1989 SPEEDLOCK ASSOCIATES")) {
+    mylog.info(`Protection Detected: Speedlock 1989 (signed)`);
+    result = "Speedlock 1989";
+  }
+  if (
+    track0.num_sectors > 7 &&
+    no_of_tracks > 40 &&
+    track1.num_sectors === 1 &&
+    track1.sector_info_table[0].sector_id === 193 &&
+    track1.sector_info_table[0].FDC_status_reg1 === 32
+  ) {
+    mylog.info(`Protection Detected: Speedlock 1989 (unsigned)`);
+    result = "Speedlock 1989 (u)";
+  }
+  return result;
 }
 
 function createDIRScreen(dirdata) {
@@ -396,11 +491,12 @@ function readDSK(data) {
 
   const disk = readEDSK(data, isExtended);
   snapshot.error = disk.error;
+  snapshot.protection = disk.protection;
   snapshot.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-  mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
+  mylog.info(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
   snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
   mylog.info(snapshot.text);
-  mylog.debug([...disk.dir.keys()]);
+  if (disk.dir) mylog.debug([...disk.dir.keys()]);
 
   snapshot.data = regs;
 
