@@ -48,9 +48,9 @@
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@mui/icons-material": "^5.10.15",
-    "@mui/material": "^5.10.15",
-    "@mui/styled-engine-sc": "^5.10.14",
+    "@mui/icons-material": "^5.10.16",
+    "@mui/material": "^5.10.16",
+    "@mui/styled-engine-sc": "^5.10.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
@@ -108,7 +108,7 @@
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
-    "electron": "^21.3.1",
+    "electron": "^22.0.0",
     "electron-builder": "^23.6.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-icon-builder": "^2.0.1",
