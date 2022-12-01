@@ -30,7 +30,8 @@ let win;
 
 function createWindow() {
   const mylog = log.scope("createWindow");
-
+  app.commandLine.appendSwitch ("disable-http-cache");
+  
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   win = new BrowserWindow({
     width: 1600,
