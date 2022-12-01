@@ -8,18 +8,33 @@ const CPCEMU_TRACK_OFFSET = 0x100;
 
 const NUM_SECTOR = 9;
 
-function read_track_info(data, track, DPB) {
+function read_track_info(data, track, DPB, disk_info_block) {
   const mylog = log.scope("read_track_info");
 
   mylog.debug(`reading track info for track: ${track}`);
 
-  var SIZ_TRACK = CPCEMU_TRACK_OFFSET + NUM_SECTOR * (128 << DPB.psh);
-  if (DPB.size_of_track) {
-    SIZ_TRACK = DPB.size_of_track;
+  // var SIZ_TRACK = CPCEMU_TRACK_OFFSET + NUM_SECTOR * (128 << DPB.psh);
+  // mylog.debug(`SIZ_TRACK: ${SIZ_TRACK}, disk_info_block.size_of_track: ${disk_info_block.size_of_track}`);
+
+  var offset_track;
+  // STD. FORMAT
+  if (disk_info_block.size_of_track) {
+    mylog.debug(`Track size STD format: DPB: ${DPB.size_of_track}`);
+    offset_track = CPCEMU_INFO_OFFSET + track * disk_info_block.size_of_track;
+  } else {
+    // The location of a Track Information Block for a chosen track is found by summing the sizes of all tracks up to the chosen track plus the size of the Disc Information Block (&100 bytes). The first track is at offset &100 in the disc image.
+    mylog.debug(`Track size EXT format, use lookup list size_of_tracks`);
+
+    var trackSizeSum = 0;
+    for (var ts = 0; ts < track; ts++) {
+      trackSizeSum += disk_info_block.size_of_tracks[ts];
+      mylog.debug(`trk: ${ts} - size: ${disk_info_block.size_of_tracks[ts]}`);
+    }
+    mylog.debug(`Sum of track sizes: ${trackSizeSum} (${trackSizeSum * 256})- for track ${track}`);
+    offset_track = CPCEMU_INFO_OFFSET + trackSizeSum * 256;
   }
   // READ TRACK INFORMATION BLOCK
 
-  const offset_track = CPCEMU_INFO_OFFSET + track * SIZ_TRACK;
   mylog.debug(`offset for track: ${track} - ${offset_track}`);
   const track_info = {
     header: String.fromCharCode.apply(null, data.slice(offset_track, offset_track + 0x0c)),
@@ -35,7 +50,7 @@ function read_track_info(data, track, DPB) {
   };
 
   mylog.info(
-    `Track Info: track: ${track_info.track_num}, side: ${track_info.head_num}, sector size: ${track_info.sector_size} (x 256b), no. of sectors: ${track_info.num_sectors}, filler: ${track_info.filler_byte}`
+    `Track Info: track: ${track_info.track_num}, side: ${track_info.head_num}, sector size: ${track_info.sector_size} (x 256b), no. of sectors: ${track_info.num_sectors}, filler: ${track_info.filler_byte}, signature: ${track_info.header}`
   );
   // READ SECTOR INFORMATION LIST
   var offset_sector = offset_track + 0x18;
@@ -57,11 +72,19 @@ function read_track_info(data, track, DPB) {
   }
 
   // READ SECTOR DATA
-  var offset_sector_data = offset_track + 0x0100;
+  var offset_sector_data = offset_track + CPCEMU_TRACK_OFFSET;
   for (var i = 0; i < track_info.num_sectors; i++) {
-    const sector_data = data.slice(offset_sector_data, offset_sector_data + 256 * track_info.sector_size);
+    var sector_data;
+    if (disk_info_block.isExtended) {
+      sector_data = data.slice(offset_sector_data, offset_sector_data + 256 * disk_info_block.size_of_tracks[track]);
+      offset_sector_data += 256 * disk_info_block.size_of_tracks[track];
+    } else {
+      // if STD, just use track_info.sector_size
+      sector_data = data.slice(offset_sector_data, offset_sector_data + 256 * track_info.sector_size);
+      offset_sector_data += 256 * track_info.sector_size;
+    }
+
     track_info.sector_data.push(sector_data);
-    offset_sector_data += 256 * track_info.sector_size;
   }
 
   return track_info;
@@ -184,9 +207,22 @@ function readEDSK(data, isExtended) {
     number_of_tracks: data[0x30], // 40, 42, 80
     number_of_sides: data[0x031], // 1 or 2
     size_of_track: data[0x032] + data[0x33] * 256, // 0 if Ext?
-    size_of_tracks: [data[0x034]], // high bytes of track sizes for all tracks
+    size_of_tracks: [], // high bytes of track sizes for all tracks
     error: [],
+    isExtended: isExtended,
   };
+
+  if (disk_info_block.size_of_track === 0) {
+    isExtended = true;
+    disk_info_block.isExtended = true;
+  }
+  // if extended, fill out the track size table
+  if (isExtended) {
+    mylog.debug(`Extended disk, finding track size table`);
+    for (var t = 0; t < disk_info_block.number_of_tracks * disk_info_block.number_of_sides; t++) {
+      disk_info_block.size_of_tracks.push(data[0x034 + t]);
+    }
+  }
 
   mylog.debug(`DISK INFO BLOCK - As identified in DSK file signature`);
   mylog.debug(`${JSON.stringify(disk_info_block)}`);
@@ -196,10 +232,10 @@ function readEDSK(data, isExtended) {
 
   var DPB = DD_SEL_FORMAT(0);
 
-  // detect additional +3 disk info
+  // detect additional +3 disk infoƒ
   // 16-byte record on track 0, head 0, physical sector 1
   mylog.debug("Reading 16 byte record to detect additional +3 disk info");
-  const sector0 = read_track_info(data, 0, DPB);
+  const sector0 = read_track_info(data, 0, DPB, disk_info_block);
 
   if (sector0.track_num === undefined && sector0.head_num === undefined && sector0.head_num === undefined && sector0.sector_size === undefined) {
     disk_info_block.error.push({ type: "error", message: `Error reading sector 0` });
@@ -266,11 +302,22 @@ function readEDSK(data, isExtended) {
     }
   }
 
-  const dir_sector = DPB.off; // first non-reserved track
+  /**
+  if(true) {
+    mylog.debug(`TRACK DEBUG BEGIN ***********************************************************************`);
+    for(var t = 0; t < disk_info_block.number_of_tracks; t++) {
+      read_track_info(data, t, DPB, disk_info_block);
+    }
+    mylog.debug(`TRACK DEBUG END ***********************************************************************`);
+  }
+ */
 
+  mylog.debug(`Looking for directory... no of reserved track(s): ${DPB.off}`);
+
+  const dir_sector = DPB.off; // first non-reserved track
   // each DIR entry = 32 bytes
   // drm + 1 * 32 = 2048 / 128<<psh (512) = 4 sectors
-  const track_data = read_track_info(data, dir_sector, DPB);
+  const track_data = read_track_info(data, dir_sector, DPB, disk_info_block);
 
   const no_of_dir_sectors = ((DPB.drm + 1) * 32) / (128 << DPB.psh);
   const no_of_files_per_sector = (128 << DPB.psh) / 32;
@@ -344,31 +391,27 @@ function readEDSK(data, isExtended) {
   disk_info_block.total_size_free = disk_info_block.total_size - disk_info_block.total_size_used;
   disk_info_block.dir = new Map([...file_map].sort());
 
-  const protection = detectProtectionSystem(data, DPB, disk_info_block.no_of_tracks);
+  const protection = detectProtectionSystem(data, DPB, disk_info_block);
 
   disk_info_block.protection = protection;
 
   return disk_info_block;
 }
 
-function detectProtectionSystem(data, DPB, no_of_tracks) {
+function detectProtectionSystem(data, DPB, disk_info_block) {
   const mylog = log.scope("detectProtectionSystem");
 
   mylog.debug(`Trying to detect if copy protection used...`);
 
   var result = "";
-  // Alkatraz copy-protection
-  const track0 = read_track_info(data, 0, DPB);
-
-  // track0.sector_data[0] ... data[no_of_sectors]
-  // header: String.fromCharCode.apply(null, data.slice(offset_track, offset_track + 0x0c)),
+  const track0 = read_track_info(data, 0, DPB, disk_info_block);
 
   // convert track data to "String"
   var track0asString = "";
   for (var t = 0; t < track0.sector_data.length; t++) {
     track0asString += track0.sector_data[t].toString();
   }
-  const track1 = read_track_info(data, 1, DPB);
+  const track1 = read_track_info(data, 1, DPB, disk_info_block);
 
   // Alkatraz copy-protection
   if (track0asString.includes(" THE ALKATRAZ PROTECTION SYSTEM   (C) 1987  Appleby Associates")) {
@@ -377,10 +420,14 @@ function detectProtectionSystem(data, DPB, no_of_tracks) {
   }
 
   // Paul Owens
-  if(track0.num_sectors === 9 && no_of_tracks > 10 && track1.num_sectors === 0) {
+  if (track0asString.includes(`PAUL OWENS`) && track0asString.includes(`PROTECTION SYSTEM`)) {
+    mylog.info(`Protection Detected: Paul Owens/OCEAN (signed)`);
+    result = "Paul Owen";
+  }
+  if (track0.num_sectors === 9 && disk_info_block.no_of_tracks > 10 && track1.num_sectors === 0) {
     mylog.info(`trying to detech Paul Owens...`);
   }
-  
+
   // Speedlock +3 1987
   if (track0asString.includes("SPEEDLOCK +3 DISC PROTECTION SYSTEM COPYRIGHT 1987 SPEEDLOCK ASSOCIATES")) {
     mylog.info(`Protection Detected: Speedlock +3 1987 (signed)`);
@@ -389,7 +436,7 @@ function detectProtectionSystem(data, DPB, no_of_tracks) {
   if (
     track0.num_sectors === 9 &&
     track1.num_sectors === 5 &&
-    (128 << track1.sector_info_table[0].sector_size === 1024) &&
+    128 << track1.sector_info_table[0].sector_size === 1024 &&
     track0.sector_info_table[6].FDC_status_reg2 === 64 &&
     track0.sector_info_table[8].FDC_status_reg2 === 0
   ) {
@@ -405,7 +452,7 @@ function detectProtectionSystem(data, DPB, no_of_tracks) {
   if (
     track0.num_sectors === 9 &&
     track1.num_sectors === 5 &&
-    (128 << track1.sector_info_table[0].sector_size === 1024) &&
+    128 << track1.sector_info_table[0].sector_size === 1024 &&
     track0.sector_info_table[6].FDC_status_reg2 === 64 &&
     track0.sector_info_table[8].FDC_status_reg2 === 64
   ) {
@@ -426,7 +473,7 @@ function detectProtectionSystem(data, DPB, no_of_tracks) {
   }
   if (
     track0.num_sectors > 7 &&
-    no_of_tracks > 40 &&
+    disk_info_block.no_of_tracks > 40 &&
     track1.num_sectors === 1 &&
     track1.sector_info_table[0].sector_id === 193 &&
     track1.sector_info_table[0].FDC_status_reg1 === 32
@@ -434,6 +481,13 @@ function detectProtectionSystem(data, DPB, no_of_tracks) {
     mylog.info(`Protection Detected: Speedlock 1989 (unsigned)`);
     result = "Speedlock 1989 (u)";
   }
+
+    // Three Inch Loader
+    if (track0asString.includes("***Loader Copyright Three Inch Software 1988, All Rights Reserved. Three Inch Software, 73 Surbiton Road, Kingston upon Thames, KT1 2HG***")) {
+      mylog.info(`Protection Detected: Three Inch Loader type 1 (signed)`);
+      result = "Three Inch Loader type 1";
+    }
+  
   return result;
 }
 
@@ -490,6 +544,8 @@ function readDSK(data) {
   }
 
   const disk = readEDSK(data, isExtended);
+  if (disk.isExtended) isExtended = true;
+
   snapshot.error = disk.error;
   snapshot.protection = disk.protection;
   snapshot.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;

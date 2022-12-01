@@ -3,24 +3,24 @@
  */
 
  const folders = [
-    "./disk",
+    "./disk",/*
     "/Users/dkThAhKo/Public/ZXTestData/WITH_ERRORS/DSK_with_errors",
     "/Users/dkThAhKo/Documents/ZXRepo/TOSEC_2020",
     "/Users/dkThAhKo/Documents/ZXRepo/TZXVault/Spectrum/",
     "/Users/dkThAhKo/Documents/ZXRepo/TZXVaultUpdate/Beta Disk",
     "/Users/dkThAhKo/Documents/ZXRepo/World of Spectrum June 2017 Mirror/sinclair/games",
-    "/Users/dkThAhKo/Documents/ZXRepo/Unsorted",
+    "/Users/dkThAhKo/Documents/ZXRepo/Unsorted",*/
   ];
   
   const format = require("../public/main/formats/dsk_format");
   const helper = require("./formatHelper");
   const log = require("electron-log");
   const path = require("path");
-  log.transports.console.level = "info";
+  log.transports.console.level = "silly";
   
   log.transports.file.resolvePath = () => path.join('.', 'output.log');
   log.transports.file.getFile().clear();
-  log.transports.file.level = "info";
+  log.transports.file.level = "debug";
   const mylog = log.scope("dsk_test_all");
   
   var totalFiles = 0;

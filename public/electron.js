@@ -22,7 +22,7 @@ const AdmZip = require("adm-zip");
 const log = require("electron-log");
 
 // use error, warn, info for production
-log.transports.console.level = isDev ? "info" :  "info";
+log.transports.console.level = isDev ? "debug" :  "info";
 log.transports.file.level = isDev ? "debug" : "info";
 log.transports.file.getFile().clear();
 
