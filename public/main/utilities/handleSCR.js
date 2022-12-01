@@ -387,9 +387,6 @@ function printAtZX81(image, x, y, text, maxLine) {
 
 function printAtSpectrum(image, x, y, text, maxLine) {
   const mylog = log.scope("printAtSpectrum");
-  mylog.debug(`x, y = (${x}, ${y}), maxLine = ${maxLine}`);
-
-  mylog.debug(`${text}`);
   return _printAt(image, x, y, text, "SPECTRUM", maxLine);
 }
 
