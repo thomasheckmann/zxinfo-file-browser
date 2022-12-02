@@ -10,6 +10,7 @@ import Z80Format from "./formats/Z80Format";
 import TAPFormat from "./formats/TAPFormat";
 import TZXFormat from "./formats/TZXFormat";
 import PFormat from "./formats/PFormat";
+import DSKFormat from "./formats/DSKFormat";
 
 const Item = styled(Paper)( {
   textAlign: "left",
@@ -170,6 +171,7 @@ export default function FileDetails(props) {
                   {item.type === "tapfmt" && <TAPFormat item={item}></TAPFormat>}
                   {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
                   {item.type === "pfmt" && <PFormat item={item}></PFormat>}
+                  {item.type === "dskfmt" && <DSKFormat item={item}></DSKFormat>}
                 </Box>
               </Grid>
             </Grid>

@@ -19,7 +19,7 @@ function read_track_info(data, track, DPB, disk_info_block) {
   var offset_track;
   // STD. FORMAT
   if (disk_info_block.size_of_track) {
-    mylog.debug(`Track size STD format: DPB: ${DPB.size_of_track}`);
+    mylog.debug(`Track size STD format: ${disk_info_block.size_of_track}`);
     offset_track = CPCEMU_INFO_OFFSET + track * disk_info_block.size_of_track;
   } else {
     // The location of a Track Information Block for a chosen track is found by summing the sizes of all tracks up to the chosen track plus the size of the Disc Information Block (&100 bytes). The first track is at offset &100 in the disc image.
@@ -28,9 +28,9 @@ function read_track_info(data, track, DPB, disk_info_block) {
     var trackSizeSum = 0;
     for (var ts = 0; ts < track; ts++) {
       trackSizeSum += disk_info_block.size_of_tracks[ts];
-      mylog.debug(`trk: ${ts} - size: ${disk_info_block.size_of_tracks[ts]}`);
+      //mylog.debug(`trk: ${ts} - size: ${disk_info_block.size_of_tracks[ts]}`);
     }
-    mylog.debug(`Sum of track sizes: ${trackSizeSum} (${trackSizeSum * 256})- for track ${track}`);
+    // mylog.debug(`Sum of track sizes: ${trackSizeSum} (${trackSizeSum * 256})- for track ${track}`);
     offset_track = CPCEMU_INFO_OFFSET + trackSizeSum * 256;
   }
   // READ TRACK INFORMATION BLOCK
@@ -340,13 +340,15 @@ function readEDSK(data, isExtended) {
       archived: (entry.charCodeAt(11) & 0b10000000) > 0,
       rc_sum: 0,
       file_size: 0,
+      al: [],
     };
 
-    // MOSTLY USED FOR DEBUG
     var al = "";
     for (var j = 16; j < 32; j++) {
       al = al + (entry.charCodeAt(j) + ", ");
+      file_entry.al.push(entry.charCodeAt(j));
     }
+    // MOSTLY USED FOR DEBUG
     if (file_entry.ua < 16) {
       mylog.debug(
         `${file_entry.ua}, ${file_entry.filename}.${file_entry.ext} ex=${entry.charCodeAt(12)}, s1=${entry.charCodeAt(13)}, s2=${entry.charCodeAt(
@@ -371,6 +373,11 @@ function readEDSK(data, isExtended) {
         file_entry.file_size = Math.ceil((file_entry.rc_sum * 128) / (128 << DPB.bsh));
         // mylog.debug(`creating new: ${JSON.stringify(file_entry)}`);
         file_map.set(current_filename + current_ext, file_entry);
+
+        // find first block of file (to read header)
+        if (file_entry.al[0] !== 0) {
+          locate_and_read_block(data, file_entry.al[0], DPB, disk_info_block);
+        }
       } else if (file_entry.ua === 0xe5) {
         // mylog.debug(`DELETED: ${current_filename}.${current_ext}`);
         file_map.delete(current_filename + current_ext);
@@ -482,13 +489,59 @@ function detectProtectionSystem(data, DPB, disk_info_block) {
     result = "Speedlock 1989 (u)";
   }
 
-    // Three Inch Loader
-    if (track0asString.includes("***Loader Copyright Three Inch Software 1988, All Rights Reserved. Three Inch Software, 73 Surbiton Road, Kingston upon Thames, KT1 2HG***")) {
-      mylog.info(`Protection Detected: Three Inch Loader type 1 (signed)`);
-      result = "Three Inch Loader type 1";
-    }
-  
+  // Three Inch Loader
+  if (
+    track0asString.includes(
+      "***Loader Copyright Three Inch Software 1988, All Rights Reserved. Three Inch Software, 73 Surbiton Road, Kingston upon Thames, KT1 2HG***"
+    )
+  ) {
+    mylog.info(`Protection Detected: Three Inch Loader type 1 (signed)`);
+    result = "Three Inch Loader type 1";
+  }
+
   return result;
+}
+
+function locate_and_read_block(data, blockNo, DPB, disk_info_block) {
+  const mylog = log.scope("locate_and_read_block");
+
+  var track_size;
+  if (disk_info_block.isExtended) {
+    track_size = disk_info_block.size_of_tracks[0] * 256 - 256;
+  } else {
+    track_size = disk_info_block.size_of_track - 256;
+  }
+
+  const block_size = 128 << DPB.bsh;
+  const no_of_blocks_per_track = track_size / block_size;
+  mylog.debug(
+    `Looking for block: ${blockNo}, size: ${block_size}, skipping ${DPB.off} track(s), blocks/track: ${no_of_blocks_per_track}, track size: ${track_size}, Extended: ${disk_info_block.isExtended}`
+  );
+
+  // assumes 9 sectors/track
+  var track = DPB.off + Math.floor(blockNo / no_of_blocks_per_track);
+  var sector = Math.round((blockNo / no_of_blocks_per_track - Math.floor(blockNo / no_of_blocks_per_track)) * 9);
+  mylog.debug(`Start: (t, s): ${track}, ${sector}`);
+
+  const track_data = read_track_info(data, track, DPB, disk_info_block);
+  const plus3header = String.fromCharCode.apply(null, track_data.sector_data[sector]);
+
+  if (plus3header.startsWith("PLUS3DOS")) {
+    var sum = 0;
+    const str = plus3header.substring(0, 127);
+    for (let i = 0; i < str.length; i++) {
+      sum += str.charCodeAt(i);
+    }
+    if (sum % 256 === plus3header.charCodeAt(127)) {
+      mylog.debug(`+3DOS signature valid`);
+    } else {
+      mylog.debug(`+3DOS signature CHECKSUM error: found ${sum % 256}, was expecting ${plus3header.charCodeAt(127)}`);
+    }
+  } else if (plus3header.startsWith("AMSDOS")) {
+    mylog.debug(`Amstrad Header`);
+  } else {
+    mylog.debug(`Headerless...`);
+  }
 }
 
 function createDIRScreen(dirdata) {
