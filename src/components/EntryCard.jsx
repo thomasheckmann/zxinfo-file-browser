@@ -116,6 +116,9 @@ function EntryCard(props) {
       newFav.set(entry.sha512, [entry.filepath]);
       setAppSettings({ ...appSettings, favorites: newFav });
       setIsFavorite(true);
+      var obj = Object.fromEntries(newFav);
+      var jsonString = JSON.stringify(obj);
+      window.electronAPI.setFavorites("favorites", jsonString);
     } else {
       if (appSettings.favorites.get(entry.sha512)) {
         // delete filepath, if array = [] - delete from map
@@ -138,10 +141,10 @@ function EntryCard(props) {
         }
         setIsFavorite(true);
       }
-    }
-    var obj = Object.fromEntries(appSettings.favorites);
-    var jsonString = JSON.stringify(obj);
-    window.electronAPI.setFavorites("favorites", jsonString);
+      var obj = Object.fromEntries(appSettings.favorites);
+      var jsonString = JSON.stringify(obj);
+      window.electronAPI.setFavorites("favorites", jsonString);
+      }
   };
 
   useEffect(() => {
