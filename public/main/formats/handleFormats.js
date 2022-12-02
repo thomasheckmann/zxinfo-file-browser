@@ -120,6 +120,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "trdfmt";
     ZXFileInfo.text = obj.text;
+    ZXFileInfo.diskdata = obj.dir_scr;
     trdfmt.createDIRScreen(obj.dir_scr).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
@@ -134,6 +135,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "sclfmt";
     ZXFileInfo.text = obj.text;
+    ZXFileInfo.diskdata = obj.dir_scr;
     sclfmt.createDIRScreen(obj.dir_scr).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");
@@ -148,6 +150,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = "mdrfmt";
     ZXFileInfo.text = obj.text;
+    ZXFileInfo.diskdata = obj.media_info;
     mdrfmt.createDIRScreen(obj.media_info).then((res) => {
       if (res.buffer) {
         ZXFileInfo.scr = "data:image/gif;base64," + res.buffer.toString("base64");

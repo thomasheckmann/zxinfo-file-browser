@@ -11,6 +11,9 @@ import TAPFormat from "./formats/TAPFormat";
 import TZXFormat from "./formats/TZXFormat";
 import PFormat from "./formats/PFormat";
 import DSKFormat from "./formats/DSKFormat";
+import TRDFormat from "./formats/TRDFormat";
+import SCLFormat from "./formats/SCLFormat";
+import MDRFormat from "./formats/MDRFormat";
 
 const Item = styled(Paper)({
   textAlign: "left",
@@ -171,6 +174,9 @@ export default function FileDetails(props) {
                   {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
                   {item.type === "pfmt" && <PFormat item={item}></PFormat>}
                   {item.type === "dskfmt" && <DSKFormat item={item}></DSKFormat>}
+                  {item.type === "trdfmt" && <TRDFormat item={item}></TRDFormat>}
+                  {item.type === "sclfmt" && <SCLFormat item={item}></SCLFormat>}
+                  {item.type === "mdrfmt" && <MDRFormat item={item}></MDRFormat>}
                 </Box>
               </Grid>
             </Grid>
