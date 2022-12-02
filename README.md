@@ -2,7 +2,7 @@
 # ZXINFO File Browser
 Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-)
 
-<img width="1024" alt="ZXInfoTV-home" src="doc/screenshot.png">
+<img width="1024" alt="main" src="doc/mainscreen.png">
 
 # Download
 Download latest build for macOS, Windows and Linx on [release page](https://github.com/thomasheckmann/zxinfo-file-browser/releases)
@@ -12,6 +12,10 @@ Please note all builds are unsiged, so you might need to give persmisson to run 
 * zxinfo-file-browser-Vnn-mac.zip - macOS on Intel
 * zxinfo-file-browser-Vnn.exe - Windows
 * zxinfo-file-browser-Vnn.AppImage - Linux
+
+Favorites list | Details TZX | Details P (ZX81)
+------------ | ------------- | -------------
+<img width="320" alt="Favorites" src="doc/favorites.png"> | <img width="320" alt="details tzx" src="doc/details_tzx.png"> | <img width="320" alt="details p(zx81)" src="doc/details_p.png">
 
 # Features
 * Scan files local on your harddisk
