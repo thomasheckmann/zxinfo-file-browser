@@ -12,10 +12,9 @@ import TZXFormat from "./formats/TZXFormat";
 import PFormat from "./formats/PFormat";
 import DSKFormat from "./formats/DSKFormat";
 
-const Item = styled(Paper)( {
+const Item = styled(Paper)({
   textAlign: "left",
 });
-
 
 export default function FileDetails(props) {
   const { onClose, open, item } = props;
@@ -166,7 +165,7 @@ export default function FileDetails(props) {
                   <Typography variant="h6">
                     Details for {item.version} - (file size: {item.data.filesize})
                   </Typography>
-                  {item.type === "snafmt" && item.data.length && <SNAFormat item={item}></SNAFormat>}
+                  {item.type === "snafmt" && item.data.filesize && <SNAFormat item={item}></SNAFormat>}
                   {item.type === "z80fmt" && <Z80Format item={item}></Z80Format>}
                   {item.type === "tapfmt" && <TAPFormat item={item}></TAPFormat>}
                   {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
