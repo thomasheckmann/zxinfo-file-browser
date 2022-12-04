@@ -108,7 +108,7 @@ function InfiniteEntriesList(props) {
 
       // adjust height, if less than one row
       if (props.files.length < getRowSize()) {
-        setVisibleHeight(averageCardHeight + 45);
+        setVisibleHeight(averageCardHeight + 70);
       }
     } else if (isVisible && props.files.length > 0 && infSettings.index > 0 && props.foldername) {
       if (isDev) console.log(`useEffect(): -> folder section back in viewport - ${props.foldername}`);

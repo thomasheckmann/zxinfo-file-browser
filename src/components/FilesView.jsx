@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 
-import { Paper, Typography } from "@mui/material";
+import { Divider, Paper, Typography } from "@mui/material";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -43,11 +43,11 @@ const FilesView = (props) => {
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, props.foldername]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
-    <Paper elevation={5} sx={{ height: "vh", my: 4 }} id={props.foldername}>
+    <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }} id={props.foldername}>
       <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
         <FolderTwoToneIcon />
         <Typography variant="button">
-          {props.foldername} - ({files.length})
+          &nbsp;{props.foldername} - ({files.length})
         </Typography>
       </Box>
       <InfiniteEntriesList files={files} foldername={props.foldername} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Divider, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
@@ -25,10 +25,12 @@ function FavoritesList(props) {
   }, [appSettings.favorites.size]);
 
   return (
-    <Paper elevation={5} sx={{ height: "vh", my: 4 }}>
-      <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2}}>
+    <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }}>
+      <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
         <FavoriteTwoToneIcon />
-        <Typography variant="button">My favorites</Typography>
+        <Typography variant="button">
+        &nbsp;My favorites
+        </Typography>
       </Box>
       {files.length > 0 ? (
         <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>

@@ -196,7 +196,7 @@ function EntryCard(props) {
 
     if (selectedSCR === undefined) {
       console.log("handling selectSCR, undefined... ?");
-      // 
+      //
     } else if (entry && selectedSCR === null) {
       // delete user selected and set default
       if (appSettings.zxinfoSCR.size > 0) {
@@ -243,8 +243,8 @@ function EntryCard(props) {
               },
             }}
             avatar={
-              <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                <Typography variant="overline" display="block" gutterBottom>
+              <Avatar sx={{ bgcolor: red[500] }} aria-label="file format">
+                <Typography variant="caption" display="block" gutterBottom>
                   {formatType(entry.type)}
                 </Typography>
               </Avatar>
@@ -258,31 +258,38 @@ function EntryCard(props) {
             }
             title={
               <Tooltip title={entry.filename}>
-                <Typography variant="subtitle" noWrap gutterBottom>
+                <Typography variant="caption" noWrap gutterBottom>
                   {entry.filename}
                 </Typography>
               </Tooltip>
             }
             titleTypographyProps={{ noWrap: true }}
             subheaderTypographyProps={{ noWrap: true }}
-            subheader={entry.subfilename}
+            subheader={
+              <Tooltip title={entry.subfilename}>
+                <Typography variant="caption" noWrap gutterBottom>
+                  {entry.subfilename}
+                </Typography>
+              </Tooltip>
+            }
           />
           <CardMedia component="img" image={entry.scr} alt={entry.filename} />
           <CardContent>
-            <Typography gutterBottom variant="subtitle1" component="div" noWrap>
+            <Typography gutterBottom variant="subtitle2" component="div" noWrap>
               {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
             </Typography>
-            <Typography gutterBottom variant="subtitle2" component="div" noWrap>
+            <Typography gutterBottom variant="body2" component="div" noWrap>
               {entry.text}&nbsp;
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center">
-              {entry.version && <Chip label={entry.version} />}
-              {entry.hwmodel && <Chip label={entry.hwmodel} />}
-              {entry.protection && <Chip label={entry.protection} />}
+              {entry.version && <Chip label={entry.version} size="small" />}
+              {entry.hwmodel && <Chip label={entry.hwmodel} size="small" />}
+              {entry.protection && <Chip label={entry.protection} size="small" />}
               {entry.zxdbID && (
                 <Tooltip title="More details at ZXInfo.dk">
                   <Chip
                     label={entry.zxdbID}
+                    size="small"
                     variant="outlined"
                     sx={{ color: appSettings.zxinfoSCR.get(props.entry.sha512) ? "#12a802" : "#000000" }}
                     onClick={(id) => openLink(entry.zxdbID)}
