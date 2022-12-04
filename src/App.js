@@ -199,7 +199,7 @@ function App() {
       getStartFolder();
       navigate("/");
     }
-  }, [startFolder, isBusyWorking, settingsLoaded]);
+  }, [startFolder, settingsLoaded]);
 
   async function loadSettings() {
     const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
