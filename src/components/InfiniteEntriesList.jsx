@@ -46,6 +46,7 @@ function InfiniteEntriesList(props) {
   const mdTOlg = useMediaQuery(theme.breakpoints.between("md", "lg"));
   const smTOmd = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const lessThanSM = useMediaQuery(theme.breakpoints.down("sm"));
+
   function getRowSize() {
     if (greaterThanLG) {
       return 4; // LG
@@ -77,16 +78,17 @@ function InfiniteEntriesList(props) {
       }
     }
     if (newIndex >= props.files.length) {
+      if ([...infSettings.items, ...itemsToAdd].length === 0) {
+        if (isDev) {
+          console.log(`fetchMoreData(): nothing to show, adjusting element size...`);
+          setVisibleHeight(45); // size of end message only
+        }
+      }
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
     } else {
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
     }
   };
-
-  useEffect(() => {
-    if (isDev) console.log(`useEffect(): props.files changed... try to reset List`);
-
-  }, [props.files.length])
 
   useEffect(() => {
     if (isDev)
@@ -106,7 +108,7 @@ function InfiniteEntriesList(props) {
 
       // adjust height, if less than one row
       if (props.files.length < getRowSize()) {
-        setVisibleHeight(averageCardHeight + 120);
+        setVisibleHeight(averageCardHeight + 45);
       }
     } else if (isVisible && props.files.length > 0 && infSettings.index > 0 && props.foldername) {
       if (isDev) console.log(`useEffect(): -> folder section back in viewport - ${props.foldername}`);
@@ -116,7 +118,7 @@ function InfiniteEntriesList(props) {
   }, [props.files, isVisible]);
 
   return (
-    <Container maxWidth="xl" sx={{py: 2, mx: 0}} id={"scrollableDiv" + props.foldername} >
+    <Container maxWidth="xl" sx={{ py: 2, mx: 0 }} id={"scrollableDiv" + props.foldername}>
       <div ref={nodeRef} style={{ height: visibleHeight, overflow: "auto" }}>
         <InfiniteScroll
           dataLength={infSettings.items.length}
@@ -133,7 +135,7 @@ function InfiniteEntriesList(props) {
           scrollableTarget={"scrollableDiv" + props.foldername}
           endMessage={
             <Grid xs={12}>
-              <ItemEnd >Total number of entries: {infSettings.items.length}</ItemEnd>
+              <ItemEnd>Total number of entries: {infSettings.items.length}</ItemEnd>
             </Grid>
           }
         >

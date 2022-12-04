@@ -192,7 +192,6 @@ function EntryCard(props) {
 
   // handle user selected SCR
   useEffect(() => {
-    console.log(entry + ", sel: " + selectedSCR);
     var useScreen = null;
 
     if (selectedSCR === undefined) {
