@@ -144,60 +144,72 @@ function EntryCard(props) {
       var obj = Object.fromEntries(appSettings.favorites);
       var jsonString = JSON.stringify(obj);
       window.electronAPI.setFavorites("favorites", jsonString);
-      }
+    }
   };
 
-  useEffect(() => {
-    if (!restCalled) {
-      setRestCalled(true);
-    
-      const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
-      axios
-        .get(dataURL)
-        .then((response) => {
-          let item = props.entry;
-          setOriginalScreen(props.entry.scr);
-          item.zxdbID = response.data.entry_id;
-          item.zxdbTitle = response.data.title;
+  useEffect(
+    () => {
+      if (!restCalled) {
+        // make sure we only call the API once
+        setRestCalled(true);
 
-          // look up SCR if user selected
-          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-          if (zxdbSCR) {
-            item.scr = zxdbSCR;
-          }
-          setEntry((entry) => item);
-          setIsFavorite(appSettings.favorites.get(item.sha512));
-        })
-        .catch((error) => {
-          // Not found
-          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-          if (zxdbSCR) {
-            setEntry({ ...props.entry, scr: zxdbSCR });
-          } else {
-            setEntry(props.entry);
-          }
-          setIsFavorite(appSettings.favorites.get(props.entry.sha512));
-        })
-        .finally(() => {});
-    }
-  }, [restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR]);
+        const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
+        axios
+          .get(dataURL)
+          .then((response) => {
+            let item = props.entry;
+
+            // save original SCR detected from file
+            setOriginalScreen(props.entry.scr);
+            item.zxdbID = response.data.entry_id;
+            item.zxdbTitle = response.data.title;
+
+            // look up SCR if user selected
+            const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
+            if (zxdbSCR) {
+              item.scr = zxdbSCR;
+            }
+            setEntry((entry) => item);
+            setIsFavorite(appSettings.favorites.get(item.sha512));
+          })
+          .catch((error) => {
+            // Not found, or other API call errors
+            const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
+            if (zxdbSCR) {
+              setEntry({ ...props.entry, scr: zxdbSCR });
+            } else {
+              setEntry(props.entry);
+            }
+            setIsFavorite(appSettings.favorites.get(props.entry.sha512));
+          })
+          .finally(() => {});
+      }
+    },
+    [
+      /*restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR*/
+    ]
+  );
 
   // handle user selected SCR
   useEffect(() => {
+    console.log(entry + ", sel: " + selectedSCR);
     var useScreen = null;
 
     if (selectedSCR === undefined) {
-    } else if (selectedSCR === null) {
-      // delete and set default
+      console.log("handling selectSCR, undefined... ?");
+      // 
+    } else if (entry && selectedSCR === null) {
+      // delete user selected and set default
       if (appSettings.zxinfoSCR.size > 0) {
         appSettings.zxinfoSCR.delete(props.entry.sha512);
       }
       useScreen = originalScreen;
-    } else if (appSettings.zxinfoSCR.size === 0) {
+    } else if (entry && appSettings.zxinfoSCR.size === 0) {
+      // zxinfoSCR, first time
       appSettings.zxinfoSCR = new Map();
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
       useScreen = selectedSCR;
-    } else if (appSettings.zxinfoSCR.size > 0 && entry) {
+    } else if (entry && appSettings.zxinfoSCR.size > 0) {
       appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
       useScreen = selectedSCR;
     }
@@ -270,12 +282,13 @@ function EntryCard(props) {
               {entry.protection && <Chip label={entry.protection} />}
               {entry.zxdbID && (
                 <Tooltip title="More details at ZXInfo.dk">
-                <Chip
-                  label={entry.zxdbID}
-                  variant="outlined"
-                  sx={{ color: appSettings.zxinfoSCR.get(props.entry.sha512) ? "#12a802" : "#000000" }}
-                  onClick={(id) => openLink(entry.zxdbID)}
-                /></Tooltip>
+                  <Chip
+                    label={entry.zxdbID}
+                    variant="outlined"
+                    sx={{ color: appSettings.zxinfoSCR.get(props.entry.sha512) ? "#12a802" : "#000000" }}
+                    onClick={(id) => openLink(entry.zxdbID)}
+                  />
+                </Tooltip>
               )}
               <Chip sx={{ bgcolor: "#ffffff" }} />
             </Stack>
