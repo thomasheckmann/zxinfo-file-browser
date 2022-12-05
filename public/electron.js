@@ -6,6 +6,12 @@
  * IPC - https://www.electronjs.org/docs/latest/tutorial/ipc
  * - one way (toMain), use ipcRenderer.send and ipcMain.on
  * - two way, use ipcRenderer.invoke and ipcMain.handle
+ * 
+ * command line parameter: dir=<start folder>
+ * 
+ * MacOS:
+ * 
+ * open zxinfo-file-browser --args --dir="/Volumes/ZXTestData/ALL_FORMAT"
  */
 
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
@@ -13,6 +19,8 @@ const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
+
+const cmdDir = app.commandLine.getSwitchValue("dir");
 
 const handleFormats = require("./main/formats/handleFormats");
 const pfmt = require("./main/formats/p_format");
@@ -22,7 +30,7 @@ const AdmZip = require("adm-zip");
 const log = require("electron-log");
 
 // use error, warn, info for production
-log.transports.console.level = isDev ? "debug" :  "info";
+log.transports.console.level = isDev ? "debug" : "info";
 log.transports.file.level = isDev ? "debug" : "info";
 log.transports.file.getFile().clear();
 
@@ -30,8 +38,8 @@ let win;
 
 function createWindow() {
   const mylog = log.scope("createWindow");
-  app.commandLine.appendSwitch ("disable-http-cache");
-  
+  app.commandLine.appendSwitch("disable-http-cache");
+
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   win = new BrowserWindow({
     width: 1600,
@@ -78,6 +86,13 @@ ipcMain.handle("getStoreValue", (event, key) => {
   const mylog = log.scope("getStoreValue");
   const value = store.get(key);
   mylog.debug(`key, value = {${key}, ${value}}`);
+
+  if (key === "start-folder" && cmdDir && cmdDir.length > 0) {
+    if (isDev) mylog.info(`start-folder from command line: ${cmdDir}`);
+    return cmdDir;
+  } else {
+    if (isDev) mylog.info(`start-folder from settings: ${value}`);
+  }
   return value;
 });
 
@@ -290,7 +305,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   } else if (extension === ".tap" || extension === ".tzx") {
   } else if (extension === ".dsk" || extension === ".trd" || extension === ".scl") {
   } else if (extension === ".mdr") {
-  } else if (extension === ".p" || extension === ".p81"|| extension === ".81") {
+  } else if (extension === ".p" || extension === ".p81" || extension === ".81") {
   } else if (extension === ".zip") {
     result = [fileObj];
     var zipCount = 0;

@@ -45,7 +45,6 @@ function listBasic(image, zx81, showFullList) {
     // create lineno
     var lineNoTXT = ("    " + lineNo).slice(-4) + " ";
     var lineTxt = "";
-    mylog.debug(`Line: ${lineNoTXT}, length: ${lineLen}`);
     for (var l = 0; l < lineNoTXT.length; l++) {
       if (lineNoTXT.charCodeAt(l) === 32) {
         lineTxt += String.fromCharCode(0); // space

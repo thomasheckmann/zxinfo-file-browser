@@ -176,6 +176,7 @@ function App() {
     setAppSettings({ ...appSettings, fileFilters: newFormats });
   };
 
+  // get start-folder from store (last used folder)
   async function getStartFolder() {
     const initialFolder = await window.electronAPI.getStoreValue("start-folder");
     if (initialFolder) {
