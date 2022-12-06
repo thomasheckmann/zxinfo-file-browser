@@ -257,9 +257,6 @@ function App() {
     window.scrollTo({
       top: 0,
     });
-
-    // navigate to / or gridview
-    location.reload();
   };
 
   return (

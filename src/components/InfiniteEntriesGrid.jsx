@@ -45,24 +45,22 @@ export default function InfiniteEntriesGrid(props) {
       if (result) {
         result.forEach(function (e) {
           if (appSettings.hideZip && e.filename.toLowerCase().endsWith("zip") && !e.subfilename) {
-            if (isDev)
-              console.log(`fetchMoreData(): removing ZIP ${e.filename} from list  + ${props.foldername}`);
+            if (isDev) console.log(`fetchMoreData(): removing ZIP ${e.filename} from list  + ${props.foldername}`);
           } else {
-            if (isDev)
-              console.log(`fetchMoreData(): adding ${e.filename} item(s) to list}`);
+            if (isDev) console.log(`fetchMoreData(): adding ${e.filename} item(s) to list}`);
             itemsToAdd.push(e);
           }
         });
       }
     }
     if (newIndex >= props.files.length) {
+      setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
       if ([...infSettings.items, ...itemsToAdd].length === 0) {
         if (isDev) {
           console.log(`fetchMoreData(): nothing to show, adjusting element size...`);
           setVisibleHeight(45); // size of end message only
         }
       }
-      setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
     } else {
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
     }
@@ -73,7 +71,7 @@ export default function InfiniteEntriesGrid(props) {
 
     if (props.files.length > 0 && infSettings.index === 0) {
       if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData() - ${props.foldername}`);
-      fetchMoreData(false);
+      fetchMoreData();
       const averageCardHeight = 170;
       const maxHeight = window.innerHeight - 40; // total files bare
 
