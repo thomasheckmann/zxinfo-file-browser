@@ -11,7 +11,7 @@
  * 
  * MacOS:
  * 
- * open zxinfo-file-browser --args --dir="/Volumes/ZXTestData/ALL_FORMAT"
+ * open zxinfo-file-browser.app --args --dir="/Volumes/ZXTestData/ALL_FORMAT"
  */
 
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");

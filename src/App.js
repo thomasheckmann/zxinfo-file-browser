@@ -8,9 +8,13 @@ import React, { useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FavoriteBorderOutlined from "@mui/icons-material/FavoriteBorderOutlined";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
+import AppsOutlinedIcon from "@mui/icons-material/AppsOutlined";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+
 import { styled } from "@mui/material/styles";
 
 import {
@@ -41,6 +45,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import FolderView from "./pages/FolderView";
 import FavoritesList from "./pages/FavoritesList";
+import GridView from "./pages/GridView";
 import IntroText from "./pages/IntroText";
 
 import { Link } from "react-scroll";
@@ -49,7 +54,6 @@ import ZXInfoSettings from "./common/ZXInfoSettings";
 import "./App.css";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { FavoriteBorderOutlined } from "@mui/icons-material";
 
 const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "81", "zip"];
 
@@ -238,11 +242,6 @@ function App() {
    * @param {*} childData
    */
   const handleOpenFolderFromChild = async (childData) => {
-    if (location.pathname.startsWith("/favorites")) {
-      navigate("/");
-      return;
-    }
-
     const foldersWithFiles = await window.electronAPI.openFolder();
     foldersWithFiles &&
       setStartFolder({
@@ -258,6 +257,9 @@ function App() {
     window.scrollTo({
       top: 0,
     });
+
+    // navigate to / or gridview
+    location.reload();
   };
 
   return (
@@ -288,14 +290,43 @@ function App() {
                     navigate("/favorites");
                   }}
                 >
-                  <Tooltip title="Favorites"><Badge color="secondary" badgeContent={appSettings.favorites.size} showZero>
-
-                    <FavoriteBorderOutlined /></Badge>
+                  <Tooltip title="Favorites">
+                    <Badge color="secondary" badgeContent={appSettings.favorites.size} showZero>
+                      <FavoriteBorderOutlined />
+                    </Badge>
                   </Tooltip>
                 </IconButton>
                 <IconButton edge="start" color="inherit" sx={{ mr: 2 }} aria-label="Open Folder" onClick={handleOpenFolderFromChild}>
-                  <Tooltip title={location.pathname.startsWith("/favorites") ? "View folder" : "Open Folder"}>
+                  <Tooltip title={"Open Folder"}>
                     <FolderOpenIcon />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={location.pathname==="/"}
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 2 }}
+                  aria-label="Folder view"
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                >
+                  <Tooltip title="View per folders">
+                    <FolderCopyOutlinedIcon />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={location.pathname.startsWith("/gridview")}
+                  edge="start"
+                  color="inherit"
+                  sx={{ mr: 2 }}
+                  aria-label="Grid view"
+                  onClick={() => {
+                    navigate("/gridview");
+                  }}
+                >
+                  <Tooltip title="View in grid">
+                    <AppsOutlinedIcon />
                   </Tooltip>
                 </IconButton>
                 <IconButton
@@ -397,6 +428,10 @@ function App() {
                   }
                 ></Route>
                 <Route path="/favorites" element={<FavoritesList />}></Route>
+                <Route
+                  path="/gridview"
+                  element={startFolder.folders && startFolder.folders.length > 0 && <GridView root={startFolder.root} folders={startFolder.folders} />}
+                ></Route>
               </Routes>
             </Container>
             <div className="footer">
