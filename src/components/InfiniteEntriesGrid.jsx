@@ -91,7 +91,7 @@ export default function InfiniteEntriesGrid(props) {
   }, [props.files]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 2, mx: 0 }} id={"scrollableDiv" + props.foldername}>
+    <Container maxWidth="xl" sx={{ py: 0, mx: 0 }} id={"scrollableDiv" + props.foldername}>
       <InfiniteScroll
         dataLength={infSettings.items.length}
         next={fetchMoreData}
@@ -101,7 +101,6 @@ export default function InfiniteEntriesGrid(props) {
             <LinearProgress color="success" />
           </Box>
         }
-        height={visibleHeight + 100}
         endMessage={<ItemEnd>Total number of entries: {infSettings.items.length}</ItemEnd>}
       >
         <ImageList sx={{ width: "100%", height: "vh" }} cols={6}>
