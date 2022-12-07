@@ -92,7 +92,7 @@ const theme = createTheme({
   },
 });
 
-function App() {
+export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -186,13 +186,17 @@ function App() {
     if (initialFolder) {
       setIsBusyWorking(true);
       const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
-      foldersWithFiles &&
+      if (foldersWithFiles) {
         setStartFolder({
           root: foldersWithFiles.root,
           folders: foldersWithFiles.folders,
           total: foldersWithFiles.total,
           time: foldersWithFiles.time,
         });
+      } else {
+        // folder not found...
+        window.alert(`Folder not found:\n${initialFolder}\nPlease try select a diffent folder...`);
+      }
       setIsBusyWorking(false);
     } else {
       setIsBusyWorking(false);
@@ -299,7 +303,7 @@ function App() {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={location.pathname==="/"}
+                  disabled={location.pathname === "/"}
                   edge="start"
                   color="inherit"
                   sx={{ mr: 2 }}
@@ -313,7 +317,7 @@ function App() {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={location.pathname.startsWith("/gridview")}
+                  disabled={startFolder.folders.length < 2 ||location.pathname.startsWith("/gridview")}
                   edge="start"
                   color="inherit"
                   sx={{ mr: 2 }}
@@ -446,5 +450,3 @@ function App() {
     )
   );
 }
-
-export default App;
