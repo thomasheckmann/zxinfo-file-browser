@@ -2,27 +2,41 @@ import { Box, Paper, Typography } from "@mui/material";
 import * as React from "react";
 import InfiniteEntriesGrid from "../components/InfiniteEntriesGrid";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
-import { useState } from "react";
-import { useEffect } from "react";
-import { isDev } from "../App";
+import { useContext, useEffect, useState } from "react";
+import ZXInfoSettings from "../common/ZXInfoSettings";
+import {mylog} from "../App";
+
+// duplicated in FilesView
+// sort on filename, but add path
+function basename(prevname) {
+  return prevname.replace(/^(.*[/\\])?/, '');
+}
 
 function filterAndSortFiles(files, sortOptions, fileFilters) {
+  mylog("GridView", "filterAndSortFiles", `sorting changed to: ${sortOptions}, filters: ${fileFilters}, no. of files: ${files.length}`);
   const newFiles = files.filter((fileName) => {
+    mylog("GridView", "filterAndSortFiles", `${basename(fileName)}, ${fileName}`);
     let result = fileFilters.some((extension) => {
-      return fileName.toLowerCase().endsWith(extension);
+      const fileExt =  fileName.substring(fileName.lastIndexOf('.')+1, fileName.length).toLowerCase() || fileName.toLowerCase();
+      return fileExt === extension;
     });
 
     return result;
   });
 
   if (sortOptions) {
-    return [...newFiles.sort()];
+    return [...newFiles.sort((a, b) => {
+      return basename(a).toLowerCase().localeCompare(basename(b).toLowerCase());
+    })];
   } else {
-    return [...newFiles.sort().reverse()];
+    return [...newFiles.sort((a, b) => {
+      return basename(a).toLowerCase().localeCompare(basename(b).toLowerCase());
+    }).reverse()];
   }
 }
 
 export default function GridView(props) {
+  const [appSettings] = useContext(ZXInfoSettings);
   const [files, setFiles] = useState([]);
   const [allDone, setAllDone] = useState(false);
 
@@ -31,26 +45,22 @@ export default function GridView(props) {
     
     for (var i = 0; i < props.folders.length; i++) {
       const folder = props.folders[i];
-      if (isDev) {
-        console.log(`useEffect(): scanning folder: ${folder}`);
-      }
+      mylog("GridView", "scanFolder", `scanning folder: ${folder}`);
       const res = await window.electronAPI.scanFolder(folder);
       if (res) {
-        if (isDev) {
-          console.log(`useEffect(): ${folder} - ${res.length}`);
-        }
+        mylog("GridView", "scanFolder", `${folder} contains: ${res.length} file(s)`);
         filesToAdd = [...filesToAdd, ...res];
       }
     }
-    setFiles((files) => filesToAdd.sort());
+    setFiles((files) => filterAndSortFiles(filesToAdd, appSettings.sortOrderFiles, appSettings.fileFilters));
     setAllDone(true);
   };
 
   useEffect(() => {
-    if (isDev) console.log(`useEffect():  fetching folders....`);
+    mylog("GridView", "useEffect", `fetching folders....`);
 
     scanFolder();
-  }, [props.folders]);
+  }, [props.folders, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
     <React.Fragment>
@@ -60,7 +70,7 @@ export default function GridView(props) {
             <FolderTwoToneIcon />
             <Typography variant="button">&nbsp;{props.root} - ({files.length})</Typography>
           </Box>
-          <InfiniteEntriesGrid files={files} foldername={props.root}></InfiniteEntriesGrid>
+          <InfiniteEntriesGrid key={files+appSettings.hideZip} files={files} foldername={props.root}></InfiniteEntriesGrid>
         </Paper>
       )}
     </React.Fragment>

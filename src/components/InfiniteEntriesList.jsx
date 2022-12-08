@@ -15,7 +15,7 @@ import { useIsVisible } from "react-is-visible";
 import EntryCard from "./EntryCard";
 import { useContext } from "react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import { isDev } from "../App";
+import { mylog } from "../App";
 
 const ItemEnd = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#008000",
@@ -25,7 +25,7 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.primary,
 }));
 
-function InfiniteEntriesList(props) {
+export default function InfiniteEntriesList(props) {
   const [appSettings] = useContext(ZXInfoSettings);
   const [infSettings, setInfSettings] = useState({ items: [], hasMore: true, index: 0 });
 
@@ -62,15 +62,17 @@ function InfiniteEntriesList(props) {
   }
 
   const fetchMoreData = async () => {
+    mylog("InfiniteEntriesList", "fetchMoreData", `no. of files: ${props.files.length}, index: ${infSettings.index} - ${props.foldername}`);
     var itemsToAdd = [];
     var newIndex;
 
     for (newIndex = infSettings.index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
       const result = await window.electronAPI.loadFile(props.files[newIndex]);
       if (result) {
+        mylog("InfiniteEntriesList", "fetchMoreData", `${props.files[newIndex]} - contains ${result.length} file(s), hideZip: ${appSettings.hideZip}`);
         result.forEach(function (entry) {
           if (appSettings.hideZip && entry.filename.toLowerCase().endsWith("zip") && !entry.subfilename) {
-            if (isDev) console.log(`fetchMoreData(): removing ZIP ${entry.filename} from list  + ${props.foldername}`);
+            mylog("InfiniteEntriesList", "fetchMoreData", `removing ZIP ${entry.filename} from list - ${props.foldername}`);
           } else {
             itemsToAdd.push(entry);
           }
@@ -79,10 +81,8 @@ function InfiniteEntriesList(props) {
     }
     if (newIndex >= props.files.length) {
       if ([...infSettings.items, ...itemsToAdd].length === 0) {
-        if (isDev) {
-          console.log(`fetchMoreData(): nothing to show, adjusting element size...`);
-          setVisibleHeight(45); // size of end message only
-        }
+        mylog("InfiniteEntriesList", "fetchMoreData", `nothing to show, adjusting element size...`);
+        setVisibleHeight(45); // size of end message only
       }
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
     } else {
@@ -91,13 +91,14 @@ function InfiniteEntriesList(props) {
   };
 
   useEffect(() => {
-    if (isDev)
-      console.log(
-        `useEffect(): visible: ${isVisible} (${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`
-      );
+    mylog(
+      "InfiniteEntriesList",
+      "useEffect",
+      `visible: ${isVisible} (${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`
+    );
 
     if (isVisible && props.files.length > 0 && infSettings.index === 0) {
-      if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData() - ${props.foldername}`);
+      mylog("InfiniteEntriesList", "useEffect", `FIRST TIME fetchMoreData() - ${props.foldername}`);
       fetchMoreData(false);
       const averageCardHeight = 500;
       const maxHeight = window.innerHeight - 40; // total files bare
@@ -111,9 +112,13 @@ function InfiniteEntriesList(props) {
         setVisibleHeight(averageCardHeight + 70);
       }
     } else if (isVisible && props.files.length > 0 && infSettings.index > 0 && props.foldername) {
-      if (isDev) console.log(`useEffect(): -> folder section back in viewport - ${props.foldername}`);
+      mylog("InfiniteEntriesList", "useEffect", `folder section back in viewport - ${props.foldername}`);
+    } else if (isVisible && props.files.length === 0) {
+      mylog("InfiniteEntriesList", "useEffect", `no files in ${props.foldername}`);
+      setVisibleHeight(45); // size of end message only
+      setInfSettings((infSettings) => ({ items: [], hasMore: false, index: 0 }));
     } else {
-      if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
+      mylog("InfiniteEntriesList", "useEffect", `SKIP - ${props.foldername} - nothing to do now`);
     }
   }, [props.files, isVisible]);
 
@@ -151,5 +156,3 @@ function InfiniteEntriesList(props) {
     </Container>
   );
 }
-
-export default InfiniteEntriesList;

@@ -6,11 +6,11 @@
  * IPC - https://www.electronjs.org/docs/latest/tutorial/ipc
  * - one way (toMain), use ipcRenderer.send and ipcMain.on
  * - two way, use ipcRenderer.invoke and ipcMain.handle
- * 
+ *
  * command line parameter: dir=<start folder>
- * 
+ *
  * MacOS:
- * 
+ *
  * open zxinfo-file-browser.app --args --dir="/Volumes/ZXTestData/ALL_FORMAT"
  */
 
@@ -28,11 +28,7 @@ const pfmt = require("./main/formats/p_format");
 const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
-
-// use error, warn, info for production
-log.transports.console.level = isDev ? "debug" : "info";
-log.transports.file.level = isDev ? "debug" : "info";
-log.transports.file.getFile().clear();
+// log.transports.file.clear();
 
 let win;
 
@@ -62,6 +58,15 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // use error, warn, info for production
+  log.transports.console.level = isDev ? "info" : "info";
+  log.transports.file.level = isDev ? "debug" : "info";
+  
+
+  log.initialize({ preload: false, spyRendererConsole: true });
+
+  log.info("Initialized electron-log, OK");
+
   createWindow();
 
   app.on("activate", function () {
@@ -90,8 +95,6 @@ ipcMain.handle("getStoreValue", (event, key) => {
   if (key === "start-folder" && cmdDir && cmdDir.length > 0) {
     if (isDev) mylog.info(`start-folder from command line: ${cmdDir}`);
     return cmdDir;
-  } else {
-    if (isDev) mylog.info(`start-folder from settings: ${value}`);
   }
   return value;
 });
@@ -202,7 +205,7 @@ function scanDirectory(dirPath, obj) {
  */
 ipcMain.handle("open-folder-dialog", async (event, arg) => {
   const mylog = log.scope("open-folder-dialog");
-  mylog.info(`${event}, ${arg}`);
+  mylog.info(`trying to open folder: ${arg}`);
 
   function initFolderView(startFolder) {
     var startTime = performance.now();

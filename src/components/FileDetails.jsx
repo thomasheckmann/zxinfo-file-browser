@@ -4,7 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { isDev } from "../App";
+import {mylog} from "../App";
 import SNAFormat from "./formats/SNAFormat.jsx";
 import Z80Format from "./formats/Z80Format";
 import TAPFormat from "./formats/TAPFormat";
@@ -45,15 +45,11 @@ export default function FileDetails(props) {
 
   useEffect(() => {
     if (!open) {
-      if (isDev) {
-        console.log(`useEffect(): NOT open, skipping for: ${item.zxdbID}`);
-      }
+      mylog("FileDetails", "useEffect", `NOT open, skipping for: ${item.zxdbID}`);
     } else if (open && !entry) {
-      if (isDev) {
-        console.log(`useEffect(): OPEN, get API data for: ${item.zxdbID} - (${entry})`);
-      }
+      mylog("FileDetails", "useEffect", `OPEN, get API data for: ${item.zxdbID}`);
       const dataURL = `https://api.zxinfo.dk/v3/games/${item.zxdbID}?mode=tiny`;
-      if (isDev) console.log(`API: ${dataURL}`);
+      mylog("FileDetails", "useEffect", `calling API ${dataURL}`);
       axios
         .get(dataURL)
         .then((response) => {

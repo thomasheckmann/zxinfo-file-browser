@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { isDev } from "../App";
+import {mylog} from "../App";
 import { Container } from "@mui/system";
 
 export default function ZXInfoSCRDialog(props) {
@@ -52,7 +52,7 @@ export default function ZXInfoSCRDialog(props) {
   useEffect(() => {
     if (open) {
       const dataURL = `https://api.zxinfo.dk/v3/games/${zxdb.zxdbID}?mode=tiny`;
-      if (isDev) console.log(`API: ${dataURL}`);
+      mylog("ZXInfoSCRDialog", "useEffect", `calling API ${dataURL}`);
       axios
         .get(dataURL)
         .then((response) => {
@@ -78,7 +78,7 @@ export default function ZXInfoSCRDialog(props) {
           setScreens(imageData);
         })
         .catch((error) => {
-          console.log(error);
+          mylog("ZXInfoSCRDialog", "useEffect", `${error}`);
         })
         .finally(() => {});
     }

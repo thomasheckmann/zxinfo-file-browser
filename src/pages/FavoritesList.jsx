@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
@@ -33,7 +33,7 @@ function FavoritesList(props) {
         </Typography>
       </Box>
       {files.length > 0 ? (
-        <InfiniteEntriesList files={files} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
+        <InfiniteEntriesList files={files} foldername={"Favorites"} maxsize={NO_OF_ITEMS}></InfiniteEntriesList>
       ) : (
         <Container>
           <Box textAlign="center" sx={{ p: 4 }}>

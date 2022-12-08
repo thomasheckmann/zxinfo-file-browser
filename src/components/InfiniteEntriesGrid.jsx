@@ -12,7 +12,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 // import { useIsVisible } from "react-is-visible";
 import { useContext } from "react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import { isDev } from "../App";
+import { mylog } from "../App";
 import { Box } from "@mui/system";
 
 import GridItem from "./GridItem";
@@ -45,9 +45,8 @@ export default function InfiniteEntriesGrid(props) {
       if (result) {
         result.forEach(function (e) {
           if (appSettings.hideZip && e.filename.toLowerCase().endsWith("zip") && !e.subfilename) {
-            if (isDev) console.log(`fetchMoreData(): removing ZIP ${e.filename} from list  + ${props.foldername}`);
+            mylog("InfiniteEntriesGrid", "fetchMoreData", `removing ZIP ${e.filename} from list - ${props.foldername}`);
           } else {
-            if (isDev) console.log(`fetchMoreData(): adding ${e.filename} item(s) to list}`);
             itemsToAdd.push(e);
           }
         });
@@ -56,10 +55,8 @@ export default function InfiniteEntriesGrid(props) {
     if (newIndex >= props.files.length) {
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: false, index: newIndex }));
       if ([...infSettings.items, ...itemsToAdd].length === 0) {
-        if (isDev) {
-          console.log(`fetchMoreData(): nothing to show, adjusting element size...`);
-          setVisibleHeight(45); // size of end message only
-        }
+        mylog("InfiniteEntriesGrid", "fetchMoreData", `nothing to show, adjusting element size...`);
+        setVisibleHeight(45); // size of end message only
       }
     } else {
       setInfSettings((infSettings) => ({ ...infSettings, items: [...infSettings.items, ...itemsToAdd], hasMore: true, index: newIndex }));
@@ -67,10 +64,14 @@ export default function InfiniteEntriesGrid(props) {
   };
 
   useEffect(() => {
-    if (isDev) console.log(`useEffect(): (${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`);
+    mylog(
+      "InfiniteEntriesGrid",
+      "useEffect",
+      `(${props.foldername}), no of files: ${props.files.length}, index: ${infSettings.index}, hide: ${appSettings.hideZip}`
+    );
 
     if (props.files.length > 0 && infSettings.index === 0) {
-      if (isDev) console.log(`useEffect(): -> FIRST TIME fetchMoreData() - ${props.foldername}`);
+      mylog("InfiniteEntriesGrid", "useEffect", `FIRST TIME fetchMoreData() - ${props.foldername}`);
       fetchMoreData();
       const averageCardHeight = 170;
       const maxHeight = window.innerHeight - 40; // total files bare
@@ -84,14 +85,18 @@ export default function InfiniteEntriesGrid(props) {
         setVisibleHeight(maxHeight + 70);
       }
     } else if (props.files.length > 0 && infSettings.index > 0 && props.foldername) {
-      if (isDev) console.log(`useEffect(): -> folder section back in viewport - ${props.foldername}`);
+      mylog("InfiniteEntriesGrid", "useEffect", `folder section back in viewport - ${props.foldername}`);
+    } else if (props.files.length === 0) {
+      mylog("InfiniteEntriesGrid", "useEffect", `no files in ${props.foldername}`);
+      setVisibleHeight(45); // size of end message only
+      setInfSettings((infSettings) => ({ items: [], hasMore: false, index: 0 }));
     } else {
-      if (isDev) console.log(`useEffect(): SKIP - ${props.foldername} - nothing to do now`);
+      mylog("InfiniteEntriesGrid", "useEffect", `SKIP - ${props.foldername} - nothing to do now`);
     }
   }, [props.files]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 0, mx: 0 }} id={"scrollableDiv" + props.foldername}>
+    <Container maxWidth="xl" sx={{ py: 0, mx: 0, my:2 }} id={"scrollableDiv" + props.foldername}>
       <InfiniteScroll
         dataLength={infSettings.items.length}
         next={fetchMoreData}

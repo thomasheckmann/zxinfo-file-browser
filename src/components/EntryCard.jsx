@@ -32,6 +32,8 @@ import ZXInfoSettings from "../common/ZXInfoSettings";
 import FileErrorDialog from "./FileErrorDialog";
 import FileDetailsDialog from "./FileDetails";
 
+import {mylog} from "../App";
+
 function formatType(t) {
   switch (t) {
     case "snafmt":
@@ -195,7 +197,7 @@ function EntryCard(props) {
     var useScreen = null;
 
     if (selectedSCR === undefined) {
-      console.log("handling selectSCR, undefined... ?");
+      mylog("EntryCaard", "useEffect", `andling selectSCR, undefined... ?`);
       //
     } else if (entry && selectedSCR === null) {
       // delete user selected and set default
