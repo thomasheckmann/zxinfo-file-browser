@@ -64,15 +64,15 @@ function readTAP(data) {
     snapshot.text = tap[0].type + ": " + tap[0].name;
     for (let index = 0; index < tap.length; index++) {
       const element = tap[index];
-      mylog.info(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
+      mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
       if (element.type === "Code") {
         if (element.startAddress === 16384) {
-          mylog.info(`Found code starting at 16384...(screen area)`);
+          mylog.debug(`Found code starting at 16384...(screen area)`);
           snapshot.scrdata = tap[index + 1].data;
           snapshot.border = 7;
           break;
         } else if (element.len === 6912) {
-          mylog.info(`Found code with length 6912...(screen length)`);
+          mylog.debug(`Found code with length 6912...(screen length)`);
           if (tap[index + 1]) {
             snapshot.scrdata = tap[index + 1].data;
             snapshot.border = 7;

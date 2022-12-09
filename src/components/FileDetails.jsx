@@ -1,10 +1,25 @@
 import { ThemeProvider } from "@emotion/react";
-import { Box, Button, createTheme, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  createTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import {mylog} from "../App";
+import { mylog } from "../App";
 import SNAFormat from "./formats/SNAFormat.jsx";
 import Z80Format from "./formats/Z80Format";
 import TAPFormat from "./formats/TAPFormat";
@@ -15,9 +30,18 @@ import TRDFormat from "./formats/TRDFormat";
 import SCLFormat from "./formats/SCLFormat";
 import MDRFormat from "./formats/MDRFormat";
 
+import LaunchTwoToneIcon from "@mui/icons-material/LaunchTwoTone";
+
+import ZXInfoSettings from "../common/ZXInfoSettings";
+import Favorite from "../common/Favorite";
+
 const Item = styled(Paper)({
   textAlign: "left",
 });
+
+const openLink = (id) => {
+  window.electronAPI.openZXINFODetail(id).then((res) => {});
+};
 
 export default function FileDetails(props) {
   const { onClose, open, item } = props;
@@ -82,6 +106,14 @@ export default function FileDetails(props) {
 
   if (!open) return null; // avoid rendering, if not open
 
+  function getTitle() {
+    var title = item.subfilename ? `${item.subfilename} in (${item.filename})` : item.filename;
+    if (item.zxdbTitle) {
+      title = `${item.zxdbTitle}`;
+    }
+    return title;
+  }
+
   return (
     entry && (
       <ThemeProvider theme={theme}>
@@ -109,8 +141,30 @@ export default function FileDetails(props) {
                     py: 1,
                   }}
                 >
-                  <Typography variant="h6">{entry.title}</Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Typography variant="h6">
+                      <Favorite entry={item}></Favorite>
+                      {getTitle()}
+                    </Typography>
+                  </Stack>
                   <Stack spacing={2}>
+                    {item.zxdbID && (
+                      <Item elevation={0}>
+                        <Typography variant="subtitle2">
+                          Entry found in ZXDB with ID: {item.zxdbID}
+                          <Tooltip title="More details at ZXInfo.dk">
+                            <IconButton aria-label="More details at ZXInfo.dk" onClick={() => openLink(item.zxdbID)}>
+                              <LaunchTwoToneIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Typography>
+                      </Item>
+                    )}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      {item.version && <Chip label={item.version} size="small" />}
+                      {item.hwmodel && <Chip label={item.hwmodel} size="small" />}
+                      {item.protection && <Chip label={item.protection} size="small" />}
+                    </Stack>
                     <Item elevation={0}>
                       <Typography variant="subtitle1">Category</Typography>
                       <Typography variant="subtitle2">{entry.genre}</Typography>
@@ -132,25 +186,37 @@ export default function FileDetails(props) {
                       )}
                     </Item>
                   </Stack>
-                  <Stack direction="row" spacing={4} sx={{ py: 4 }}>
-                    {screens[0] && (
-                      <Item elevation={4} sx={{ p: 2 }}>
-                        <img src={`https://zxinfo.dk/media${screens[0].url}`} alt={screens[0].title}></img>
+                  <Stack spacing={0} sx={{ pt: 2 }}>
+                    <Item elevation={0}>
+                      <Typography variant="subtitle1">Preview and Screens found in ZXDB</Typography>
+                    </Item>
+                    <Stack direction="row" spacing={1} sx={{ py: 0 }}>
+                      <Item elevation={4} sx={{ p: 1 }}>
+                        <img src={item.orgScr} alt={screens[0].title} width="220"></img>
                         <br />
                         <Typography variant="caption">
-                          {screens[0].type} (Release: {screens[0].release_seq})
+                          Generated preview
                         </Typography>
                       </Item>
-                    )}
-                    {screens[1] && (
-                      <Item elevation={4} sx={{ p: 2 }}>
-                        <img src={`https://zxinfo.dk/media${screens[1].url}`} alt={screens[1].title}></img>
-                        <br />
-                        <Typography variant="caption">
-                          {screens[1].type} (Release: {screens[1].release_seq})
-                        </Typography>
-                      </Item>
-                    )}
+                      {screens[0] && (
+                        <Item elevation={4} sx={{ p: 1 }}>
+                          <img src={`https://zxinfo.dk/media${screens[0].url}`} alt={screens[0].title} width="220"></img>
+                          <br />
+                          <Typography variant="caption">
+                            {screens[0].type} (Release: {screens[0].release_seq})
+                          </Typography>
+                        </Item>
+                      )}
+                      {screens[1] && (
+                        <Item elevation={4} sx={{ p: 1 }}>
+                          <img src={`https://zxinfo.dk/media${screens[1].url}`} alt={screens[1].title} width="220"></img>
+                          <br />
+                          <Typography variant="caption">
+                            {screens[1].type} (Release: {screens[1].release_seq})
+                          </Typography>
+                        </Item>
+                      )}
+                    </Stack>
                   </Stack>
                 </Box>
               </Grid>

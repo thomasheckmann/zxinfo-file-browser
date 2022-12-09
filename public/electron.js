@@ -60,7 +60,7 @@ function createWindow() {
 app.whenReady().then(() => {
   // use error, warn, info for production
   log.transports.console.level = isDev ? "info" : "info";
-  log.transports.file.level = isDev ? "debug" : "info";
+  log.transports.file.level = isDev ? "silly" : "info";
   
 
   log.initialize({ preload: false, spyRendererConsole: true });
@@ -164,6 +164,7 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", "
 function scanDirectory(dirPath, obj) {
   const mylog = log.scope("scanDirectory");
   mylog.log(`scanning dir: ${dirPath}`);
+  //win.webContents.send('update-status-text', `scanning dir: ${dirPath}`);
 
   let filesInDir = 0;
   try {
@@ -250,7 +251,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 /**
  * Scan a folder for known files and return array with filenames, NOT including subfolders. Consider userSettings for sorting option.
  */
-ipcMain.handle("scan-folder", (event, arg) => {
+ipcMain.handle("scan-folder", async (event, arg) => {
   const mylog = log.scope("scan-folder");
   mylog.log(`input folder: ${arg}`);
   var result = [];
@@ -262,19 +263,24 @@ ipcMain.handle("scan-folder", (event, arg) => {
     fs.readdirSync(dirPath).forEach(function (folder) {
       let filepath = path.join(dirPath, folder);
       let stat = fs.statSync(filepath);
+      mylog.info(`processing: ${filepath}`);
+      //win.webContents.send('update-status-text', `processing: ${filepath}`);
       if (!stat.isDirectory()) {
+        mylog.info(`file, looking at extension: ${filepath}`);
         let extension = path.extname(filepath).toLowerCase();
         if (supportedExts.indexOf(extension) >= 0) {
           filesInDir++;
-          mylog.debug(`found a file: ${filepath}, count=${filesInDir}`);
+          mylog.debug(`file with valid extension: ${filepath}, count=${filesInDir}`);
           result.push(filepath);
         }
+      } else {
+        mylog.info(`directory, ignoring: ${filepath}`);
       }
     });
   } catch (error) {
     mylog.error(error);
   }
-  mylog.debug(`Returning: total files: ${filesInDir}`);
+  mylog.info(`Returning: total files: ${filesInDir}`);
   return result;
 });
 

@@ -49,7 +49,7 @@ function read_track_info(data, track, DPB, disk_info_block) {
     sector_data: [], // num_sectors * (sector_size * 256b)
   };
 
-  mylog.info(
+  mylog.debug(
     `Track Info: track: ${track_info.track_num}, side: ${track_info.head_num}, sector size: ${track_info.sector_size} (x 256b), no. of sectors: ${track_info.num_sectors}, filler: ${track_info.filler_byte}, signature: ${track_info.header}`
   );
   // READ SECTOR INFORMATION LIST

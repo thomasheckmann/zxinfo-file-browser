@@ -420,13 +420,13 @@ function HardwareBlock(len, data) {
   this.length = data[0];
   this.hw = [];
 
-  mylog.info(`Number of entries: ${this.length}`);
+  mylog.debug(`Number of entries: ${this.length}`);
   const hwData = data.slice(1);
   for (var i = 0; i < this.length; i++) {
     const hardwareType = hwData[i * 3];
     const hardwareId = hwData[i * 3 + 1];
     const hardwareInfo = hwData[i * 3 + 2];
-    mylog.info(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
+    mylog.debug(`${hardwareType}, ${hardwareId}, ${hardwareInfo} => ${HWTYPE.get(hardwareType).hardware[hardwareId]} - ${HWINFO.get(hardwareInfo)}`);
     if (HWINFO.get(hardwareInfo)) {
       this.hw.push(HWTYPE.get(hardwareType).hardware[hardwareId]);
     }

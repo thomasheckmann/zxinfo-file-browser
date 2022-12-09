@@ -114,6 +114,8 @@ export default function App() {
   const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
   const [isBusyWorking, setIsBusyWorking] = React.useState(false);
 
+  const [statusText, setStatusText] = React.useState("");
+
   /**
    * xs, sm, md, lg, xl
    * @returns
@@ -165,9 +167,8 @@ export default function App() {
     setAppSettings({ ...appSettings, sortOrderFiles: event.target.checked });
   };
 
-
   function sortFolders(folders, option) {
-    if(option) {
+    if (option) {
       return folders.sort();
     } else {
       return folders.sort().reverse();
@@ -198,6 +199,10 @@ export default function App() {
     setAppSettings({ ...appSettings, fileFilters: newFormats });
   };
 
+  window.electronAPI.onUpdateStatusText((_event, value) => {
+    setStatusText(value);
+  });
+
   // get start-folder from store (last used folder)
   async function getStartFolder() {
     const initialFolder = await window.electronAPI.getStoreValue("start-folder");
@@ -206,8 +211,9 @@ export default function App() {
       setIsBusyWorking(true);
       const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
       if (foldersWithFiles) {
-        setStartFolder((startFolder) =>({
-          ...startFolder, root: foldersWithFiles.root,
+        setStartFolder((startFolder) => ({
+          ...startFolder,
+          root: foldersWithFiles.root,
           folders: sortFolders(foldersWithFiles.folders, appSettings.sortOrderFolders),
           total: foldersWithFiles.total,
           time: foldersWithFiles.time,
@@ -464,6 +470,9 @@ export default function App() {
                   <Typography>
                     {startFolder.total} file(s) found in {startFolder.root} ({startFolder.time} sec.)
                   </Typography>
+                </Box>
+                <Box sx={{ display: "flex" }}>
+                  <Typography align="center">{statusText}</Typography>
                 </Box>
               </Container>
             </div>

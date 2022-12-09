@@ -58,7 +58,6 @@ export default function GridView(props) {
 
   useEffect(() => {
     mylog("GridView", "useEffect", `fetching folders....`);
-
     scanFolder();
   }, [props.folders, appSettings.sortOrderFiles, appSettings.fileFilters]);
 

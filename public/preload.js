@@ -39,4 +39,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Locate and open folder with file, from render to main
   locateFileAndFolder: (args) => ipcRenderer.invoke("locate-file-and-folder", args),
+  
+  onUpdateStatusText: (callback) => ipcRenderer.on('update-status-text', callback),
 });
