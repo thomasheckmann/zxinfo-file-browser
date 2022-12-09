@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {mylog} from "../App";
+import { mylog } from "../App";
 import { Container } from "@mui/system";
 
 export default function ZXInfoSCRDialog(props) {

@@ -18,7 +18,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
-import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
 
 import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflineTwoTone";
 import WarningTwoToneIcon from "@mui/icons-material/WarningTwoTone";
@@ -26,12 +25,13 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import Favorite from "../common/Favorite";
+import Favorite from "../common/cardactions/Favorite";
+import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 import FileErrorDialog from "./FileErrorDialog";
 import FileDetailsDialog from "./FileDetails";
 
-import {mylog} from "../App";
+import { mylog } from "../App";
 
 function formatType(t) {
   switch (t) {
@@ -62,10 +62,6 @@ function formatType(t) {
 
 const openLink = (id) => {
   window.electronAPI.openZXINFODetail(id).then((res) => {});
-};
-
-const openFolderFile = (name) => {
-  window.electronAPI.locateFileAndFolder(name).then((res) => {});
 };
 
 function EntryCard(props) {
@@ -108,12 +104,10 @@ function EntryCard(props) {
     setFileDetailsDialogOpen(true);
   };
 
-
   useEffect(
     () => {
       if (!restCalled) {
         // make sure we only call the API once
-        setRestCalled(true);
 
         const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
         axios
@@ -121,6 +115,7 @@ function EntryCard(props) {
           .then((response) => {
             let item = props.entry;
             item.orgScr = props.entry.scr;
+
             // save original SCR detected from file
             setOriginalScreen(props.entry.scr);
             item.zxdbID = response.data.entry_id;
@@ -139,10 +134,13 @@ function EntryCard(props) {
             if (zxdbSCR) {
               setEntry({ ...props.entry, scr: zxdbSCR });
             } else {
+              props.entry.orgScr = props.entry.scr;
               setEntry(props.entry);
             }
           })
-          .finally(() => {});
+          .finally(() => {
+            setRestCalled(true);
+          });
       }
     },
     [
@@ -155,7 +153,7 @@ function EntryCard(props) {
     var useScreen = null;
 
     if (selectedSCR === undefined) {
-      mylog("EntryCard", "useEffect", `andling selectSCR, undefined... ?`);
+      mylog("EntryCard", "useEffect", `handling selectSCR, undefined... ?`);
       //
     } else if (entry && selectedSCR === null) {
       // delete user selected and set default
@@ -184,14 +182,23 @@ function EntryCard(props) {
   return (
     entry && (
       <React.Fragment>
-        <ZXInfoSCRDialog
-          open={isSCRDialogOpen}
-          zxdb={{ zxdbID: entry.zxdbID, title: entry.zxdbTitle }}
-          selectedValue={selectedSCR}
-          onClose={handleSCRDialogClose}
-        ></ZXInfoSCRDialog>
+        {isSCRDialogOpen && (
+          <ZXInfoSCRDialog
+            open={isSCRDialogOpen}
+            zxdb={{ zxdbID: entry.zxdbID, title: entry.zxdbTitle }}
+            selectedValue={selectedSCR}
+            onClose={handleSCRDialogClose}
+          ></ZXInfoSCRDialog>
+        )}
         {isFileErrorDialogOpen && <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>}
-        {isFileDetailsDialogOpen && <FileDetailsDialog open={isFileDetailsDialogOpen} onClose={handleFileDetailsDialogClose} item={entry}></FileDetailsDialog>}
+        {isFileDetailsDialogOpen && (
+          <FileDetailsDialog
+            open={isFileDetailsDialogOpen}
+            onClose={handleFileDetailsDialogClose}
+            item={entry}
+            handleclose={handleSCRDialogClose}
+          ></FileDetailsDialog>
+        )}
         <Card raised elevation={4}>
           <CardHeader
             sx={{
@@ -209,13 +216,7 @@ function EntryCard(props) {
                 </Typography>
               </Avatar>
             }
-            action={
-              <Tooltip title="Locate file">
-                <IconButton aria-label="Locate file" onClick={(name) => openFolderFile(entry.filepath)}>
-                  <InsertLinkOutlinedIcon />
-                </IconButton>
-              </Tooltip>
-            }
+            action={<LocateFileAndFolder path={entry.filepath}></LocateFileAndFolder>}
             title={
               <Tooltip title={entry.filename}>
                 <Typography variant="caption" noWrap gutterBottom>
@@ -260,7 +261,7 @@ function EntryCard(props) {
             </Stack>
           </CardContent>
           <CardActions disableSpacing>
-          <Favorite entry={entry}></Favorite>
+            <Favorite entry={entry}></Favorite>
             {/* and not already downloaded */}
             {entry.zxdbID && (
               <Tooltip title="Get SCR fron ZXInfo" onClick={() => handleSCRDialogOpen(this)}>

@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 
-import ZXInfoSettings from "../common/ZXInfoSettings";
-import { mylog } from "../App";
+import ZXInfoSettings from "../ZXInfoSettings";
+import { mylog } from "../../App";
 
 export default function Favorite(props) {
   const [isFavorite, setIsFavorite] = useState(false);

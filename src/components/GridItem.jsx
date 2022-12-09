@@ -6,7 +6,8 @@ import axios from "axios";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import Favorite from "../common/Favorite";
+import Favorite from "../common/cardactions/Favorite";
+import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 export default function GridItem(props) {
   const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
@@ -38,6 +39,7 @@ export default function GridItem(props) {
         .get(dataURL)
         .then((response) => {
           let item = props.entry;
+          item.orgScr = props.entry.scr;
 
           // save original SCR detected from file
           item.zxdbID = response.data.entry_id;
@@ -56,6 +58,7 @@ export default function GridItem(props) {
           if (zxdbSCR) {
             setEntry({ ...props.entry, scr: zxdbSCR });
           } else {
+            props.entry.orgScr = props.entry.scr;
             setEntry(props.entry);
           }
         })
@@ -72,6 +75,7 @@ export default function GridItem(props) {
         <ImageListItem sx={{ border: 1, borderColor: "#c0c0c0" }}>
           <img src={entry.scr} alt={entry.filename} />
           <Favorite entry={entry} sx={{ position: "absolute", top: 0, left: 0 }}></Favorite>
+          <LocateFileAndFolder path={entry.filepath} sx={{ position: "absolute", top: 0, right: 0 }}/>
           <ImageListItemBar
             title={
               <Tooltip title={getTitle()}>
@@ -82,7 +86,7 @@ export default function GridItem(props) {
             }
             actionIcon={
               <Tooltip title="See file details" onClick={() => handleFileDetailsDialogOpen(this)}>
-                <IconButton arial-label="see file details">
+                <IconButton arial-label="see file details" size="small">
                   <InfoOutlinedIcon sx={{ color: "rgba(255, 255, 255, 0.54)" }} />
                 </IconButton>
               </Tooltip>

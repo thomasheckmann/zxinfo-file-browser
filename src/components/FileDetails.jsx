@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { mylog } from "../App";
@@ -29,11 +29,13 @@ import DSKFormat from "./formats/DSKFormat";
 import TRDFormat from "./formats/TRDFormat";
 import SCLFormat from "./formats/SCLFormat";
 import MDRFormat from "./formats/MDRFormat";
+import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 
 import LaunchTwoToneIcon from "@mui/icons-material/LaunchTwoTone";
+import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflineTwoTone";
 
-import ZXInfoSettings from "../common/ZXInfoSettings";
-import Favorite from "../common/Favorite";
+import Favorite from "../common/cardactions/Favorite";
+import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 const Item = styled(Paper)({
   textAlign: "left",
@@ -45,9 +47,21 @@ const openLink = (id) => {
 
 export default function FileDetails(props) {
   const { onClose, open, item } = props;
-
   const [entry, setEntry] = useState(null);
   const [screens, setScreens] = useState([]);
+
+  // Fetch SCR from ZXInfo API
+  const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
+  const [selectedSCR, setSelectedSCR] = useState("");
+
+  const handleSCRDialogClose = (value) => {
+    setSCRDialogOpen(false);
+    props.handleclose(value);
+  };
+
+  const handleSCRDialogOpen = () => {
+    setSCRDialogOpen(true);
+  };
 
   const theme = createTheme({
     palette: {
@@ -117,6 +131,14 @@ export default function FileDetails(props) {
   return (
     entry && (
       <ThemeProvider theme={theme}>
+        {isSCRDialogOpen && (
+          <ZXInfoSCRDialog
+            open={isSCRDialogOpen}
+            zxdb={{ zxdbID: item.zxdbID, title: item.zxdbTitle }}
+            selectedValue={selectedSCR}
+            onClose={handleSCRDialogClose}
+          ></ZXInfoSCRDialog>
+        )}
         <Dialog
           onClose={handleClose}
           open={open}
@@ -145,6 +167,7 @@ export default function FileDetails(props) {
                     <Typography variant="h6">
                       <Favorite entry={item}></Favorite>
                       {getTitle()}
+                      <LocateFileAndFolder path={item.filepath}></LocateFileAndFolder>
                     </Typography>
                   </Stack>
                   <Stack spacing={2}>
@@ -188,15 +211,22 @@ export default function FileDetails(props) {
                   </Stack>
                   <Stack spacing={0} sx={{ pt: 2 }}>
                     <Item elevation={0}>
-                      <Typography variant="subtitle1">Preview and Screens found in ZXDB</Typography>
+                      <Typography variant="subtitle1">
+                        Preview and Screens found in ZXDB
+                        {item.zxdbID && (
+                          <Tooltip title="Get SCR fron ZXInfo" onClick={() => handleSCRDialogOpen(this)}>
+                            <IconButton arial-label="get scr from zxinfo">
+                              <DownloadForOfflineTwoToneIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Typography>
                     </Item>
                     <Stack direction="row" spacing={1} sx={{ py: 0 }}>
                       <Item elevation={4} sx={{ p: 1 }}>
-                        <img src={item.orgScr} alt={screens[0].title} width="220"></img>
+                        <img src={item.orgScr} alt="Generated preview" width="220"></img>
                         <br />
-                        <Typography variant="caption">
-                          Generated preview
-                        </Typography>
+                        <Typography variant="caption">Generated preview</Typography>
                       </Item>
                       {screens[0] && (
                         <Item elevation={4} sx={{ p: 1 }}>
