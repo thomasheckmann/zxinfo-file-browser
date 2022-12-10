@@ -77,6 +77,8 @@ export default function InfiniteEntriesList(props) {
             itemsToAdd.push(entry);
           }
         });
+      } else {
+        mylog("InfiniteEntriesList", "fetchMoreData", `File NOT found: ${props.files[newIndex]}`);
       }
     }
     if (newIndex >= props.files.length) {

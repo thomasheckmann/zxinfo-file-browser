@@ -199,9 +199,11 @@ export default function App() {
     setAppSettings({ ...appSettings, fileFilters: newFormats });
   };
 
+  /**
   window.electronAPI.onUpdateStatusText((_event, value) => {
     setStatusText(value);
   });
+ */
 
   // get start-folder from store (last used folder)
   async function getStartFolder() {

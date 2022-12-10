@@ -101,9 +101,9 @@ export default function TZXFormat(props) {
 
   return (
     <TableContainer component={Paper} sx={{ minWidth: 300 }}>
-      <Table aria-label="Snapshot registers" size="small">
+      <Table aria-label="TZX Details" size="small">
         <TableBody>
-          {item.data.tape.map((row, i) => (
+          {item.data.tape && item.data.tape.map((row, i) => (
             <TableRow key={i}>
               <TableCell component="th" scope="row">
                 {i}: <b>{row.blockName}</b>
