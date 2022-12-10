@@ -334,6 +334,7 @@ export default function App() {
                     <FolderOpenIcon />
                   </Tooltip>
                 </IconButton>
+                <Divider orientation="vertical" variant="middle" sx={{color: "#ff0000"}}/>
                 <IconButton
                   disabled={location.pathname === "/"}
                   edge="start"
