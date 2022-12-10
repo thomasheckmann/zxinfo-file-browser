@@ -53,10 +53,10 @@ function readMDR(data) {
   // A cartridge file contains 254 'sectors' of 543 bytes each
   var file_map = new Map();
   var no_of_used_blocks = 0;
-  var media_info = { title: null, freespace: 0, catalog: null };
+  var dir_scr = { title: null, freespace: 0, catalog: null };
 
   var i;
-  for (i = 0; i < 254 && ((i * 543)< (data.length - 29)); i++) {
+  for (i = 0; i < 254 && i * 543 < data.length - 29; i++) {
     const offset = i * 543;
 
     const block = data.slice(offset, offset + 543);
@@ -74,8 +74,8 @@ function readMDR(data) {
 
     const usedBlock = (mdr_block.recflg & 0b00000010) > 0 || mdr_block.reclen === 512;
     const emptyBlock = (mdr_block.recflg & 0b00000010) === 0 && mdr_block.recflg === 0;
-    const unusableBlock = (mdr_block.recflg & 0b00000010) >0  && mdr_block.reclen === 0;
-    media_info.title = mdr_block.hdname;
+    const unusableBlock = (mdr_block.recflg & 0b00000010) > 0 && mdr_block.reclen === 0;
+    dir_scr.title = mdr_block.hdname;
 
     mylog.debug(`(s: ${mdr_block.hdnumb}, d: ${mdr_block.recnum} - used: ${usedBlock}, empty: ${emptyBlock}, unusable: ${unusableBlock})`);
 
@@ -96,20 +96,20 @@ function readMDR(data) {
     }
   }
 
-  if(i < 254) {
-    snapshot.error.push({type: "warning", message: `Number of sectors (${i}) < 254`});
+  if (i < 254) {
+    snapshot.error.push({ type: "warning", message: `Number of sectors (${i}) < 254` });
     mylog.warn(`Number of sectors (${i}) < 254`);
   }
   const freeSpace = (254 * 512) / 1024 - Math.ceil((no_of_used_blocks * 512) / 1024);
   const sortedCatalo = new Map([...file_map].sort());
-  media_info.catalog = sortedCatalo;
-  media_info.freespace = freeSpace;
+  dir_scr.catalog = sortedCatalo;
+  dir_scr.freespace = freeSpace;
 
   mylog.log(`Total used blocks: ${no_of_used_blocks} (${Math.ceil((no_of_used_blocks * 512) / 1024)}) / 254 (${(254 * 512) / 1024}) - Free: ${freeSpace}`);
 
-  snapshot.media_info = media_info;
-  snapshot.text = `${media_info.title}, sectors: ${no_of_used_blocks} / 254 - Free: ${freeSpace}K`;
-  mylog.debug(media_info);
+  snapshot.dir_scr = dir_scr;
+  snapshot.text = `${dir_scr.title}, sectors: ${no_of_used_blocks} / 254 - Free: ${freeSpace}K`;
+  mylog.debug(dir_scr);
 
   snapshot.data = regs;
 

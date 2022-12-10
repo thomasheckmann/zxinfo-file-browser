@@ -598,8 +598,8 @@ function readTZX(data) {
 
   const signature = String.fromCharCode.apply(null, data.slice(0, 7));
   if (signature !== "ZXTape!") {
-    mylog.warn(`NOT a TZX file, skipping...`);
-    return null;
+    mylog.warn(`TZX Signature not found, skipping...`);
+    return  { type: "?", error: [{type: "error", message: "TZX Signature not found"}], scrdata: null, data: [] };
   }
   const TZXMajorVersion = data[8];
   const TZXMinorVersion = data[9];

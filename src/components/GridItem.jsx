@@ -9,6 +9,8 @@ import ZXInfoSettings from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
+import { mylog } from "../App";
+
 export default function GridItem(props) {
   const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
@@ -24,6 +26,13 @@ export default function GridItem(props) {
     setFileDetailsDialogOpen(true);
   };
 
+  const [selectedSCR, setSelectedSCR] = useState("");
+  const [originalScreen, setOriginalScreen] = useState();
+
+  const handleSCRDialogClose = (value) => {
+    setSelectedSCR((selectedSCR) => value);
+  };
+
   function getTitle() {
     var title = entry.subfilename ? entry.subfilename + " in (" + entry.filename + ")" : entry.filename;
     if (entry.zxdbTitle) {
@@ -31,6 +40,37 @@ export default function GridItem(props) {
     }
     return title;
   }
+
+  // handle user selected SCR
+  useEffect(() => {
+    var useScreen = null;
+
+    if (selectedSCR === undefined) {
+      mylog("GritItem", "useEffect", `handling selectSCR, undefined... ?`);
+      //
+    } else if (entry && selectedSCR === null) {
+      // delete user selected and set default
+      if (appSettings.zxinfoSCR.size > 0) {
+        appSettings.zxinfoSCR.delete(props.entry.sha512);
+      }
+      useScreen = originalScreen;
+    } else if (entry && appSettings.zxinfoSCR.size === 0) {
+      // zxinfoSCR, first time
+      appSettings.zxinfoSCR = new Map();
+      appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
+      useScreen = selectedSCR;
+    } else if (entry && appSettings.zxinfoSCR.size > 0) {
+      appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
+      useScreen = selectedSCR;
+    }
+
+    if (useScreen && entry) {
+      setEntry((entry) => ({ ...entry, scr: useScreen }));
+      var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
+      var jsonString1 = JSON.stringify(obj1);
+      window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
+    }
+  }, [selectedSCR]);
 
   useEffect(() => {
     if (!restCalled) {
@@ -71,11 +111,18 @@ export default function GridItem(props) {
   return (
     entry && (
       <React.Fragment>
-        {isFileDetailsDialogOpen && <FileDetailsDialog open={isFileDetailsDialogOpen} onClose={handleFileDetailsDialogClose} item={entry}></FileDetailsDialog>}
+        {isFileDetailsDialogOpen && (
+          <FileDetailsDialog
+            open={isFileDetailsDialogOpen}
+            onClose={handleFileDetailsDialogClose}
+            item={entry}
+            handleclose={handleSCRDialogClose}
+          ></FileDetailsDialog>
+        )}
         <ImageListItem sx={{ border: 1, borderColor: "#c0c0c0" }}>
           <img src={entry.scr} alt={entry.filename} />
           <Favorite entry={entry} sx={{ position: "absolute", top: 0, left: 0 }}></Favorite>
-          <LocateFileAndFolder path={entry.filepath} sx={{ position: "absolute", top: 0, right: 0 }}/>
+          <LocateFileAndFolder path={entry.filepath} sx={{ position: "absolute", top: 0, right: 0 }} />
           <ImageListItemBar
             title={
               <Tooltip title={getTitle()}>
