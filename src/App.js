@@ -60,10 +60,12 @@ const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "ta
 export const ZXInfoSettingsObj = {
   fileFilters: defaultFileFilters,
 
+  hideZip: false,
   // persistent app config saved to config.json
   sortOrderFiles: true,
   sortOrderFolders: true,
   favorites: new Map(),
+  zxdbIDs: new Map(),
 };
 
 export const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
@@ -255,6 +257,12 @@ export default function App() {
         if (zxinfoSCR) {
           scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
         }
+        const zxdbIDs = await window.electronAPI.getZXDBs("zxdb-id-store");
+        mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(zxdbIDs)}`);
+        var zxdbidsMap = new Map();
+        if (zxdbIDs) {
+          zxdbidsMap = new Map(Object.entries(JSON.parse(zxdbIDs)));
+        }
         setAppSettings({
           ...appSettings,
           sortOrderFiles: sortOrdersFiles,
@@ -262,6 +270,7 @@ export default function App() {
           hideZip: hideZip,
           favorites: favMap,
           zxinfoSCR: scrMap,
+          zxdbIDs: zxdbidsMap,
         });
         mylog("App", "loadSettings", `-exit- appSettings: ${JSON.stringify(appSettings)}`);
         setSettingsLoaded(true);

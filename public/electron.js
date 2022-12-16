@@ -58,13 +58,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // use error, warn, info for production
   log.transports.console.level = isDev ? "info" : "info";
   log.transports.file.level = isDev ? "silly" : "info";
-  
-
   log.initialize({ preload: false, spyRendererConsole: true });
-
   log.info("Initialized electron-log, OK");
 
   createWindow();
@@ -86,6 +82,7 @@ const Store = require("electron-store");
 const store = new Store();
 const favoritesStore = new Store({ name: "favorites" });
 const zxinfoSCRStore = new Store({ name: "zxinfoSCR" });
+const zxdbIDStore = new Store({ name: "zxdb_id" });
 
 ipcMain.handle("getStoreValue", (event, key) => {
   const mylog = log.scope("getStoreValue");
@@ -108,7 +105,6 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 ipcMain.handle("getFavorites", (event, key) => {
   const mylog = log.scope("getFavorites");
   const value = favoritesStore.get(key);
-  // mylog.debug(`key, value = {${key}, ${value}}`);
   return value;
 });
 
@@ -126,6 +122,17 @@ ipcMain.handle("getZxinfoSCR", (event, key) => {
 ipcMain.handle("setZxinfoSCR", (event, key, value) => {
   const mylog = log.scope("setzxinfoSCR");
   zxinfoSCRStore.set(key, value);
+});
+
+ipcMain.handle("get-zxdb-id-store", (event, key) => {
+  const mylog = log.scope("get-zxdb-id-store");
+  const value = zxdbIDStore.get(key);
+  return value;
+});
+
+ipcMain.handle("set-zxdb-id-store", (event, key, value) => {
+  const mylog = log.scope("set-zxdb-id-store");
+  zxdbIDStore.set(key, value);
 });
 
 ipcMain.handle("convertSCR", (event, img) => {
@@ -249,7 +256,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 });
 
 /**
- * Scan a folder for known files and return array with filenames, NOT including subfolders. Consider userSettings for sorting option.
+ * Scan a folder for known files and return array with filenames, NOT including subfolders.
  */
 ipcMain.handle("scan-folder", async (event, arg) => {
   const mylog = log.scope("scan-folder");

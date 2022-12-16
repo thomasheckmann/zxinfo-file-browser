@@ -15,7 +15,7 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
 
@@ -26,6 +26,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 import ZXInfoSettings from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
+import ZXdbID from "../common/cardactions/ZXdbID";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 import FileErrorDialog from "./FileErrorDialog";
@@ -104,49 +105,46 @@ function EntryCard(props) {
     setFileDetailsDialogOpen(true);
   };
 
-  useEffect(
-    () => {
-      if (!restCalled) {
-        // make sure we only call the API once
+  useEffect(() => {
+    if (!restCalled) {
+      // make sure we only call the API once
 
-        const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
-        axios
-          .get(dataURL)
-          .then((response) => {
-            let item = props.entry;
-            item.orgScr = props.entry.scr;
+      mylog("EntryCard", "useEffect", `OPEN, get API data for: ${props.entry.sha512}`);
+      const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
+      mylog("EntryCard", "useEffect", `calling API ${dataURL}`);
+      axios
+        .get(dataURL)
+        .then((response) => {
+          let item = props.entry;
+          item.orgScr = props.entry.scr;
 
-            // save original SCR detected from file
-            setOriginalScreen(props.entry.scr);
-            item.zxdbID = response.data.entry_id;
-            item.zxdbTitle = response.data.title;
+          // save original SCR detected from file
+          setOriginalScreen(props.entry.scr);
+          item.zxdbID = response.data.entry_id;
+          item.zxdbTitle = response.data.title;
 
-            // look up SCR if user selected
-            const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-            if (zxdbSCR) {
-              item.scr = zxdbSCR;
-            }
-            setEntry((entry) => item);
-          })
-          .catch((error) => {
-            // Not found, or other API call errors
-            const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-            if (zxdbSCR) {
-              setEntry({ ...props.entry, scr: zxdbSCR });
-            } else {
-              props.entry.orgScr = props.entry.scr;
-              setEntry(props.entry);
-            }
-          })
-          .finally(() => {
-            setRestCalled(true);
-          });
-      }
-    },
-    [
-      /*restCalled, isFavorite, appSettings.favorites, appSettings.zxinfoSCR*/
-    ]
-  );
+          // look up SCR if user selected
+          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
+          if (zxdbSCR) {
+            item.scr = zxdbSCR;
+          }
+          setEntry((entry) => item);
+        })
+        .catch((error) => {
+          // Not found, or other API call errors
+          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
+          if (zxdbSCR) {
+            setEntry({ ...props.entry, scr: zxdbSCR });
+          } else {
+            props.entry.orgScr = props.entry.scr;
+            setEntry(props.entry);
+          }
+        })
+        .finally(() => {
+          setRestCalled(true);
+        });
+    }
+  }, []); // only run once
 
   // handle user selected SCR
   useEffect(() => {
@@ -246,7 +244,7 @@ function EntryCard(props) {
               {entry.version && <Chip label={entry.version} size="small" />}
               {entry.hwmodel && <Chip label={entry.hwmodel} size="small" />}
               {entry.protection && <Chip label={entry.protection} size="small" />}
-              {entry.zxdbID && (
+              {entry.zxdbID ? (
                 <Tooltip title="More details at ZXInfo.dk">
                   <Chip
                     label={entry.zxdbID}
@@ -256,6 +254,8 @@ function EntryCard(props) {
                     onClick={(id) => openLink(entry.zxdbID)}
                   />
                 </Tooltip>
+              ) : (
+                <ZXdbID entry={entry}></ZXdbID>
               )}
               <Chip sx={{ bgcolor: "#ffffff" }} />
             </Stack>

@@ -28,6 +28,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Save zxinfoSCRStore
   setZxinfoSCR: (key, value) => ipcRenderer.invoke("setZxinfoSCR", key, value),
 
+  // Load zxdb-id store
+  getZXDBs: (args) => ipcRenderer.invoke("get-zxdb-id-store", args),
+
+  // Save zxdb-id store
+  setZXDBs: (key, value) => ipcRenderer.invoke("set-zxdb-id-store", key, value),
+
   // Convert SCR to 320x240 - centered (used when getting SCR from ZXInfo)
   // NOT USED
   convertSCR: (img) => ipcRenderer.invoke("convertSCR", img),
