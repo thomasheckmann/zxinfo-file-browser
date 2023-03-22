@@ -124,6 +124,7 @@ export default function GridItem(props) {
           <Favorite entry={entry} sx={{ position: "absolute", top: 0, left: 0 }}></Favorite>
           <LocateFileAndFolder path={entry.filepath} sx={{ position: "absolute", top: 0, right: 0 }} />
           <ImageListItemBar
+            sx={{ backgroundColor: entry.zxdbID ? "#02b554": "" }}
             title={
               <Tooltip title={getTitle()}>
                 <Typography variant="caption" noWrap gutterBottom>

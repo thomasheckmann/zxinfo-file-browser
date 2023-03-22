@@ -200,7 +200,8 @@ function EntryCard(props) {
         <Card raised elevation={4}>
           <CardHeader
             sx={{
-              backgroundColor: entry.type === "zip" ? "#606060" : "#808080",
+              backgroundColor: entry.zxdbID ? "#02b554": "#808080",
+              // backgroundColor: entry.type === "zip" ? "#606060" : "#808080",
               display: "flex",
               overflow: "hidden",
               "& .MuiCardHeader-content": {
@@ -208,7 +209,7 @@ function EntryCard(props) {
               },
             }}
             avatar={
-              <Avatar sx={{ bgcolor: red[500] }} aria-label="file format">
+              <Avatar sx={{ bgcolor: entry.zxdbID ? "#606060": red[500] }} aria-label="file format">
                 <Typography variant="caption" display="block" gutterBottom>
                   {formatType(entry.type)}
                 </Typography>
