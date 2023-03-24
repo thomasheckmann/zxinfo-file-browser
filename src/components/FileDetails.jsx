@@ -36,6 +36,7 @@ import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflin
 
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
+import ZXdbID from "../common/cardactions/ZXdbID";
 
 const Item = styled(Paper)({
   textAlign: "left",
@@ -171,17 +172,23 @@ export default function FileDetails(props) {
                     </Typography>
                   </Stack>
                   <Stack spacing={2}>
-                    {item.zxdbID && (
-                      <Item elevation={0}>
-                        <Typography variant="subtitle2">
-                          Entry found in ZXDB with ID: {item.zxdbID}
-                          <Tooltip title="More details at ZXInfo.dk">
-                            <IconButton aria-label="More details at ZXInfo.dk" onClick={() => openLink(item.zxdbID)}>
-                              <LaunchTwoToneIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Typography>
-                      </Item>
+                    {item.zxdbID ? (
+                      <Stack direction="row" spacing={2}>
+                        <Item elevation={0}>
+                          <Typography variant="subtitle2">
+                            Entry found in ZXDB with ID: {item.zxdbID}
+                            <Tooltip title="More details at ZXInfo.dk">
+                              <IconButton aria-label="More details at ZXInfo.dk" onClick={() => openLink(item.zxdbID)}>
+                                <LaunchTwoToneIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </Typography>
+                        </Item>
+                      </Stack>
+                    ) : (
+                      <Stack direction="row" spacing={1}>
+                        <ZXdbID entry={item}></ZXdbID>
+                      </Stack>
                     )}
                     <Stack direction="row" spacing={1} alignItems="center">
                       {item.version && <Chip label={item.version} size="small" />}
