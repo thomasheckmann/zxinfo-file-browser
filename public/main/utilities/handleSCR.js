@@ -352,8 +352,9 @@ function _printAt(image, x, y, text, model, maxLine) {
   var my_y = y;
   for (var i = 0; i < text.length; i++) {
     const c = text.charCodeAt(i) - charOffset;
-    if (c < 0 || c > 95) {
+    if ((c < 0 || c > 95) && model !== "ZX81") {
       // ignore, non-printable
+      // console.log(`ignored: ${c} - ${model}`);
     } else if (my_y < maxLine) {
       const fontData = charset[c];
       for (var r = 0; r < 8; r++) {
