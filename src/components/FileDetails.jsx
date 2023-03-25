@@ -154,6 +154,8 @@ export default function FileDetails(props) {
         >
           <DialogTitle align="center" sx={{ color: "#ffffff", bgcolor: "#965602" }}>
             File info for {item.filename}
+            <br />
+            <Typography variant="caption">{item.sha512}</Typography>
           </DialogTitle>
           <DialogContent>
             <Grid container id="common" sx={{ height: "100%" }}>
@@ -173,7 +175,7 @@ export default function FileDetails(props) {
                   </Stack>
                   <Stack spacing={2}>
                     {item.zxdbID ? (
-                      <Stack direction="row" spacing={2}>
+                      <Stack direction="row" spacing={1}>
                         <Item elevation={0}>
                           <Typography variant="subtitle2">
                             Entry found in ZXDB with ID: {item.zxdbID}
@@ -183,11 +185,13 @@ export default function FileDetails(props) {
                               </IconButton>
                             </Tooltip>
                           </Typography>
+                          <Typography variant="subtitle2">Source: {item.source}</Typography>
                         </Item>
                       </Stack>
                     ) : (
                       <Stack direction="row" spacing={1}>
                         <ZXdbID entry={item}></ZXdbID>
+                        <br />
                       </Stack>
                     )}
                     <Stack direction="row" spacing={1} alignItems="center">

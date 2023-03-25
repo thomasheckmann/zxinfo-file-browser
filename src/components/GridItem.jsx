@@ -84,6 +84,8 @@ export default function GridItem(props) {
           // save original SCR detected from file
           item.zxdbID = response.data.entry_id;
           item.zxdbTitle = response.data.title;
+          item.source = response.data.file.source;
+          item.sha512 = props.entry.sha512;
 
           // look up SCR if user selected
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
