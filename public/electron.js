@@ -49,16 +49,17 @@ function createWindow() {
     },
   });
   // Open the DevTools.
+  console.log("tmp path is:", app.getPath("temp"));
   if (isDev) {
     mylog.debug("opening DevTools");
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
   }
 
   win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
 }
 
 app.whenReady().then(() => {
-  log.transports.console.level = isDev ? "info" : "info";
+  log.transports.console.level = isDev ? "silly" : "info";
   log.transports.file.level = isDev ? "silly" : "info";
   log.initialize({ preload: false, spyRendererConsole: true });
   log.info("Initialized electron-log, OK");
@@ -386,4 +387,59 @@ ipcMain.handle("open-zxinfo-detail", (event, arg) => {
 ipcMain.handle("locate-file-and-folder", (event, arg) => {
   const mylog = log.scope("locate-file-and-folder");
   shell.showItemInFolder(arg);
+});
+
+ipcMain.handle("get-file-jsspeccy", (event, arg) => {
+  const mylog = log.scope("get-file-jsspeccy");
+  mylog.log(`prepare file: ${arg.file} - ${arg.subfilename}`);
+
+  var jsspeccy_filename = null;
+
+  if (arg.file && !arg.subfilename) {
+    // single file only
+    mylog.log(`handling single file: ${arg.file}`);
+    var ext = path.parse(arg.file).ext;
+
+    var destPath = null;
+
+    if (isDev) {
+      destPath = path.resolve(__dirname + "/tmp");
+      mylog.log(`development mode, destPath: ${destPath}`);
+      jsspeccy_filename = "./tmp/entryfile" + ext;
+    } else {
+      destPath = app.getPath("temp");
+      mylog.log(`LIVE mode, destPath: ${destPath}`);
+      jsspeccy_filename = destPath + "/entryfile" + ext;
+    }
+    const destFile = destPath + "/entryfile" + ext;
+    mylog.log(`destination: ${jsspeccy_filename}`);
+    const res = fs.copyFileSync(arg.file, destFile);
+  } else if (arg.file && arg.subfilename) {
+    // within ZIP
+    mylog.log(`handling file within ZIP: ${arg.file} - ${__dirname}`);
+    var zip = new AdmZip(arg.file);
+    var ext = path.parse(arg.subfilename).ext;
+    var destPath = null;
+    if(isDev) {
+       destPath = path.resolve(__dirname + "/tmp");
+       mylog.log(`development mode, destPath: ${destPath}`);
+       jsspeccy_filename = "./tmp/entryfile" + ext;
+    } else {
+      destPath = app.getPath("temp");
+      mylog.log(`LIVE mode, destPath: ${destPath}`);
+      jsspeccy_filename = destPath + "/entryfile" + ext;
+    }
+    const destFile = destPath + "/entryfile" + ext;
+
+    mylog.log(`extracting ${arg.subfilename} to '${destPath}/'`);
+    zip.extractEntryTo(arg.subfilename, destPath, false, true, "entryfile" + ext);
+    // This extract method ignores the outFileName, so perform a rename
+    mylog.log(`renaming file to entry.<ext>`);
+    fs.renameSync(`${destPath}/${arg.subfilename}`, `${destPath}/${"entryfile" + ext}`);
+  } else {
+    mylog.warn(`nothing to load...`);
+  }
+
+  mylog.log(`returning filename: ${jsspeccy_filename}`);
+  return jsspeccy_filename;
 });

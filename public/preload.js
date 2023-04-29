@@ -45,6 +45,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Locate and open folder with file, from render to main
   locateFileAndFolder: (args) => ipcRenderer.invoke("locate-file-and-folder", args),
-  
+
+  // Locate file to launch in emulator, (extrac) and copy file to ./tmp folder. from render to main
+  getFileForJSSpeccy: (args) => ipcRenderer.invoke("get-file-jsspeccy", args),
+
   // onUpdateStatusText: (callback) => ipcRenderer.on('update-status-text', callback),
 });

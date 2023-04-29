@@ -15,13 +15,13 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { Avatar, Card, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Avatar, Card, CardActionArea, CardActions, CardContent, CardHeader, CardMedia, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { red } from "@mui/material/colors";
 import axios from "axios";
 
 import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflineTwoTone";
 import WarningTwoToneIcon from "@mui/icons-material/WarningTwoTone";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import GamepadOutlinedIcon from "@mui/icons-material/GamepadOutlined";
 
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
 import ZXInfoSettings from "../common/ZXInfoSettings";
@@ -31,6 +31,8 @@ import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 import FileErrorDialog from "./FileErrorDialog";
 import FileDetailsDialog from "./FileDetails";
+
+import JSSpeccyDialog from "./JSSpeccyDialog";
 
 import { mylog } from "../App";
 
@@ -103,6 +105,39 @@ function EntryCard(props) {
 
   const handleFileDetailsDialogOpen = () => {
     setFileDetailsDialogOpen(true);
+  };
+
+  // JSSpeccy Details dialog
+  const [isJSSpeccyDialogOpen, setJSSpeccyDialogOpen] = useState(false);
+
+  const handleJSSpeccyDialogClose = (value) => {
+    setJSSpeccyDialogOpen(false);
+  };
+
+  const handleJSSpeccyDialogOpen = () => {
+    setJSSpeccyDialogOpen(true);
+  };
+
+  const validJSSpeccyFormat = () => {
+    mylog("EntryCard", "validJSSpeccyFormat", `checking if ${entry.filename} (${entry.subfilename}) is a valid JSSpeccy format`);
+
+    switch (formatType(entry.type)) {
+      case "ZIP":
+        return false;
+        break;
+      case "SNA":
+      case "Z80":
+      case "SZX":
+      case "TAP":
+        return true;
+      case "TZX":
+        // zx81 not supported
+        return entry.hwmodel !== "ZX81";
+        break;
+      default:
+        break;
+    }
+    return false;
   };
 
   useEffect(() => {
@@ -191,18 +226,12 @@ function EntryCard(props) {
           ></ZXInfoSCRDialog>
         )}
         {isFileErrorDialogOpen && <FileErrorDialog open={isFileErrorDialogOpen} errors={entry.error} onClose={handleFileErrorDialogClose}></FileErrorDialog>}
-        {isFileDetailsDialogOpen && (
-          <FileDetailsDialog
-            open={isFileDetailsDialogOpen}
-            onClose={handleFileDetailsDialogClose}
-            item={entry}
-            handleclose={handleSCRDialogClose}
-          ></FileDetailsDialog>
-        )}
+        {isFileDetailsDialogOpen && <FileDetailsDialog open={isFileDetailsDialogOpen} onClose={handleFileDetailsDialogClose} item={entry}></FileDetailsDialog>}
+        {isJSSpeccyDialogOpen && <JSSpeccyDialog open={isJSSpeccyDialogOpen} onClose={handleJSSpeccyDialogClose} item={entry}></JSSpeccyDialog>}
         <Card raised elevation={4}>
           <CardHeader
             sx={{
-              backgroundColor: entry.zxdbID ? "#02b554": "#808080",
+              backgroundColor: entry.zxdbID ? "#02b554" : "#808080",
               // backgroundColor: entry.type === "zip" ? "#606060" : "#808080",
               display: "flex",
               overflow: "hidden",
@@ -211,7 +240,7 @@ function EntryCard(props) {
               },
             }}
             avatar={
-              <Avatar sx={{ bgcolor: entry.zxdbID ? "#606060": red[500] }} aria-label="file format">
+              <Avatar sx={{ bgcolor: entry.zxdbID ? "#606060" : red[500] }} aria-label="file format">
                 <Typography variant="caption" display="block" gutterBottom>
                   {formatType(entry.type)}
                 </Typography>
@@ -235,7 +264,11 @@ function EntryCard(props) {
               </Tooltip>
             }
           />
-          <CardMedia component="img" image={entry.scr} alt={entry.filename} />
+          <CardActionArea onClick={() => handleFileDetailsDialogOpen(this)}>
+            <Tooltip title="See file details">
+              <CardMedia component="img" image={entry.scr} alt={entry.filename} />
+            </Tooltip>
+          </CardActionArea>
           <CardContent>
             <Typography gutterBottom variant="subtitle2" component="div" noWrap>
               {entry.zxdbTitle ? entry.zxdbTitle : entry.filename}
@@ -280,10 +313,11 @@ function EntryCard(props) {
                 </IconButton>
               </Tooltip>
             )}
-            {true && (
-              <Tooltip title="See file details" onClick={() => handleFileDetailsDialogOpen(this)} sx={{ marginLeft: "auto" }}>
-                <IconButton arial-label="see file details">
-                  <InfoOutlinedIcon sx={{ color: "#000000" }} />
+
+            {validJSSpeccyFormat() && (
+              <Tooltip title="Play in emulator" onClick={() => handleJSSpeccyDialogOpen(this)} sx={{ marginLeft: "auto" }}>
+                <IconButton arial-label="Play in emulator">
+                  <GamepadOutlinedIcon sx={{ color: "#000000" }} />
                 </IconButton>
               </Tooltip>
             )}

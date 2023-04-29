@@ -1,15 +1,20 @@
+/**
+ * GridItem - used in compact grid view mode
+ */
+
 import { IconButton, ImageListItem, ImageListItemBar, Tooltip, Typography } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import FileDetailsDialog from "../components/FileDetails";
 import axios from "axios";
 
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import GamepadOutlinedIcon from "@mui/icons-material/GamepadOutlined";
 
 import ZXInfoSettings from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
 import { mylog } from "../App";
+import JSSpeccyDialog from "./JSSpeccyDialog";
 
 export default function GridItem(props) {
   const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
@@ -22,7 +27,7 @@ export default function GridItem(props) {
     setFileDetailsDialogOpen(false);
   };
 
-  const handleFileDetailsDialogOpen = () => {
+  const handleFileDetailsDialogOpen = (e) => {
     setFileDetailsDialogOpen(true);
   };
 
@@ -32,6 +37,66 @@ export default function GridItem(props) {
   const handleSCRDialogClose = (value) => {
     setSelectedSCR((selectedSCR) => value);
   };
+
+  // JSSpeccy Details dialog
+  const [isJSSpeccyDialogOpen, setJSSpeccyDialogOpen] = useState(false);
+
+  const handleJSSpeccyDialogClose = (value) => {
+    setJSSpeccyDialogOpen(false);
+  };
+
+  const handleJSSpeccyDialogOpen = () => {
+    setJSSpeccyDialogOpen(true);
+  };
+
+  const validJSSpeccyFormat = () => {
+    mylog("EntryCard", "validJSSpeccyFormat", `checking if ${entry.filename} (${entry.subfilename}) is a valid JSSpeccy format`);
+
+    switch (formatType(entry.type)) {
+      case "ZIP":
+        return false;
+        break;
+      case "SNA":
+      case "Z80":
+      case "SZX":
+      case "TAP":
+        return true;
+      case "TZX":
+        // zx81 not supported
+        return entry.hwmodel !== "ZX81";
+        break;
+      default:
+        break;
+    }
+    return false;
+  };
+
+  function formatType(t) {
+    switch (t) {
+      case "snafmt":
+        return "SNA";
+      case "z80fmt":
+        return "Z80";
+      case "tapfmt":
+        return "TAP";
+      case "tzxfmt":
+        return "TZX";
+      case "dskfmt":
+        return "DSK";
+      case "sclfmt":
+        return "SCL";
+      case "trdfmt":
+        return "TRD";
+      case "mdrfmt":
+        return "MDR";
+      case "pfmt":
+        return "P";
+      case "zip":
+        return "ZIP";
+      default:
+        return t;
+    }
+  }
 
   function getTitle() {
     var title = entry.subfilename ? entry.subfilename + " in (" + entry.filename + ")" : entry.filename;
@@ -113,6 +178,7 @@ export default function GridItem(props) {
   return (
     entry && (
       <React.Fragment>
+        {isJSSpeccyDialogOpen && <JSSpeccyDialog open={isJSSpeccyDialogOpen} onClose={handleJSSpeccyDialogClose} item={entry}></JSSpeccyDialog>}
         {isFileDetailsDialogOpen && (
           <FileDetailsDialog
             open={isFileDetailsDialogOpen}
@@ -122,11 +188,11 @@ export default function GridItem(props) {
           ></FileDetailsDialog>
         )}
         <ImageListItem sx={{ border: 1, borderColor: "#c0c0c0" }}>
-          <img src={entry.scr} alt={entry.filename} />
+          <img src={entry.scr} alt={entry.filename} onClick={() => handleFileDetailsDialogOpen(this)} />
           <Favorite entry={entry} sx={{ position: "absolute", top: 0, left: 0 }}></Favorite>
           <LocateFileAndFolder path={entry.filepath} sx={{ position: "absolute", top: 0, right: 0 }} />
           <ImageListItemBar
-            sx={{ backgroundColor: entry.zxdbID ? "#02b554": "" }}
+            sx={{ backgroundColor: entry.zxdbID ? "#02b554" : "" }}
             title={
               <Tooltip title={getTitle()}>
                 <Typography variant="caption" noWrap gutterBottom>
@@ -135,11 +201,13 @@ export default function GridItem(props) {
               </Tooltip>
             }
             actionIcon={
-              <Tooltip title="See file details" onClick={() => handleFileDetailsDialogOpen(this)}>
-                <IconButton arial-label="see file details" size="small">
-                  <InfoOutlinedIcon sx={{ color: "rgba(255, 255, 255, 0.54)" }} />
-                </IconButton>
-              </Tooltip>
+              validJSSpeccyFormat() && (
+                <Tooltip title="Play in emulator" onClick={() => handleJSSpeccyDialogOpen(this)}>
+                  <IconButton arial-label="play in emulator" size="small">
+                    <GamepadOutlinedIcon sx={{ color: "rgba(255, 255, 255, 0.54)" }} />
+                  </IconButton>
+                </Tooltip>
+              )
             }
           />
         </ImageListItem>
