@@ -24,6 +24,23 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+    <script>
+      {
+        // disable hot-reload in development - TODO: make sure its only loaded in dev.
+        // https://blog.iansinnott.com/how-to-disable-live-reload-in-create-react-app
+        var WS = window.WebSocket;
+        function DevWebSocket(s) {
+          if (s === "ws://localhost:3000/ws") {
+            console.info("[DEV NOTICE] Live Reload Has Been Disabled");
+            return {};
+          } else {
+            // Pass through other usage of sockets
+            return new WS(s);
+          }
+        }
+        window.WebSocket = DevWebSocket;
+      }
+    </script>
 </head>
 
 <body>
