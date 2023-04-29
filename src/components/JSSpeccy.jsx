@@ -45,17 +45,35 @@ export default function JSSpeccy(props) {
     async function launchJSSpeccy(e) {
       const tmpFile = await window.electronAPI.getFileForJSSpeccy(e);
       mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `file to launch: ${tmpFile}`);
+
+      // Adjust JSSpeccy3 options for TAP/TZX based on found machinetype
+      var machinetype = "128";
+      switch (fileItem.machinetype) {
+        case "ZX-Spectrum 48K":
+          machinetype = "48";
+          break;
+      
+        default:
+          break;
+      }
+
+      // Always enable tapeTraps for TAP files
+      var tapeTrapsEnabled = false;
+      if(fileItem.type === "tapfmt") {
+        tapeTrapsEnabled = true;
+      }
+
       let emu = window.JSSpeccy(window.document.getElementById("jsspeccy"), {
         // openUrl: tmpFile,
         // in developtment, only resources in public
         // in prod, files
         openUrl: isDev ? tmpFile : `file://${tmpFile}`,
-        autoStart: true,
-        tapeTrapsEnabled: true,
-        tapeAutoLoadMode: "usr0",
-        autoLoadTapes: true,
-        machine: "128",
+        machine: machinetype,
         sandbox: true,
+        autoStart: true,
+        autoLoadTapes: true,
+        tapeTrapsEnabled: tapeTrapsEnabled,
+        // tapeAutoLoadMode: "usr0",
         zoom: 2,
       });
       emuInst = emu;

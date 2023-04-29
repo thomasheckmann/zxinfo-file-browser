@@ -152,6 +152,15 @@ export default function GridItem(props) {
           item.source = response.data.file.source;
           item.sha512 = props.entry.sha512;
 
+          item.zxinfoVersion = response.data.zxinfoVersion;
+          item.contentType = response.data.contentType;
+          item.originalYearOfRelease = response.data.originalYearOfRelease;
+          item.machinetype = response.data.machineType;
+          item.genre = response.data.genre;
+          item.genreType = response.data.genreType;
+          item.genreSubType = response.data.genreSubType;
+          item.publishers = response.data.publishers;
+
           // look up SCR if user selected
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
           if (zxdbSCR) {
