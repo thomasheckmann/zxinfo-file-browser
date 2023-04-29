@@ -49,10 +49,10 @@ export default function JSSpeccyDialog(props) {
         <DialogContent dividers={true} sx={{ p: 0, m: 0 }}>
           <Container style={{ display: "flex", justifyContent: "center" }}>
             <Typography variant="subtitle2" display="block" gutterBottom>
-              {item.zxdbTitle}
+              {item.zxdbTitle} - ({item.machinetype})
             </Typography>
           </Container>
-          <JSSpeccy fileItem={{ file: item.filepath, subfilename: item.subfilename }}></JSSpeccy>
+          <JSSpeccy fileItem={{ file: item.filepath, subfilename: item.subfilename, machinetype: item.machinetype, type: item.type }}></JSSpeccy>
         </DialogContent>
         <DialogActions>
           <Box textAlign="center" sx={{ p: 0 }}>
