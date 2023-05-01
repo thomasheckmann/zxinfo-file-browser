@@ -57,6 +57,11 @@ export default function JSSpeccy(props) {
           break;
       }
 
+      var tapeAutoLoadMode = "default";
+      if(fileItem.comments === "(load in USR0 mode)") {
+        machinetype = "128";
+        tapeAutoLoadMode = "usr0";
+      }
       // Always enable tapeTraps for TAP files
       var tapeTrapsEnabled = false;
       if(fileItem.type === "tapfmt") {
@@ -64,7 +69,6 @@ export default function JSSpeccy(props) {
       }
 
       let emu = window.JSSpeccy(window.document.getElementById("jsspeccy"), {
-        // openUrl: tmpFile,
         // in developtment, only resources in public
         // in prod, files
         openUrl: isDev ? tmpFile : `file://${tmpFile}`,
@@ -73,7 +77,7 @@ export default function JSSpeccy(props) {
         autoStart: true,
         autoLoadTapes: true,
         tapeTrapsEnabled: tapeTrapsEnabled,
-        // tapeAutoLoadMode: "usr0",
+        tapeAutoLoadMode: tapeAutoLoadMode,
         zoom: 2,
       });
       emuInst = emu;
