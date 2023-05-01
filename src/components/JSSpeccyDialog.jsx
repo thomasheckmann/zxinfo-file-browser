@@ -52,7 +52,7 @@ export default function JSSpeccyDialog(props) {
               {item.zxdbTitle} - ({item.machinetype})
             </Typography>
           </Container>
-          <JSSpeccy fileItem={{ file: item.filepath, subfilename: item.subfilename, machinetype: item.machinetype, type: item.type }}></JSSpeccy>
+          <JSSpeccy fileItem={{ file: item.filepath, subfilename: item.subfilename, machinetype: item.machinetype, type: item.type, comments: item.comments }}></JSSpeccy>
         </DialogContent>
         <DialogActions>
           <Box textAlign="center" sx={{ p: 0 }}>

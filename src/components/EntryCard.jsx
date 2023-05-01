@@ -169,6 +169,19 @@ function EntryCard(props) {
           item.genreSubType = response.data.genreSubType;
           item.publishers = response.data.publishers;
 
+          const files = response.data.file;
+          if (item.subfilename && item.filename) {
+            const f = files.find((i) => i.archive === item.filename && i.filename === item.subfilename);
+            if (f.comments) {
+              item.comments = f.comments;
+            }
+          } else {
+            const f = files.find((i) => i.filename === item.filename);
+            if (f.comments) {
+              item.comments = f.comments;
+            }
+          }
+
           // look up SCR if user selected
           const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
           if (zxdbSCR) {
