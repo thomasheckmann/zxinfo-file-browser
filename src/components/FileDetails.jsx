@@ -47,17 +47,17 @@ const openLink = (id) => {
 };
 
 export default function FileDetails(props) {
-  const { onClose, open, item } = props;
+  const { onClose, open, item, selectedSCR, setSelectedSCR } = props;
   const [entry, setEntry] = useState(null);
   const [screens, setScreens] = useState([]);
 
   // Fetch SCR from ZXInfo API
   const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
-  const [selectedSCR, setSelectedSCR] = useState("");
 
   const handleSCRDialogClose = (value) => {
+    setSelectedSCR( value);
     setSCRDialogOpen(false);
-    props.handleclose(value);
+    // props.handleclose(value);
   };
 
   const handleSCRDialogOpen = () => {
@@ -185,7 +185,7 @@ export default function FileDetails(props) {
                               </IconButton>
                             </Tooltip>
                           </Typography>
-                          <Typography variant="subtitle2">Source: {item.source}</Typography>
+                          <Typography variant="subtitle2">Source: {JSON.stringify(item.source)}</Typography>
                         </Item>
                       </Stack>
                     ) : (

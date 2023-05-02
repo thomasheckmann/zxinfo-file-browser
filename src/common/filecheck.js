@@ -18,7 +18,6 @@ export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScr
       setOriginalScreenCallback(entry.scr);
       item.zxdbID = response.data.entry_id;
       item.zxdbTitle = response.data.title;
-      item.source = response.data.file.source;
       item.sha512 = entry.sha512;
 
       item.zxinfoVersion = response.data.zxinfoVersion;
@@ -30,6 +29,11 @@ export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScr
       item.genreSubType = response.data.genreSubType;
       item.publishers = response.data.publishers;
 
+      item.source = [];
+      for (const key in response.data.file) {
+        item.source.push(response.data.file[key].source);
+      }
+      
       const files = response.data.file;
       if (item.subfilename && item.filename) {
         const f = files.find((i) => i.archive === item.filename && i.filename === item.subfilename);
