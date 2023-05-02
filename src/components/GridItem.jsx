@@ -5,7 +5,6 @@
 import { IconButton, ImageListItem, ImageListItemBar, Tooltip, Typography } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import FileDetailsDialog from "../components/FileDetails";
-import axios from "axios";
 
 import GamepadOutlinedIcon from "@mui/icons-material/GamepadOutlined";
 
@@ -13,7 +12,7 @@ import ZXInfoSettings from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
-import { mylog } from "../App";
+import { zxdbFileCheck, validJSSpeccyFormat, handleUserSelectedSCR } from "../common/filecheck.js";
 import JSSpeccyDialog from "./JSSpeccyDialog";
 
 export default function GridItem(props) {
@@ -49,55 +48,6 @@ export default function GridItem(props) {
     setJSSpeccyDialogOpen(true);
   };
 
-  const validJSSpeccyFormat = () => {
-    mylog("EntryCard", "validJSSpeccyFormat", `checking if ${entry.filename} (${entry.subfilename}) is a valid JSSpeccy format`);
-
-    switch (formatType(entry.type)) {
-      case "ZIP":
-        return false;
-        break;
-      case "SNA":
-      case "Z80":
-      case "SZX":
-      case "TAP":
-        return true;
-      case "TZX":
-        // zx81 not supported
-        return entry.hwmodel !== "ZX81";
-        break;
-      default:
-        break;
-    }
-    return false;
-  };
-
-  function formatType(t) {
-    switch (t) {
-      case "snafmt":
-        return "SNA";
-      case "z80fmt":
-        return "Z80";
-      case "tapfmt":
-        return "TAP";
-      case "tzxfmt":
-        return "TZX";
-      case "dskfmt":
-        return "DSK";
-      case "sclfmt":
-        return "SCL";
-      case "trdfmt":
-        return "TRD";
-      case "mdrfmt":
-        return "MDR";
-      case "pfmt":
-        return "P";
-      case "zip":
-        return "ZIP";
-      default:
-        return t;
-    }
-  }
-
   function getTitle() {
     var title = entry.subfilename ? entry.subfilename + " in (" + entry.filename + ")" : entry.filename;
     if (entry.zxdbTitle) {
@@ -108,92 +58,13 @@ export default function GridItem(props) {
 
   // handle user selected SCR
   useEffect(() => {
-    var useScreen = null;
-
-    if (selectedSCR === undefined) {
-      mylog("GritItem", "useEffect", `handling selectSCR, undefined... ?`);
-      //
-    } else if (entry && selectedSCR === null) {
-      // delete user selected and set default
-      if (appSettings.zxinfoSCR.size > 0) {
-        appSettings.zxinfoSCR.delete(props.entry.sha512);
-      }
-      useScreen = originalScreen;
-    } else if (entry && appSettings.zxinfoSCR.size === 0) {
-      // zxinfoSCR, first time
-      appSettings.zxinfoSCR = new Map();
-      appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
-      useScreen = selectedSCR;
-    } else if (entry && appSettings.zxinfoSCR.size > 0) {
-      appSettings.zxinfoSCR.set(entry.sha512, selectedSCR);
-      useScreen = selectedSCR;
-    }
-
-    if (useScreen && entry) {
-      setEntry((entry) => ({ ...entry, scr: useScreen }));
-      var obj1 = Object.fromEntries(appSettings.zxinfoSCR);
-      var jsonString1 = JSON.stringify(obj1);
-      window.electronAPI.setZxinfoSCR("zxinfoSCR", jsonString1);
-    }
+    handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR);
   }, [selectedSCR]);
 
   useEffect(() => {
+    // make sure we only call the API once
     if (!restCalled) {
-      const dataURL = `https://api.zxinfo.dk/v3/filecheck/${props.entry.sha512}`;
-      axios
-        .get(dataURL)
-        .then((response) => {
-          let item = props.entry;
-          item.orgScr = props.entry.scr;
-
-          // save original SCR detected from file
-          item.zxdbID = response.data.entry_id;
-          item.zxdbTitle = response.data.title;
-          item.source = response.data.file.source;
-          item.sha512 = props.entry.sha512;
-
-          item.zxinfoVersion = response.data.zxinfoVersion;
-          item.contentType = response.data.contentType;
-          item.originalYearOfRelease = response.data.originalYearOfRelease;
-          item.machinetype = response.data.machineType;
-          item.genre = response.data.genre;
-          item.genreType = response.data.genreType;
-          item.genreSubType = response.data.genreSubType;
-          item.publishers = response.data.publishers;
-
-          const files = response.data.file;
-          if (item.subfilename && item.filename) {
-            const f = files.find((i) => i.archive === item.filename && i.filename === item.subfilename);
-            if (f.comments) {
-              item.comments = f.comments;
-            }
-          } else {
-            const f = files.find((i) => i.filename === item.filename);
-            if (f.comments) {
-              item.comments = f.comments;
-            }
-          }
-
-          // look up SCR if user selected
-          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-          if (zxdbSCR) {
-            item.scr = zxdbSCR;
-          }
-          setEntry((entry) => item);
-        })
-        .catch((error) => {
-          // Not found, or other API call errors
-          const zxdbSCR = appSettings.zxinfoSCR.get(props.entry.sha512);
-          if (zxdbSCR) {
-            setEntry({ ...props.entry, scr: zxdbSCR });
-          } else {
-            props.entry.orgScr = props.entry.scr;
-            setEntry(props.entry);
-          }
-        })
-        .finally(() => {
-          setRestCalled(true);
-        });
+      zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
     }
   }, [props.entry]);
 
@@ -223,7 +94,7 @@ export default function GridItem(props) {
               </Tooltip>
             }
             actionIcon={
-              validJSSpeccyFormat() && (
+              validJSSpeccyFormat(entry) && (
                 <Tooltip title="Play in emulator" onClick={() => handleJSSpeccyDialogOpen(this)}>
                   <IconButton arial-label="play in emulator" size="small">
                     <GamepadOutlinedIcon sx={{ color: "rgba(255, 255, 255, 0.54)" }} />
