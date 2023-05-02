@@ -16,6 +16,9 @@ Please note all builds are unsiged, so you might need to give persmisson to run 
 Favorites list | Details TZX | Details P (ZX81)
 ------------ | ------------- | -------------
 <img width="320" alt="Favorites" src="doc/favorites.png"> | <img width="320" alt="details tzx" src="doc/details_tzx.png"> | <img width="320" alt="details p(zx81)" src="doc/details_p.png">
+Grid view | JSSpeccy 3
+------------ | ------------- | -------------
+<img width="320" alt="Grid View" src="doc/gridview.png"> | <img width="320" alt="JSSpeccy 3" src="doc/jsspeccy.png">
 
 # Features
 * Scan files local on your harddisk
