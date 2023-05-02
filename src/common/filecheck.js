@@ -69,15 +69,16 @@ export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScr
     });
 }
 
-export function handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR) {
+export function handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR, originalScreen) {
   var useScreen = null;
   if (selectedSCR === undefined) {
     mylog("filecheck.js", "handleUserSelectedSCR", `handling selectSCR, undefined... ?`);
     //
   } else if (entry && selectedSCR === null) {
+    mylog("filecheck.js", "handleUserSelectedSCR", `deleting user selected...`);
     // delete user selected and set default
     if (appSettings.zxinfoSCR.size > 0) {
-      appSettings.zxinfoSCR.delete(props.entry.sha512);
+      appSettings.zxinfoSCR.delete(entry.sha512);
     }
     useScreen = originalScreen;
   } else if (entry && appSettings.zxinfoSCR.size === 0) {
