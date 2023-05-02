@@ -1,6 +1,6 @@
 
 # ZXINFO File Browser
-Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-)
+Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-) - Now with JSSPeccy 3 integrated to play games right away.
 
 <img width="1024" alt="main" src="doc/mainscreen.png">
 
