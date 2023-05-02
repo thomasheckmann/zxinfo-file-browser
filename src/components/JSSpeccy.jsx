@@ -49,22 +49,29 @@ export default function JSSpeccy(props) {
       // Adjust JSSpeccy3 options for TAP/TZX based on found machinetype
       var machinetype = "128";
       switch (fileItem.machinetype) {
+        case "ZX-Spectrum 16K":
         case "ZX-Spectrum 48K":
+        case "ZX-Spectrum 16K/48K":
           machinetype = "48";
           break;
-      
+        case "ZX-Spectrum 128K":
+        case "ZX-Spectrum 48K/128K":
+        case "ZX-Spectrum 128 +2":
+        case "ZX-Spectrum 128 +2B":
+          machinetype = "128";
         default:
+          mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `unhandled machinetype: ${fileItem.machinetype}, using default: 128K`);
           break;
       }
 
       var tapeAutoLoadMode = "default";
-      if(fileItem.comments === "(load in USR0 mode)") {
+      if (fileItem.comments === "(load in USR0 mode)") {
         machinetype = "128";
         tapeAutoLoadMode = "usr0";
       }
       // Always enable tapeTraps for TAP files
       var tapeTrapsEnabled = false;
-      if(fileItem.type === "tapfmt") {
+      if (fileItem.type === "tapfmt") {
         tapeTrapsEnabled = true;
       }
 
