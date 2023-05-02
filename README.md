@@ -1,6 +1,6 @@
 
 # ZXINFO File Browser
-Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-)
+Browse your ZX Spectrum emulator files, powered by the web - kind of a "Picasa for ZX Spectrum emulator files" :-) - Now with JSSpeccy 3 integrated to play games right away.
 
 <img width="1024" alt="main" src="doc/mainscreen.png">
 
@@ -29,6 +29,7 @@ Favorites list | Details TZX | Details P (ZX81)
 * Ability to choose SCR preview from ZXInfo, if known
 * Keep track of your favorite games with your own favorites list
 * Quick access to folders
+* [JSSpeccy 3](https://github.com/gasman/jsspeccy3) by Matt Westcott integrated so games can be played right away. JSSpeccy 3 is licensed under the GPL version 3 - see [COPYING](https://raw.githubusercontent.com/gasman/jsspeccy3/main/COPYING).
 
 # Questions?
 See the [FAQ](FAQ.md)
