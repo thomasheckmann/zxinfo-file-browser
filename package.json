@@ -1,6 +1,6 @@
 {
   "name": "zxinfo-file-browser",
-  "version": "1.1.5",
+  "version": "1.1.5.1",
   "description": "ZX Spectrum & ZX81 emulator file browser powered by the web",
   "author": "thomas.kolbeck@gmail.com",
   "license": "MIT",
@@ -56,12 +56,9 @@
     "@testing-library/user-event": "^14.4.3",
     "adm-zip": "^0.5.10",
     "axios": "^1.4.0",
-    "cross-env": "^7.0.3",
-    "crypto": "^1.0.1",
     "electron-is-dev": "^2.0.0",
     "electron-log": "^5.0.0-beta.23",
     "electron-store": "^8.1.0",
-    "fs": "^0.0.1-security",
     "gifwrap": "^0.10.1",
     "jimp": "^0.22.7",
     "minimist": "^1.2.8",
@@ -111,6 +108,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.0.1",
+    "cross-env": "^7.0.3",
     "electron": "^24.2.0",
     "electron-builder": "^23.6.0",
     "electron-devtools-installer": "^3.2.0",
