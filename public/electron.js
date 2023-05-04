@@ -37,6 +37,7 @@ function createWindow() {
   app.commandLine.appendSwitch("disable-http-cache");
 
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
+  mylog.info(`nodeJS version: ${process.version}`);
   win = new BrowserWindow({
     width: 1600,
     height: 900,
@@ -60,7 +61,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   log.transports.console.level = isDev ? "silly" : "info";
-  log.transports.file.level = isDev ? "silly" : "info";
+  log.transports.file.level = isDev ? "silly" : "warn";
   log.initialize({ preload: false, spyRendererConsole: true });
   log.info("Initialized electron-log, OK");
 

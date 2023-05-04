@@ -48,6 +48,9 @@ function EntryCard(props) {
   const [selectedSCR, setSelectedSCR] = useState("");
   const [originalScreen, setOriginalScreen] = useState();
 
+  // File is valid for JSSpeccy
+  const [isFileJSSpeccyValid, setFileJSSpeccyValid] = useState(false);
+
   const handleSCRDialogClose = (value) => {
     setSelectedSCR((selectedSCR) => value);
     setSCRDialogOpen(false);
@@ -98,6 +101,7 @@ function EntryCard(props) {
     // make sure we only call the API once
     if (!restCalled) {
       zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
+      setFileJSSpeccyValid(validJSSpeccyFormat(props.entry));
     }
   }, [props.entry]);
 
@@ -201,7 +205,7 @@ function EntryCard(props) {
               </Tooltip>
             )}
 
-            {validJSSpeccyFormat(entry) && (
+            {isFileJSSpeccyValid && (
               <Tooltip title="Play in emulator" onClick={() => handleJSSpeccyDialogOpen(this)} sx={{ marginLeft: "auto" }}>
                 <IconButton arial-label="Play in emulator">
                   <GamepadOutlinedIcon sx={{ color: "#000000" }} />
