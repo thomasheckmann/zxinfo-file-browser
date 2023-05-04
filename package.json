@@ -87,9 +87,9 @@
     "build": "npm run react-build && npm run electron-build",
     "build-mac": "npm run react-build && npm run electron-build-mac",
     "build-win": "npm run react-build && npm run electron-build-win",
-    "start": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://localhost:3000 && electron .'",
-    "start-with-dir": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://localhost:3000 && electron . --dir=\"/Volumes/ZXTestData/ALL_FORMAT\"'",
-    "start-with-dir-fail": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://localhost:3000 && electron . --dir=\"/Volumes/ZXTestData/XALL_FORMAT\"'"
+    "start": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://127.0.0.1:3000 && electron .'",
+    "start-with-dir": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://127.0.0.1:3000 && electron . --dir=\"/Volumes/ZXTestData/ALL_FORMAT\"'",
+    "start-with-dir-fail": "concurrently 'cross-env BROWSER=none npm run react-start' 'wait-on http://127.0.0.1:3000 && electron . --dir=\"/Volumes/ZXTestData/XALL_FORMAT\"'"
   },
   "eslintConfig": {
     "extends": [
