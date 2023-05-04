@@ -27,11 +27,11 @@ export default function JSSpeccy(props) {
     if (!existingScript) {
       mylog("JSSpeccy", "loadJSSpeccy", `adding jsspeccy.js script to DOM`);
       const script = document.createElement("script");
+      scriptNode = script;
       script.src = "./jsspeccy/jsspeccy.js";
       script.id = "JSSpeccy_JS";
       document.body.appendChild(script);
       script.onload = () => {
-        scriptNode = script;
         if (callback) callback();
         mylog("JSSpeccy", "loadJSSpeccy", `script loaded...`);
       };
@@ -59,6 +59,7 @@ export default function JSSpeccy(props) {
         case "ZX-Spectrum 128 +2":
         case "ZX-Spectrum 128 +2B":
           machinetype = "128";
+          break;
         default:
           mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `unhandled machinetype: ${fileItem.machinetype}, using default: 128K`);
           break;
@@ -111,10 +112,10 @@ export default function JSSpeccy(props) {
       if (scriptNode) {
         mylog("JSSpeccy", "useEffect", `removing script...`);
         document.body.removeChild(scriptNode);
-        setLoaded(false);
       }
+      setLoaded(false);
     };
-  }, []);
+  }, [fileItem]);
 
   return (
     <Container style={{ display: "flex", justifyContent: "center" }}>

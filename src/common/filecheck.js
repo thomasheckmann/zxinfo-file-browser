@@ -6,6 +6,14 @@ import axios from "axios";
  * @param {*} e
  */
 export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScreenCallback, setRestCalledCallback) {
+  const sources = new Map([
+    ['spectrumcomputing.co.uk', './images/icons/sc.png'],
+    ['TOSEC 2020', './images/icons/tosec.png'],
+    ['WOS June 2017 Mirror', './images/icons/archive.png'],
+    ['ZX81 STUFF', './images/icons/zx81stuff.png']
+  ]);
+
+
   const dataURL = `https://api.zxinfo.dk/v3/filecheck/${entry.sha512}`;
   mylog("filecheck.js", "zxdbFileCheck", `OPEN, get API data for: ${entry.sha512} - endPoint: ${dataURL}`);
   axios
@@ -29,9 +37,12 @@ export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScr
       item.genreSubType = response.data.genreSubType;
       item.publishers = response.data.publishers;
 
-      item.source = [];
+      item.sources = [];
       for (const key in response.data.file) {
-        item.source.push(response.data.file[key].source);
+        var logo = sources.get(response.data.file[key].source);
+        if(logo === null) logo = "./images/icons/default.png";
+        const src_item = {source: response.data.file[key].source, logo: logo};
+        item.sources.push(src_item);
       }
       
       const files = response.data.file;

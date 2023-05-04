@@ -88,7 +88,6 @@ export default function TZXFormat(props) {
           <List dense>
             {t.hw.map((x, i) => (
               <ListItem>
-                {" "}
                 <ListItemText>{x}</ListItemText>
               </ListItem>
             ))}
@@ -100,27 +99,30 @@ export default function TZXFormat(props) {
   };
 
   return (
-    <TableContainer component={Paper} sx={{ minWidth: 300 }}>
-      <Table aria-label="TZX Details" size="small">
-        <TableBody>
-          {item.data.tape && item.data.tape.map((row, i) => (
-            <TableRow key={i}>
-              <TableCell component="th" scope="row">
-                {i}: <b>{row.blockName}</b>
-                {printTape(row)}
-                {row.block &&
-                  row.block.error &&
-                  row.block.error.map((e, ii) => (
-                    <Alert severity={e.type} key={ii}>
-                      {e.message}
-                    </Alert>
-                  ))}
-              </TableCell>
-            </TableRow>
-          ))}
-          {item.data.zx81data && <PFormat item={item}></PFormat>}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <React.Fragment>
+      <TableContainer component={Paper} sx={{ minWidth: 300 }}>
+        <Table aria-label="TZX Details" size="small">
+          <TableBody>
+            {item.data.tape &&
+              item.data.tape.map((row, i) => (
+                <TableRow key={i}>
+                  <TableCell component="th" scope="row">
+                    {i}: <b>{row.blockName}</b>
+                    {printTape(row)}
+                    {row.block &&
+                      row.block.error &&
+                      row.block.error.map((e, ii) => (
+                        <Alert severity={e.type} key={ii}>
+                          {e.message}
+                        </Alert>
+                      ))}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {item.data.zx81data && <PFormat item={item}></PFormat>}
+    </React.Fragment>
   );
 }

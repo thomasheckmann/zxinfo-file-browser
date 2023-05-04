@@ -55,7 +55,7 @@ export default function FileDetails(props) {
   const [isSCRDialogOpen, setSCRDialogOpen] = useState(false);
 
   const handleSCRDialogClose = (value) => {
-    setSelectedSCR( value);
+    setSelectedSCR(value);
     setSCRDialogOpen(false);
     // props.handleclose(value);
   };
@@ -185,15 +185,19 @@ export default function FileDetails(props) {
                               </IconButton>
                             </Tooltip>
                           </Typography>
-                          <Typography variant="subtitle2">Source: {JSON.stringify(item.source)}</Typography>
                         </Item>
                       </Stack>
                     ) : (
                       <Stack direction="row" spacing={1}>
                         <ZXdbID entry={item}></ZXdbID>
-                        <br />
                       </Stack>
                     )}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      {item.sources && item.sources.map((e,i) => (
+                        <Tooltip title={e.source} key={i}>
+                        <img width="32" src={e.logo} alt={e.source}></img></Tooltip>
+                      ))}
+                    </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">
                       {item.version && <Chip label={item.version} size="small" />}
                       {item.hwmodel && <Chip label={item.hwmodel} size="small" />}
