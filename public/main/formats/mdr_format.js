@@ -1,9 +1,9 @@
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
 function cleanString(filename) {
-  const mylog = log.scope("cleanString");
+  const mylog = logger().scope("cleanString");
   var cleanedFilename = "";
   for (var i = 0; i < filename.length; i++) {
     cleanedFilename = cleanedFilename + String.fromCharCode(filename.charCodeAt(i) & 0x7f);
@@ -41,8 +41,9 @@ function createDIRScreen(dirdata) {
 }
 
 function readMDR(data) {
-  const mylog = log.scope("readMDR");
+  const mylog = logger().scope("readMDR");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing MDR file...`);
 
   var snapshot = { type: "MDR", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;

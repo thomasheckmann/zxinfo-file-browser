@@ -3,7 +3,7 @@
  * - https://sinclair.wiki.zxnet.co.uk/wiki/SCL_format#Files_data
  *
  */
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
@@ -38,7 +38,7 @@ function createDIRScreen(dirdata) {
 }
 
 function detectSCL(data) {
-  const mylog = log.scope("detectSCL");
+  const mylog = logger().scope("detectSCL");
 
   const disk_info = {
     signature: String.fromCharCode.apply(null, data.slice(0, 8)),
@@ -57,7 +57,7 @@ function detectSCL(data) {
 }
 
 function readDir(data, disk_info) {
-  const mylog = log.scope("readDIR");
+  const mylog = logger().scope("readDIR");
 
   const dirOffset = 9;
   const dirOffsetEnd = dirOffset + disk_info.no_files * 14;
@@ -79,8 +79,9 @@ function readDir(data, disk_info) {
 }
 
 function readSCL(data) {
-  const mylog = log.scope("readSCL");
+  const mylog = logger().scope("readSCL");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing SCL file...`);
 
   var snapshot = { type: "SCL", error: [], scrdata: null, data: [] };
   snapshot.scrdata = null;

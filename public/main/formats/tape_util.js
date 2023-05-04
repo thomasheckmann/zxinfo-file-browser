@@ -1,11 +1,11 @@
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 
 /**
  * Then raw tape data follows, including the flag and checksum bytes.
  * @param {*} data
  */
 function createHeader(data, index) {
-  const mylog = log.scope("createHeader");
+  const mylog = logger().scope("createHeader");
 
   let dataBlock = {
     flag: null,
@@ -67,7 +67,7 @@ function createHeader(data, index) {
 }
 
 function createData(data, index) {
-  const mylog = log.scope("createData");
+  const mylog = logger().scope("createData");
 
   let dataBlock = {
     flag: null,
@@ -89,7 +89,7 @@ function createData(data, index) {
 }
 
 function createRAWData(data) {
-  const mylog = log.scope("createRAWData");
+  const mylog = logger().scope("createRAWData");
 
   let dataBlock = {
     data: null,

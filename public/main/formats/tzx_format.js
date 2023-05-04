@@ -9,7 +9,7 @@
  * }
  */
 
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const util = require("./tape_util");
 
 function getWord(low, high) {
@@ -38,7 +38,7 @@ function TZXObject(major, minor) {
 
 // ID 0x10
 function StandardSpeedDataBlock(len, data) {
-  const mylog = log.scope("StandardSpeedDataBlock");
+  const mylog = logger().scope("StandardSpeedDataBlock");
   this.id = 0x10;
   this.block = { error: [] };
   this.blockName = "Standard Speed Data Block";
@@ -63,7 +63,7 @@ function StandardSpeedDataBlock(len, data) {
 
 // ID 0x11
 function TurboSpeedDataBlock(len, data) {
-  const mylog = log.scope("TurboSpeedDataBlock");
+  const mylog = logger().scope("TurboSpeedDataBlock");
   this.id = 0x11;
   this.blockName = "Turbo Speed Data Block";
   this.length = getWord(data[0x0f], data[0x10], data[0x11]);
@@ -83,7 +83,7 @@ function TurboSpeedDataBlock(len, data) {
 
 // ID 0x12
 function PureTone(len, data) {
-  const mylog = log.scope("PureTone");
+  const mylog = logger().scope("PureTone");
   this.id = 0x12;
   this.blockName = "Pure Tone";
   this.length = len;
@@ -94,7 +94,7 @@ function PureTone(len, data) {
 
 // ID 0x13
 function PulseSequence(len, data) {
-  const mylog = log.scope("PulseSequence");
+  const mylog = logger().scope("PulseSequence");
   this.id = 0x13;
   this.blockName = "Pulse sequence";
   this.length = len;
@@ -105,7 +105,7 @@ function PulseSequence(len, data) {
 
 // ID 0x14
 function PureDataBlock(len, data) {
-  const mylog = log.scope("PureDataBlock");
+  const mylog = logger().scope("PureDataBlock");
   this.id = 0x14;
   this.blockName = "Pure Data Block";
   this.length = len;
@@ -120,7 +120,7 @@ function PureDataBlock(len, data) {
 
 // ID 0x15 TODO: Direct
 function DirectRecordingBlock(len, data) {
-  const mylog = log.scope("DirectRecordingBlock");
+  const mylog = logger().scope("DirectRecordingBlock");
   this.id = 0x14;
   this.blockName = "Direct Recording Block";
   this.length = len;
@@ -128,7 +128,7 @@ function DirectRecordingBlock(len, data) {
 }
 // ID 0x18 TODO: CSW
 function CSWRecordingBlock(len, data) {
-  const mylog = log.scope("CSWRecordingBlock");
+  const mylog = logger().scope("CSWRecordingBlock");
   this.id = 0x18;
   this.blockName = "CSW Recording Block";
   this.length = len;
@@ -137,7 +137,7 @@ function CSWRecordingBlock(len, data) {
 
 // ID 19
 function GeneralizedDataBlock(len, data) {
-  const mylog = log.scope("GeneralizedDataBlock");
+  const mylog = logger().scope("GeneralizedDataBlock");
   this.id = 0x19;
   this.blockName = "Generalized Data Block";
   this.length = getDWord(data[0x00], data[0x01], data[0x02], data[0x03]);
@@ -162,7 +162,7 @@ function GeneralizedDataBlock(len, data) {
 
 // ID 20
 function PauseStopTape(len, pause) {
-  const mylog = log.scope("PauseStopTape");
+  const mylog = logger().scope("PauseStopTape");
   this.id = 0x20;
   this.blockName = "Pause (silence) or 'Stop the Tape' command";
   this.length = len;
@@ -171,7 +171,7 @@ function PauseStopTape(len, pause) {
 
 // ID 21
 function GroupStart(len, data) {
-  const mylog = log.scope("GroupStart");
+  const mylog = logger().scope("GroupStart");
   this.id = 0x21;
   this.blockName = "Group start";
   this.text = String.fromCharCode.apply(null, data);
@@ -181,7 +181,7 @@ function GroupStart(len, data) {
 
 // ID 22
 function GroupEnd() {
-  const mylog = log.scope("GroupEnd");
+  const mylog = logger().scope("GroupEnd");
   this.id = 0x22;
   this.blockName = "Group end";
 }
@@ -190,7 +190,7 @@ function GroupEnd() {
 
 // ID 24
 function LoopStart(len, data) {
-  const mylog = log.scope("LoopStart");
+  const mylog = logger().scope("LoopStart");
   this.id = 0x24;
   this.blockName = "Loop start";
   this.text = `Loops: ${getWord(data[0], data[1])}`;
@@ -200,7 +200,7 @@ function LoopStart(len, data) {
 
 // ID 25
 function LoopEnd() {
-  const mylog = log.scope("LoopEnd");
+  const mylog = logger().scope("LoopEnd");
   this.id = 0x25;
   this.blockName = "Loop end";
 }
@@ -220,7 +220,7 @@ function SelectBlock(len, data) {
 
 // ID 0x30
 function TextDescription(len, data) {
-  const mylog = log.scope("TextDescription");
+  const mylog = logger().scope("TextDescription");
   this.id = 0x30;
   this.blockName = "Text Description";
   this.text = String.fromCharCode.apply(null, data);
@@ -233,7 +233,7 @@ function TextDescription(len, data) {
 
 // ID 32
 function ArchiveInfo(len, data) {
-  const mylog = log.scope("ArchiveInfo");
+  const mylog = logger().scope("ArchiveInfo");
   this.id = 0x32;
   this.blockName = "Archive info";
   this.noStrings = data[0];
@@ -414,7 +414,7 @@ const HWINFO = new Map([
 
 // ID 0x33 TODO: Hardware type
 function HardwareBlock(len, data) {
-  const mylog = log.scope("HardwareBlock");
+  const mylog = logger().scope("HardwareBlock");
   this.id = 0x33;
   this.blockName = "Hardware Info Block";
   this.length = data[0];
@@ -438,8 +438,8 @@ function HardwareBlock(len, data) {
 // ID 0x35 TODO: Custom info block
 
 function processTZXData(data) {
-  const mylog = log.scope("processTZXData");
-  mylog.debug(`processing...`);
+  const mylog = logger().scope("processTZXData");
+  mylog.debug(`processing data`);
 
   var tapeData = [];
 
@@ -592,9 +592,9 @@ function processTZXData(data) {
 }
 
 function readTZX(data) {
-  const mylog = log.scope("readTZX");
+  const mylog = logger().scope("readTZX");
   mylog.debug(`input: ${data.length}`);
-  mylog.debug(`processing TZX file...`);
+  mylog.info(`processing TZX file...`);
 
   const signature = String.fromCharCode.apply(null, data.slice(0, 7));
   if (signature !== "ZXTape!") {
@@ -662,7 +662,7 @@ function readTZX(data) {
       snapshot.data = regs;
       return snapshot;
     } else {
-      mylog.debug(`not 3 blocks, probaly not ZX81...`);
+      mylog.warn(`not 3 blocks, probaly not ZX81...`);
     }
   }
 

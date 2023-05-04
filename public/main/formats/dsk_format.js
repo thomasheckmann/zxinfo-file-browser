@@ -1,6 +1,6 @@
 const Jimp = require("jimp");
 
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const screenZX = require("../utilities/handleSCR");
 
 const CPCEMU_INFO_OFFSET = 0x100;
@@ -9,7 +9,7 @@ const CPCEMU_TRACK_OFFSET = 0x100;
 const NUM_SECTOR = 9;
 
 function read_track_info(data, track, DPB, disk_info_block) {
-  const mylog = log.scope("read_track_info");
+  const mylog = logger().scope("read_track_info");
 
   mylog.debug(`reading track info for track: ${track}`);
 
@@ -91,7 +91,7 @@ function read_track_info(data, track, DPB, disk_info_block) {
 }
 
 function valid_filename(filename) {
-  const mylog = log.scope("valid_filename");
+  const mylog = logger().scope("valid_filename");
   // returns true, if filename contains only valid ASCII characters 32 - 127
   var valid = true;
   var hexString = "";
@@ -108,7 +108,7 @@ function valid_filename(filename) {
 
 // removes 7th bit of chars in string
 function cleanString(filename) {
-  const mylog = log.scope("cleanString");
+  const mylog = logger().scope("cleanString");
   var cleanedFilename = "";
   for (var i = 0; i < filename.length; i++) {
     var char = filename.charCodeAt(i) & 0x7f;
@@ -174,7 +174,7 @@ const DPB_PCW_SPECTRUM = {
  * 3 => PCW format, double sided, double track
  */
 function DD_SEL_FORMAT(format) {
-  const mylog = log.scope("DD_SEL_FORMAT");
+  const mylog = logger().scope("DD_SEL_FORMAT");
 
   mylog.debug(`Requsting disk format: ${format}`);
 
@@ -199,7 +199,7 @@ function DD_SEL_FORMAT(format) {
 
 // init disk
 function readEDSK(data, isExtended) {
-  const mylog = log.scope("readEDSK");
+  const mylog = logger().scope("readEDSK");
   const disk_info_block = {
     signature: String.fromCharCode.apply(null, data.slice(0, 0x22)),
     name_of_creator: String.fromCharCode.apply(null, data.slice(0x22, 0x30)),
@@ -298,7 +298,7 @@ function readEDSK(data, isExtended) {
       DPB.off = disk_specs.off;
       DPB.bsh = disk_specs.bsh;
       disk_info_block.number_of_tracks = disk_specs.tracks;
-      mylog.info(`Specs from boot record: ${JSON.stringify(disk_specs)}`);
+      mylog.debug(`Specs from boot record: ${JSON.stringify(disk_specs)}`);
     }
   }
 
@@ -406,7 +406,7 @@ function readEDSK(data, isExtended) {
 }
 
 function detectProtectionSystem(data, DPB, disk_info_block) {
-  const mylog = log.scope("detectProtectionSystem");
+  const mylog = logger().scope("detectProtectionSystem");
 
   mylog.debug(`Trying to detect if copy protection used...`);
 
@@ -503,7 +503,7 @@ function detectProtectionSystem(data, DPB, disk_info_block) {
 }
 
 function locate_and_read_block(data, blockNo, DPB, disk_info_block) {
-  const mylog = log.scope("locate_and_read_block");
+  const mylog = logger().scope("locate_and_read_block");
 
   var track_size;
   if (disk_info_block.isExtended) {
@@ -581,7 +581,8 @@ function createDIRScreen(dirdata) {
 }
 
 function readDSK(data) {
-  const mylog = log.scope("readDSK");
+  const mylog = logger().scope("readDSK");
+  mylog.info(`Processing DSK`);
   mylog.debug(`input: ${data.length}`);
 
   var snapshot = { type: "DSK", error: [], scrdata: null, data: [] };
@@ -602,9 +603,9 @@ function readDSK(data) {
   snapshot.error = disk.error;
   snapshot.protection = disk.protection;
   snapshot.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
-  mylog.info(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
+  mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
   snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-  mylog.info(snapshot.text);
+  mylog.debug(snapshot.text);
   if (disk.dir) mylog.debug([...disk.dir.keys()]);
 
   snapshot.data = regs;

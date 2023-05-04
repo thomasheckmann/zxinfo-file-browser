@@ -4,7 +4,7 @@
  *
  * 16 sectors per track, with 256-byte sectors
  */
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
@@ -23,7 +23,7 @@ const ext_names = new Map([
 ]);
 
 function detectTRD(data) {
-  const mylog = log.scope("detectTRD");
+  const mylog = logger().scope("detectTRD");
 
   // read h0t0s9 (sectors 1-8, index 1)
   const infoOffset = 256 * 8;
@@ -81,7 +81,7 @@ function createDIRScreen(dirdata) {
 }
 
 function readDir(data, disk_info) {
-  const mylog = log.scope("readDir");
+  const mylog = logger().scope("readDir");
 
   // dir (h0t0s1..h0t0s8) length 16, max = 128 files
   const dirOffsetEnd = 256 * 8;
@@ -106,8 +106,9 @@ function readDir(data, disk_info) {
 }
 
 function readTRD(data) {
-  const mylog = log.scope("readTRD");
+  const mylog = logger().scope("readTRD");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing TRD file...`);
 
   var snapshot = { type: "TRD", error: [], scrdata: null, data: [] };
   snapshot.type = "TRD";

@@ -10,15 +10,13 @@
  *    error,
  * }
  */
-const log = require("electron-log");
-//log.transports.console.level = 'debug';
-
+const {logger} = require("../logger.js");
 const util = require("./tape_util");
 
 function readTAP(data) {
-  const mylog = log.scope("readTAP");
+  const mylog = logger().scope("readTAP");
   mylog.debug(`input: ${data.length}`);
-  mylog.debug(`processing TAP file...`);
+  mylog.info(`processing TAP file...`);
 
   // error: Array of warning and error messages for this file
   var snapshot = { type: null, error: [], scrdata: null };
@@ -56,7 +54,7 @@ function readTAP(data) {
   }
 
   // iterate tap[] - find first code block starting at 16384 OR with lengh og 6912
-  mylog.info(`tap structure length: ${tap.length}`);
+  mylog.debug(`tap structure length: ${tap.length}`);
 
   if (tap.length === 0) {
     snapshot.error.push({ type: "error", message: "TAP lenght 0, invalid" });

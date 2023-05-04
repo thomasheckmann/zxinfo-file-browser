@@ -65,7 +65,7 @@ export default function JSSpeccy(props) {
           break;
       }
 
-      var tapeAutoLoadMode = "default";
+      var tapeAutoLoadMode = "";
       if (fileItem.comments === "(load in USR0 mode)") {
         machinetype = "128";
         tapeAutoLoadMode = "usr0";
@@ -75,6 +75,8 @@ export default function JSSpeccy(props) {
       if (fileItem.type === "tapfmt") {
         tapeTrapsEnabled = true;
       }
+
+      mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `machine: ${machinetype}, tapeAutoLoadMode: ${tapeAutoLoadMode}, tapeTrapsEnabled: ${tapeTrapsEnabled}`);
 
       let emu = window.JSSpeccy(window.document.getElementById("jsspeccy"), {
         // in developtment, only resources in public

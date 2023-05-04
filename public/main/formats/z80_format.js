@@ -7,8 +7,7 @@
  *
  */
 
-const log = require("electron-log");
-//log.transports.console.level = 'debug';
+const {logger} = require("../logger.js");
 
 function readCompressed(data, length) {
   var zxram = [];
@@ -33,7 +32,7 @@ function readCompressed(data, length) {
 }
 
 function readV1(data, compressed) {
-  const mylog = log.scope("Z80 - readV1");
+  const mylog = logger().scope("Z80 - readV1");
   mylog.debug(`readV1 compressed? (${compressed})`);
 
   const mem = data.subarray(30);
@@ -51,7 +50,7 @@ function readV1(data, compressed) {
 }
 
 function readV2(data, compressed) {
-  const mylog = log.scope("Z80 - readV2");
+  const mylog = logger().scope("Z80 - readV2");
 
   const headerLength = data[30];
 
@@ -90,8 +89,9 @@ function readV2(data, compressed) {
 }
 
 function readZ80(data) {
-  const mylog = log.scope("readZ80");
+  const mylog = logger().scope("readZ80");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing Z80 file...`);
 
   var snapshot = { error: [], scrdata: null, data: [] };
   var version = 1;

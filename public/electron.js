@@ -27,17 +27,17 @@ const pfmt = require("./main/formats/p_format");
 
 const AdmZip = require("adm-zip");
 
-const log = require("electron-log");
-// log.transports.file.clear();
+const {logger} = require("./main/logger.js");
 
 let win;
 
 function createWindow() {
-  const mylog = log.scope("createWindow");
+  const mylog = logger().scope("createWindow");
   app.commandLine.appendSwitch("disable-http-cache");
 
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   mylog.info(`nodeJS version: ${process.version}`);
+  mylog.info(`####################################`);
   win = new BrowserWindow({
     width: 1600,
     height: 900,
@@ -49,10 +49,11 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
   });
+
   // Open the DevTools.
-  console.log("tmp path is:", app.getPath("temp"));
   if (isDev) {
     mylog.debug("opening DevTools");
+    mylog.debug("tmp path is:" +  app.getPath("temp"));
     win.webContents.openDevTools();
   }
 
@@ -60,11 +61,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  log.transports.console.level = isDev ? "silly" : "info";
-  log.transports.file.level = isDev ? "silly" : "warn";
-  log.initialize({ preload: false, spyRendererConsole: true });
-  log.info("Initialized electron-log, OK");
-
+ 
   createWindow();
 
   app.on("activate", function () {
@@ -87,7 +84,7 @@ const zxinfoSCRStore = new Store({ name: "zxinfoSCR" });
 const zxdbIDStore = new Store({ name: "zxdb_id" });
 
 ipcMain.handle("getStoreValue", (event, key) => {
-  const mylog = log.scope("getStoreValue");
+  const mylog = logger().scope("getStoreValue");
   const value = store.get(key);
   mylog.debug(`key, value = {${key}, ${value}}`);
 
@@ -99,46 +96,46 @@ ipcMain.handle("getStoreValue", (event, key) => {
 });
 
 ipcMain.handle("setStoreValue", (event, key, value) => {
-  const mylog = log.scope("setStoreValue");
+  const mylog = logger().scope("setStoreValue");
   mylog.debug(`key, value = {${key}, ${value}}`);
   store.set(key, value);
 });
 
 ipcMain.handle("getFavorites", (event, key) => {
-  const mylog = log.scope("getFavorites");
+  const mylog = logger().scope("getFavorites");
   const value = favoritesStore.get(key);
   return value;
 });
 
 ipcMain.handle("setFavorites", (event, key, value) => {
-  const mylog = log.scope("setFavorites");
+  const mylog = logger().scope("setFavorites");
   favoritesStore.set(key, value);
 });
 
 ipcMain.handle("getZxinfoSCR", (event, key) => {
-  const mylog = log.scope("getzxinfoSCR");
+  const mylog = logger().scope("getzxinfoSCR");
   const value = zxinfoSCRStore.get(key);
   return value;
 });
 
 ipcMain.handle("setZxinfoSCR", (event, key, value) => {
-  const mylog = log.scope("setzxinfoSCR");
+  const mylog = logger().scope("setzxinfoSCR");
   zxinfoSCRStore.set(key, value);
 });
 
 ipcMain.handle("get-zxdb-id-store", (event, key) => {
-  const mylog = log.scope("get-zxdb-id-store");
+  const mylog = logger().scope("get-zxdb-id-store");
   const value = zxdbIDStore.get(key);
   return value;
 });
 
 ipcMain.handle("set-zxdb-id-store", (event, key, value) => {
-  const mylog = log.scope("set-zxdb-id-store");
+  const mylog = logger().scope("set-zxdb-id-store");
   zxdbIDStore.set(key, value);
 });
 
 ipcMain.handle("convertSCR", (event, img) => {
-  const mylog = log.scope("convertSCR");
+  const mylog = logger().scope("convertSCR");
   mylog.debug(`convertSCR(): ` + img);
   // create a SCR preview of DIR
   let mainImage = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
@@ -149,7 +146,7 @@ ipcMain.handle("convertSCR", (event, img) => {
 });
 
 ipcMain.handle("create-zx81-basic-list", async (event, data) => {
-  const mylog = log.scope("create-zx81-basic-list");
+  const mylog = logger().scope("create-zx81-basic-list");
 
   const res = await pfmt.createBASICListAsScr(data);
   if (res.buffer) {
@@ -171,7 +168,7 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", "
  * @returns
  */
 function scanDirectory(dirPath, obj) {
-  const mylog = log.scope("scanDirectory");
+  const mylog = logger().scope("scanDirectory");
   mylog.log(`scanning dir: ${dirPath}`);
   //win.webContents.send('update-status-text', `scanning dir: ${dirPath}`);
 
@@ -214,8 +211,8 @@ function scanDirectory(dirPath, obj) {
  *
  */
 ipcMain.handle("open-folder-dialog", async (event, arg) => {
-  const mylog = log.scope("open-folder-dialog");
-  mylog.info(`trying to open folder: ${arg}`);
+  const mylog = logger().scope("open-folder-dialog");
+  mylog.info(`starting at folder: ${arg}`);
 
   function initFolderView(startFolder) {
     var startTime = performance.now();
@@ -232,7 +229,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 
     var endTime = performance.now();
 
-    mylog.info(`time: ${(endTime - startTime) / 1000} sec.`);
+    mylog.debug(`time: ${(endTime - startTime) / 1000} sec.`);
     return { root: startFolder, folders: result, total: totalFiles, time: ((endTime - startTime) / 1000).toFixed(2) };
   }
 
@@ -261,7 +258,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
  * Scan a folder for known files and return array with filenames, NOT including subfolders.
  */
 ipcMain.handle("scan-folder", async (event, arg) => {
-  const mylog = log.scope("scan-folder");
+  const mylog = logger().scope("scan-folder");
   mylog.log(`input folder: ${arg}`);
   var result = [];
 
@@ -275,7 +272,7 @@ ipcMain.handle("scan-folder", async (event, arg) => {
       mylog.info(`processing: ${filepath}`);
       //win.webContents.send('update-status-text', `processing: ${filepath}`);
       if (!stat.isDirectory()) {
-        mylog.info(`file, looking at extension: ${filepath}`);
+        mylog.debug(`file, looking at extension: ${filepath}`);
         let extension = path.extname(filepath).toLowerCase();
         if (supportedExts.indexOf(extension) >= 0) {
           filesInDir++;
@@ -283,13 +280,13 @@ ipcMain.handle("scan-folder", async (event, arg) => {
           result.push(filepath);
         }
       } else {
-        mylog.info(`directory, ignoring: ${filepath}`);
+        mylog.debug(`directory, ignoring: ${filepath}`);
       }
     });
   } catch (error) {
     mylog.error(error);
   }
-  mylog.info(`Returning: total files: ${filesInDir}`);
+  mylog.debug(`Returning: total files: ${filesInDir}`);
   return result;
 });
 
@@ -301,7 +298,7 @@ ipcMain.handle("scan-folder", async (event, arg) => {
  * .Z80 and ...
  */
 ipcMain.handle("load-file", async (event, arg) => {
-  const mylog = log.scope("load-file");
+  const mylog = logger().scope("load-file");
   mylog.debug(`loading details for file: ${arg}`);
 
   let result; // either object or array (zip)
@@ -367,7 +364,7 @@ ipcMain.handle("load-file", async (event, arg) => {
   }
 
   if (fileObj.error.length > 0) {
-    mylog.error(`Problems loading file: ${JSON.stringify(fileObj.error)}`);
+    mylog.debug(`Problems loading file: ${JSON.stringify(fileObj.error)}`);
     return [fileObj];
   }
 
@@ -381,17 +378,17 @@ ipcMain.handle("load-file", async (event, arg) => {
 });
 
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
-  const mylog = log.scope("open-zxinfo-detail");
+  const mylog = logger().scope("open-zxinfo-detail");
   require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
 });
 
 ipcMain.handle("locate-file-and-folder", (event, arg) => {
-  const mylog = log.scope("locate-file-and-folder");
+  const mylog = logger().scope("locate-file-and-folder");
   shell.showItemInFolder(arg);
 });
 
 ipcMain.handle("get-file-jsspeccy", (event, arg) => {
-  const mylog = log.scope("get-file-jsspeccy");
+  const mylog = logger().scope("get-file-jsspeccy");
   mylog.log(`prepare file: ${arg.file} - ${arg.subfilename}`);
 
   var jsspeccy_filename = null;

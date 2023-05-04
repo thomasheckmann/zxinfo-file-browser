@@ -3,7 +3,7 @@
  * 0x4014 - 16404
  *
  */
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/zx81print");
 //const screenZX = require("../utilities/handleSCR");
@@ -25,7 +25,7 @@ function createPreviewSCR(data) {
 }
 
 function listBasic(image, zx81, showFullList) {
-  const mylog = log.scope("createDIRScreen");
+  const mylog = logger().scope("createDIRScreen");
   mylog.debug(`input: ${zx81.data.length}`);
   mylog.debug(`full list: ${showFullList}`);
 
@@ -84,7 +84,7 @@ function listBasic(image, zx81, showFullList) {
 }
 
 function readZX81(data) {
-  const mylog = log.scope("readZX81");
+  const mylog = logger().scope("readZX81");
   mylog.debug(`input: ${data.length}`);
 
   const zx81_sys_vars = {
@@ -100,8 +100,9 @@ function readZX81(data) {
 }
 
 function readP81(data) {
-  const mylog = log.scope("readP81");
+  const mylog = logger().scope("readP81");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing P81 (zx81) file...`);
 
   var i = 0;
   var program_name = "";
@@ -124,7 +125,7 @@ function readP81(data) {
   regs.zx81data = { ...zx81data, data: data.slice(i + 1, i + 1 + zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
-  mylog.info(`readP() - OK ${snapshot.text}`);
+  mylog.debug(`readP() - OK ${snapshot.text}`);
 
   snapshot.data = regs;
 
@@ -132,8 +133,9 @@ function readP81(data) {
 }
 
 function readP(data) {
-  const mylog = log.scope("readP");
+  const mylog = logger().scope("readP");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing P (zx81) file...`);
 
   const zx81data = readZX81(data);
   mylog.debug(JSON.stringify(zx81data));
@@ -147,7 +149,7 @@ function readP(data) {
   regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
-  mylog.info(`readP() - OK ${snapshot.text}`);
+  mylog.debug(`readP() - OK ${snapshot.text}`);
 
   snapshot.data = regs;
 

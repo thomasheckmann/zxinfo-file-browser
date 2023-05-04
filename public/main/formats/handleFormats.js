@@ -1,4 +1,4 @@
-const log = require("electron-log");
+const {logger} = require("../logger.js");
 const crypto = require("crypto");
 const path = require("path");
 
@@ -15,7 +15,7 @@ const pfmt = require("./p_format");
 const screenZX = require("../utilities/handleSCR");
 
 function getZXFormat(fileName, subFileName, data) {
-  const mylog = log.scope("getZXFormat");
+  const mylog = logger().scope("getZXFormat");
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
@@ -82,6 +82,7 @@ function getZXFormat(fileName, subFileName, data) {
     ZXFileInfo.border = obj.border; // not found in tap
 
     if (obj.hwModel === "ZX81" && fn.t === "tzxfmt") {
+      mylog.info(`TZX detected as ZX81 format... processing as P81`);
       const orgType = obj.type;
       obj = pfmt.readP81(obj.zx81);
       ZXFileInfo.version = orgType;

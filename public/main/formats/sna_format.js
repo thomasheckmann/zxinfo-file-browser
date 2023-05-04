@@ -12,12 +12,12 @@
  *    error,
  * }
  */
-const log = require("electron-log");
-//log.transports.console.level = 'debug';
+const {logger} = require("../logger.js");
 
 function readSNA(data) {
-  const mylog = log.scope("readSNA48K");
+  const mylog = logger().scope("readSNA");
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing SNA file...`);
 
   var snapshot = { error: [], scrdata: null, data: [] };
 
