@@ -95,11 +95,12 @@ export default function JSSpeccy(props) {
   };
 
   useEffect(() => {
-    mylog("JSSpeccy", "useEffect", `${loaded}`);
+    mylog("JSSpeccy", "useEffect", `loaded: ${loaded}`);
 
     if (!loaded) {
       loadJSSpeccy(() => {
         setLoaded(true);
+        startJSSpeccy(fileItem);
       });
     }
 
@@ -108,19 +109,20 @@ export default function JSSpeccy(props) {
       if (emuInst) {
         mylog("JSSpeccy", "useEffect", `exit() - emulator`);
         emuInst.exit();
+        emuInst = null;
       }
       if (scriptNode) {
         mylog("JSSpeccy", "useEffect", `removing script...`);
         document.body.removeChild(scriptNode);
+        scriptNode = null;
       }
       setLoaded(false);
     };
-  }, [fileItem]);
+  }, []);
 
   return (
     <Container style={{ display: "flex", justifyContent: "center" }}>
       <div id="jsspeccy"></div>
-      {loaded && startJSSpeccy(fileItem)}
     </Container>
   );
 }
