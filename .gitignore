@@ -2,8 +2,6 @@
 
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
 
 # testing
 /coverage
@@ -30,3 +28,4 @@ yarn-error.log*
 /src/components.*
 test_cases/output.log
 test_cases/output.old.log
+public/tmp/entryfile.*
