@@ -27,7 +27,7 @@ const pfmt = require("./main/formats/p_format");
 
 const AdmZip = require("adm-zip");
 
-const {logger} = require("./main/logger.js");
+const { logger } = require("./main/logger.js");
 
 let win;
 
@@ -37,6 +37,7 @@ function createWindow() {
 
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   mylog.info(`nodeJS version: ${process.version}`);
+  mylog.info(`mode: ${isDev ? "DEBUG mode" : "PROD mode"}`);
   mylog.info(`####################################`);
   win = new BrowserWindow({
     width: 1600,
@@ -53,7 +54,7 @@ function createWindow() {
   // Open the DevTools.
   if (isDev) {
     mylog.debug("opening DevTools");
-    mylog.debug("tmp path is:" +  app.getPath("temp"));
+    mylog.debug("tmp path is:" + app.getPath("temp"));
     win.webContents.openDevTools();
   }
 
@@ -61,7 +62,6 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
- 
   createWindow();
 
   app.on("activate", function () {
@@ -170,6 +170,8 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", "
 function scanDirectory(dirPath, obj) {
   const mylog = logger().scope("scanDirectory");
   mylog.log(`scanning dir: ${dirPath}`);
+  var hrstart = process.hrtime();
+
   //win.webContents.send('update-status-text', `scanning dir: ${dirPath}`);
 
   let filesInDir = 0;
@@ -202,6 +204,8 @@ function scanDirectory(dirPath, obj) {
   if (filesInDir > 0) {
     obj.set(dirPath, filesInDir);
   }
+  const hrend = process.hrtime(hrstart);
+  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
   return { folders: obj, totalFiles: filesInDir };
 }
 
@@ -260,6 +264,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 ipcMain.handle("scan-folder", async (event, arg) => {
   const mylog = logger().scope("scan-folder");
   mylog.log(`input folder: ${arg}`);
+  var hrstart = process.hrtime();
   var result = [];
 
   const dirPath = arg; // TODO: Validate input
@@ -287,6 +292,8 @@ ipcMain.handle("scan-folder", async (event, arg) => {
     mylog.error(error);
   }
   mylog.debug(`Returning: total files: ${filesInDir}`);
+  const hrend = process.hrtime(hrstart);
+  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
   return result;
 });
 
@@ -300,6 +307,7 @@ ipcMain.handle("scan-folder", async (event, arg) => {
 ipcMain.handle("load-file", async (event, arg) => {
   const mylog = logger().scope("load-file");
   mylog.debug(`loading details for file: ${arg}`);
+  var hrstart = process.hrtime();
 
   let result; // either object or array (zip)
 
@@ -363,6 +371,9 @@ ipcMain.handle("load-file", async (event, arg) => {
     fileObj.scr = "./images/no_image.png";
   }
 
+  const hrend = process.hrtime(hrstart);
+  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
+
   if (fileObj.error.length > 0) {
     mylog.debug(`Problems loading file: ${JSON.stringify(fileObj.error)}`);
     return [fileObj];
@@ -418,10 +429,10 @@ ipcMain.handle("get-file-jsspeccy", (event, arg) => {
     var zip = new AdmZip(arg.file);
     var ext = path.parse(arg.subfilename).ext;
     var destPath = null;
-    if(isDev) {
-       destPath = path.resolve(__dirname + "/tmp");
-       mylog.log(`development mode, destPath: ${destPath}`);
-       jsspeccy_filename = "./tmp/entryfile" + ext;
+    if (isDev) {
+      destPath = path.resolve(__dirname + "/tmp");
+      mylog.log(`development mode, destPath: ${destPath}`);
+      jsspeccy_filename = "./tmp/entryfile" + ext;
     } else {
       destPath = app.getPath("temp");
       mylog.log(`LIVE mode, destPath: ${destPath}`);
