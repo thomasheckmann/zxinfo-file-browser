@@ -91,12 +91,11 @@ function read_track_info(data, track, DPB, disk_info_block) {
 }
 
 function valid_filename(filename) {
-  const mylog = logger().scope("valid_filename");
   // returns true, if filename contains only valid ASCII characters 32 - 127
   var valid = true;
-  var hexString = "";
+  // var hexString = "";
   for (var i = 0; i < filename.length; i++) {
-    hexString += filename.charCodeAt(i).toString(16) + ",";
+    // hexString += filename.charCodeAt(i).toString(16) + ",";
     if (filename.charCodeAt(i) < 32 || filename.charCodeAt(i) > 127) {
       // mylog.debug(`ops, illegal character: ${filename.charCodeAt(i)}`);
       valid = false;
@@ -108,7 +107,6 @@ function valid_filename(filename) {
 
 // removes 7th bit of chars in string
 function cleanString(filename) {
-  const mylog = logger().scope("cleanString");
   var cleanedFilename = "";
   for (var i = 0; i < filename.length; i++) {
     var char = filename.charCodeAt(i) & 0x7f;
@@ -545,9 +543,6 @@ function locate_and_read_block(data, blockNo, DPB, disk_info_block) {
 }
 
 function createDIRScreen(dirdata) {
-  const offsetX = 32,
-    offsetY = 24;
-
   // create a SCR preview of DIR
   let frame0 = new Jimp(320, 240, Jimp.cssColorToHex("#D7D7D7"), (err, image) => {
     if (err) throw err;

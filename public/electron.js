@@ -312,20 +312,19 @@ ipcMain.handle("scan-folder", async (event, arg) => {
  * .SNA and 131103 OR 147487 bytes = SNA 128K
  * .Z80 and ...
  */
-ipcMain.handle("load-file", async (event, arg) => {
+ipcMain.handle("load-file", async (event, filename, isPreview) => {
   const mylog = logger().scope("load-file");
-  mylog.debug(`loading details for file: ${arg}`);
+  mylog.debug(`loading details for file: ${filename}, isPreview: ${isPreview}`);
   var hrstart = process.hrtime();
 
   let result; // either object or array (zip)
 
-  const filename_base = path.basename(arg);;
-  const filename_ext = path.extname(arg).toLocaleLowerCase();
+  const filename_base = path.basename(filename);;
+  const filename_ext = path.extname(filename).toLocaleLowerCase();
 
   mylog.debug(`filename (base): ${filename_base}`);
   mylog.debug(`filename (ext): ${filename_ext}`);
 
-  const filename = arg; // TODO: Validate input
   let buf;
   try {
     buf = fs.readFileSync(filename);
@@ -334,7 +333,7 @@ ipcMain.handle("load-file", async (event, arg) => {
     return null;
   }
 
-  let fileObj = handleFormats.getZXFormat(filename, null, buf);
+  let fileObj = handleFormats.getZXFormat(filename, null, buf, isPreview);
   mylog.log(`INPUT : size of file\t - ${sizeof(buf)} bytes, ${filename}`);
   mylog.log(`OUTPUT: size of ZX Obj\t - ${sizeof(fileObj)} bytes`);
   mylog.debug(`hash: ${fileObj.sha512}`);
@@ -439,7 +438,7 @@ ipcMain.handle("get-file-jsspeccy", (event, arg) => {
     }
     const destFile = destPath + "/entryfile" + ext;
     mylog.log(`destination: ${jsspeccy_filename}`);
-    const res = fs.copyFileSync(arg.file, destFile);
+    fs.copyFileSync(arg.file, destFile);
   } else if (arg.file && arg.subfilename) {
     // within ZIP
     mylog.log(`handling file within ZIP: ${arg.file} - ${__dirname}`);

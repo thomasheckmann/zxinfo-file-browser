@@ -8,11 +8,11 @@ const logger = () => {
   if (mylog) return mylog;
 
   log.transports.console.level = isDev ? "info" : "error";
-  log.transports.file.format = '[{level}] {scope}\t{text}';
+  log.transports.file.format = "[{level}] {scope}\t{text}";
   log.transports.file.level = isDev ? "debug" : "info";
-  log.initialize({ preload: true });
+  log.transports.file.fileName = isDev ? "dev-main.log" : "main.log";
   // NOT working... log.transports.file.getFile().clear();
-  log.info("Initialized electron-log, OK");
+  log.info(`Initialized electron-log, OK - logfile=${log.transports.file.fileName}`);
 
   mylog = log;
   return mylog;
