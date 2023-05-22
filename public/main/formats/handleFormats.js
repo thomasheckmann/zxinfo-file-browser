@@ -47,12 +47,12 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.info(`processing: ${subFileName}`);
     mylog.debug(`File inside archive`);
     filename = subFileName.toLowerCase();
-    fileext = filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+    fileext = path.extname(filename).substring(1);
   } else {
     mylog.info(`processing: ${fileName}`);
     mylog.debug(`Single file`);
     filename = fileName.toLowerCase();
-    fileext = filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+    fileext = path.extname(filename).substring(1);
   }
 
   let obj;
