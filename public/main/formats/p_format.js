@@ -3,7 +3,7 @@
  * 0x4014 - 16404
  *
  */
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/zx81print");
 //const screenZX = require("../utilities/handleSCR");
@@ -76,8 +76,8 @@ function listBasic(image, zx81, showFullList) {
   mylog.debug(`final line: ${y}`);
   // resize image 24 pixels top and bottom, y * 8 lines
 
-  if(showFullList) {
-    image.crop(0, 0, 320, 24+y*8+24);
+  if (showFullList) {
+    image.crop(0, 0, 320, 24 + y * 8 + 24);
   }
   // image.write("file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
@@ -99,10 +99,10 @@ function readZX81(data) {
   return zx81_sys_vars;
 }
 
-function readP81(data) {
+function readP81(data, isPreview = true) {
   const mylog = logger().scope("readP81");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing P81 (zx81) file...`);
+  mylog.info(`processing P81 (ZX91) file, preview only: ${isPreview}`);
 
   var i = 0;
   var program_name = "";
@@ -122,20 +122,25 @@ function readP81(data) {
   snapshot.type = "P81";
   snapshot.hwModel = "ZX81";
   //  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
-  regs.zx81data = { ...zx81data, data: data.slice(i + 1, i + 1 + zx81data.len) };
   snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
 
   mylog.debug(`readP() - OK ${snapshot.text}`);
 
-  snapshot.data = regs;
+  if (isPreview) {
+    regs.zx81data = { ...zx81data, data: data.slice(0, 768) };
+    snapshot.data = regs;
+  } else {
+    regs.zx81data = { ...zx81data, data: data.slice(i + 1, i + 1 + zx81data.len) };
+    snapshot.data = regs;
+  }
 
   return snapshot;
 }
 
-function readP(data) {
+function readP(data, isPreview = true) {
   const mylog = logger().scope("readP");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing P (zx81) file...`);
+  mylog.info(`processing P (ZX91) file, preview only: ${isPreview}`);
 
   const zx81data = readZX81(data);
   mylog.debug(JSON.stringify(zx81data));
@@ -146,12 +151,16 @@ function readP(data) {
 
   snapshot.type = "P";
   snapshot.hwModel = "ZX81";
-  regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
   snapshot.text = "ZX81 Program: length = " + zx81data.len;
 
   mylog.debug(`readP() - OK ${snapshot.text}`);
 
-  snapshot.data = regs;
+  if (isPreview) {
+    regs.zx81data = { ...zx81data, data: data.slice(0, 768) };
+    snapshot.data = regs;
+  } else {
+    regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
+  }
 
   return snapshot;
 }

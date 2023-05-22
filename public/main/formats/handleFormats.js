@@ -116,7 +116,7 @@ function getZXFormat(fileName, subFileName, data, isPreview) {
     });
   } else if (fileext === "p" || fileext === "p81" || fileext === "81") {
     mylog.debug(`handling ${fileext}`);
-    obj = fn.f(data);
+    obj = fn.f(data, isPreview);
     ZXFileInfo.version = obj.type;
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = fn.t;

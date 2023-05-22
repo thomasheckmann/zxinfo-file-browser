@@ -334,8 +334,8 @@ ipcMain.handle("load-file", async (event, filename, isPreview) => {
   }
 
   let fileObj = handleFormats.getZXFormat(filename, null, buf, isPreview);
-  mylog.log(`INPUT : size of file\t - ${sizeof(buf)} bytes, ${filename}`);
-  mylog.log(`OUTPUT: size of ZX Obj\t - ${sizeof(fileObj)} bytes`);
+  mylog.log(`INPUT : size of file   - ${sizeof(buf)} bytes, ${filename}`);
+  mylog.log(`OUTPUT: size of ZX Obj - ${sizeof(fileObj)} bytes`);
   mylog.debug(`hash: ${fileObj.sha512}`);
 
   if (filename_ext === ".sna" || filename_ext === ".z80") {
