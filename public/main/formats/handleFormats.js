@@ -14,7 +14,7 @@ const pfmt = require("./p_format");
 
 const screenZX = require("../utilities/handleSCR");
 
-function getZXFormat(fileName, subFileName, data) {
+function getZXFormat(fileName, subFileName, data, isPreview) {
   const mylog = logger().scope("getZXFormat");
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
@@ -47,12 +47,12 @@ function getZXFormat(fileName, subFileName, data) {
     mylog.info(`processing: ${subFileName}`);
     mylog.debug(`File inside archive`);
     filename = subFileName.toLowerCase();
-    fileext = filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+    fileext = path.extname(filename).substring(1);
   } else {
     mylog.info(`processing: ${fileName}`);
     mylog.debug(`Single file`);
     filename = fileName.toLowerCase();
-    fileext = filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+    fileext = path.extname(filename).substring(1);
   }
 
   let obj;
@@ -74,7 +74,7 @@ function getZXFormat(fileName, subFileName, data) {
   const fn = fLookup.get(fileext);
   if (fileext === "sna" || fileext === "z80" || fileext === "tap" || fileext === "tzx") {
     mylog.debug(`handling ${fileext}`);
-    obj = fn.f(data);
+    obj = fn.f(data, isPreview);
     ZXFileInfo.version = obj.type;
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = fn.t;
@@ -116,7 +116,7 @@ function getZXFormat(fileName, subFileName, data) {
     });
   } else if (fileext === "p" || fileext === "p81" || fileext === "81") {
     mylog.debug(`handling ${fileext}`);
-    obj = fn.f(data);
+    obj = fn.f(data, isPreview);
     ZXFileInfo.version = obj.type;
     ZXFileInfo.data = obj.data;
     ZXFileInfo.type = fn.t;

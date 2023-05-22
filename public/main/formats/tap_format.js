@@ -13,10 +13,10 @@
 const {logger} = require("../logger.js");
 const util = require("./tape_util");
 
-function readTAP(data) {
+function readTAP(data, isPreview = true) {
   const mylog = logger().scope("readTAP");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing TAP file...`);
+  mylog.info(`processing TAP file, preview only: ${isPreview}`);
 
   // error: Array of warning and error messages for this file
   var snapshot = { type: null, error: [], scrdata: null };
@@ -65,8 +65,8 @@ function readTAP(data) {
       mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
       if (element.type === "Code") {
         if (element.startAddress === 16384) {
-          mylog.debug(`Found code starting at 16384...(screen area)`);
-          snapshot.scrdata = tap[index + 1].data;
+          mylog.debug(`Found code starting at 16384...(screen area), limit to size: 6912`);
+          snapshot.scrdata = tap[index + 1].data.subarray(0, 6912);
           snapshot.border = 7;
           break;
         } else if (element.len === 6912) {
@@ -81,7 +81,7 @@ function readTAP(data) {
         } else if (element.len > 6912) {
           mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
           if (tap[index + 1]) {
-            snapshot.scrdata = tap[index + 1].data;
+            snapshot.scrdata = tap[index + 1].data.subarray(0, 6912);
             snapshot.border = 7;
           } else {
             snapshot.border = 2;
@@ -93,7 +93,7 @@ function readTAP(data) {
         mylog.debug(`data block: ${element.data.length}`);
         if (element.data.length > 32767 || element.data.length === 6912) {
           mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
-          snapshot.scrdata = element.data;
+          snapshot.scrdata = element.data.subarray(0, 6912);
           snapshot.border = 7;
         }
       }
@@ -102,7 +102,12 @@ function readTAP(data) {
     regs.tape = tap;
   }
 
-  snapshot.data = regs;
+  if(isPreview) {
+  // NOT required for preview mode
+  snapshot.data = null;
+  } else {
+    snapshot.data = regs;
+  }
 
   const errors = snapshot.error;
   snapshot.error = [];
@@ -111,6 +116,7 @@ function readTAP(data) {
       snapshot.error.push(...e);
     }
   });
+
   return snapshot;
 }
 

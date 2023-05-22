@@ -19,6 +19,7 @@ const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
+const sizeof = require('object-sizeof')
 
 const cmdDir = app.commandLine.getSwitchValue("dir");
 
@@ -104,33 +105,39 @@ ipcMain.handle("setStoreValue", (event, key, value) => {
 ipcMain.handle("getFavorites", (event, key) => {
   const mylog = logger().scope("getFavorites");
   const value = favoritesStore.get(key);
+  mylog.debug(`key, value = {${key}, ${value}}`);
   return value;
 });
 
 ipcMain.handle("setFavorites", (event, key, value) => {
   const mylog = logger().scope("setFavorites");
+  mylog.debug(`key = {${key}}`);
   favoritesStore.set(key, value);
 });
 
 ipcMain.handle("getZxinfoSCR", (event, key) => {
   const mylog = logger().scope("getzxinfoSCR");
   const value = zxinfoSCRStore.get(key);
+  mylog.debug(`key = {${key}}`);
   return value;
 });
 
 ipcMain.handle("setZxinfoSCR", (event, key, value) => {
   const mylog = logger().scope("setzxinfoSCR");
+  mylog.debug(`key = {${key}}`);
   zxinfoSCRStore.set(key, value);
 });
 
 ipcMain.handle("get-zxdb-id-store", (event, key) => {
   const mylog = logger().scope("get-zxdb-id-store");
   const value = zxdbIDStore.get(key);
+  mylog.debug(`key, value = {${key}, ${value}}`);
   return value;
 });
 
 ipcMain.handle("set-zxdb-id-store", (event, key, value) => {
   const mylog = logger().scope("set-zxdb-id-store");
+  mylog.debug(`key, value = {${key}, ${value}}`);
   zxdbIDStore.set(key, value);
 });
 
@@ -147,6 +154,7 @@ ipcMain.handle("convertSCR", (event, img) => {
 
 ipcMain.handle("create-zx81-basic-list", async (event, data) => {
   const mylog = logger().scope("create-zx81-basic-list");
+  mylog.debug(`data.length = ${data.length}`);
 
   const res = await pfmt.createBASICListAsScr(data);
   if (res.buffer) {
@@ -304,15 +312,19 @@ ipcMain.handle("scan-folder", async (event, arg) => {
  * .SNA and 131103 OR 147487 bytes = SNA 128K
  * .Z80 and ...
  */
-ipcMain.handle("load-file", async (event, arg) => {
+ipcMain.handle("load-file", async (event, filename, isPreview) => {
   const mylog = logger().scope("load-file");
-  mylog.debug(`loading details for file: ${arg}`);
+  mylog.debug(`loading details for file: ${filename}, isPreview: ${isPreview}`);
   var hrstart = process.hrtime();
 
   let result; // either object or array (zip)
 
-  const filename = arg; // TODO: Validate input
-  var extension = path.extname(filename).toLowerCase();
+  const filename_base = path.basename(filename);;
+  const filename_ext = path.extname(filename).toLocaleLowerCase();
+
+  mylog.debug(`filename (base): ${filename_base}`);
+  mylog.debug(`filename (ext): ${filename_ext}`);
+
   let buf;
   try {
     buf = fs.readFileSync(filename);
@@ -321,15 +333,17 @@ ipcMain.handle("load-file", async (event, arg) => {
     return null;
   }
 
-  let fileObj = handleFormats.getZXFormat(filename, null, buf);
+  let fileObj = handleFormats.getZXFormat(filename, null, buf, isPreview);
+  mylog.log(`INPUT : size of file   - ${sizeof(buf)} bytes, ${filename}`);
+  mylog.log(`OUTPUT: size of ZX Obj - ${sizeof(fileObj)} bytes`);
   mylog.debug(`hash: ${fileObj.sha512}`);
 
-  if (extension === ".sna" || extension === ".z80") {
-  } else if (extension === ".tap" || extension === ".tzx") {
-  } else if (extension === ".dsk" || extension === ".trd" || extension === ".scl") {
-  } else if (extension === ".mdr") {
-  } else if (extension === ".p" || extension === ".p81" || extension === ".81") {
-  } else if (extension === ".zip") {
+  if (filename_ext === ".sna" || filename_ext === ".z80") {
+  } else if (filename_ext === ".tap" || filename_ext === ".tzx") {
+  } else if (filename_ext === ".dsk" || filename_ext === ".trd" || filename_ext === ".scl") {
+  } else if (filename_ext === ".mdr") {
+  } else if (filename_ext === ".p" || filename_ext === ".p81" || filename_ext === ".81") {
+  } else if (filename_ext === ".zip") {
     result = [fileObj];
     var zipCount = 0;
     try {
@@ -366,7 +380,7 @@ ipcMain.handle("load-file", async (event, arg) => {
       return [];
     }
   } else {
-    fileObj.type = "?" + extension.substring(1).toLowerCase();
+    fileObj.type = "?" + filename_ext.substring(1).toLowerCase();
     mylog.warn(`Can't identify file format: ${fileObj.type}`);
     fileObj.scr = "./images/no_image.png";
   }
@@ -390,11 +404,13 @@ ipcMain.handle("load-file", async (event, arg) => {
 
 ipcMain.handle("open-zxinfo-detail", (event, arg) => {
   const mylog = logger().scope("open-zxinfo-detail");
+  mylog.debug(`opening external link: https://zxinfo.dk/details/${arg}`);
   require("electron").shell.openExternal(`https://zxinfo.dk/details/${arg}`);
 });
 
 ipcMain.handle("locate-file-and-folder", (event, arg) => {
   const mylog = logger().scope("locate-file-and-folder");
+  mylog.debug(`locating folder: ${arg}`);
   shell.showItemInFolder(arg);
 });
 
@@ -422,13 +438,13 @@ ipcMain.handle("get-file-jsspeccy", (event, arg) => {
     }
     const destFile = destPath + "/entryfile" + ext;
     mylog.log(`destination: ${jsspeccy_filename}`);
-    const res = fs.copyFileSync(arg.file, destFile);
+    fs.copyFileSync(arg.file, destFile);
   } else if (arg.file && arg.subfilename) {
     // within ZIP
     mylog.log(`handling file within ZIP: ${arg.file} - ${__dirname}`);
     var zip = new AdmZip(arg.file);
-    var ext = path.parse(arg.subfilename).ext;
-    var destPath = null;
+    ext = path.parse(arg.subfilename).ext;
+    destPath = null;
     if (isDev) {
       destPath = path.resolve(__dirname + "/tmp");
       mylog.log(`development mode, destPath: ${destPath}`);
@@ -438,7 +454,6 @@ ipcMain.handle("get-file-jsspeccy", (event, arg) => {
       mylog.log(`LIVE mode, destPath: ${destPath}`);
       jsspeccy_filename = destPath + "/entryfile" + ext;
     }
-    const destFile = destPath + "/entryfile" + ext;
 
     mylog.log(`extracting ${arg.subfilename} to '${destPath}/'`);
     zip.extractEntryTo(arg.subfilename, destPath, false, true, "entryfile" + ext);

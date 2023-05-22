@@ -45,7 +45,7 @@ function createHeader(data, index) {
         // param 2
         if (headerBlock[15] + headerBlock[16] * 256 !== 32768) {
           dataBlock.error.push({ type: "warning", message: `index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}` });
-          mylog.warn(`index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}`);
+          mylog.debug(`index: ${index} - CODE param 2 should be 32768, found ${headerBlock[15] + headerBlock[16] * 256}`);
         }
         break;
       default:

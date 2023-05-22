@@ -67,7 +67,7 @@ export default function InfiniteEntriesList(props) {
     var newIndex;
 
     for (newIndex = infSettings.index; newIndex < props.files.length && itemsToAdd.length < maxSize; newIndex++) {
-      const result = await window.electronAPI.loadFile(props.files[newIndex]);
+      const result = await window.electronAPI.loadFile(props.files[newIndex], true);
       if (result) {
         mylog("InfiniteEntriesList", "fetchMoreData", `${props.files[newIndex]} - contains ${result.length} file(s), hideZip: ${appSettings.hideZip}`);
         result.forEach(function (entry) {

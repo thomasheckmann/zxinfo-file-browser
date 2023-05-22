@@ -591,10 +591,10 @@ function processTZXData(data) {
   return tapeData;
 }
 
-function readTZX(data) {
+function readTZX(data, isPreview = true) {
   const mylog = logger().scope("readTZX");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing TZX file...`);
+  mylog.info(`processing TZX file, preview only: ${isPreview}`);
 
   const signature = String.fromCharCode.apply(null, data.slice(0, 7));
   if (signature !== "ZXTape!") {
@@ -614,7 +614,7 @@ function readTZX(data) {
 
   const tzxData = processTZXData(data);
 
-  snapshot.hwModel;
+//  snapshot.hwModel;
   // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
     if (d.error) {
@@ -677,7 +677,7 @@ function readTZX(data) {
     if (element.type === "Code" && i < tap.length - 1) {
       if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
-        snapshot.scrdata = tap[i + 1].block.data;
+        snapshot.scrdata = tap[i + 1].block.data.subarray(0, 6912);
         snapshot.border = 7;
         break;
       } else if (element.len === 6912) {
@@ -687,7 +687,7 @@ function readTZX(data) {
         break;
       } else if (element.len > 6912) {
         mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
-        snapshot.scrdata = tap[i + 1].block.data;
+        snapshot.scrdata = tap[i + 1].block.data.subarray(0, 6912);
         snapshot.border = 7;
         break;
       }
@@ -696,14 +696,18 @@ function readTZX(data) {
       // mylog.debug(`${i} - data block: ${element.data.length}`);
       if (element.data.length > 16000 || element.data.length === 6912) {
         mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
-        snapshot.scrdata = element.data;
+        snapshot.scrdata = element.data.subarray(0, 6912);
         snapshot.border = 7;
       }
     }
   }
 
-  regs.tape = tzxData;
-  snapshot.data = regs;
+  if(isPreview) {
+    snapshot.data = null;
+  } else {
+    regs.tape = tzxData;
+    snapshot.data = regs;
+  }
 
   return snapshot;
 }

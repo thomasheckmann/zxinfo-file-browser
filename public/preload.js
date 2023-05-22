@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   scanFolder: (args) => ipcRenderer.invoke("scan-folder", args),
 
   // Load file and return details about format, from render to main
-  loadFile: (args) => ipcRenderer.invoke("load-file", args),
+  loadFile: (filename, isPreview) => ipcRenderer.invoke("load-file", filename, isPreview),
 
   // Load store value (settings), from render to main
   getStoreValue: (args) => ipcRenderer.invoke("getStoreValue", args),
