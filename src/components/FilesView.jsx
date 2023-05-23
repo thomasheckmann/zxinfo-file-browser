@@ -9,14 +9,14 @@ import { useState } from "react";
 import InfiniteEntriesList from "./InfiniteEntriesList";
 import { useContext } from "react";
 import ZXInfoSettings from "../common/ZXInfoSettings";
-import {mylog} from "../App";
+import { mylog } from "../App";
 
 // duplicated in GridView
 function filterAndSortFiles(files, sortOptions, fileFilters) {
   mylog("FilesView", "filterAndSortFiles", `sorting changed to: ${sortOptions}, filters: ${fileFilters}, no. of files: ${files.length}`);
   const newFiles = files.filter((fileName) => {
     let result = fileFilters.some((extension) => {
-      const fileExt =  fileName.substring(fileName.lastIndexOf('.')+1, fileName.length).toLowerCase() || fileName.toLowerCase();
+      const fileExt = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase() || fileName.toLowerCase();
       return fileExt === extension;
     });
 
@@ -47,15 +47,17 @@ const FilesView = (props) => {
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, appSettings.hideZip]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
-    isInitialized && <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }} id={props.foldername}>
-      <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
-        <FolderTwoToneIcon />
-        <Typography variant="button">
-          &nbsp;{props.foldername} - ({files.length})
-        </Typography>
-      </Box>
-      <InfiniteEntriesList key={files+appSettings.hideZip} files={files} foldername={props.foldername}></InfiniteEntriesList>
-    </Paper>
+    isInitialized && (
+      <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }} id={props.foldername}>
+        <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
+          <FolderTwoToneIcon />
+          <Typography variant="button">
+            &nbsp;{props.foldername} - ({files.length})
+          </Typography>
+        </Box>
+        <InfiniteEntriesList key={files + appSettings.hideZip} files={files} foldername={props.foldername}></InfiniteEntriesList>
+      </Paper>
+    )
   );
 };
 export default FilesView;

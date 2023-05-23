@@ -1,4 +1,6 @@
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
+
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
@@ -40,13 +42,12 @@ function createDIRScreen(dirdata) {
   return image.getBase64Async(Jimp.MIME_PNG);
 }
 
-function readMDR(data) {
+function readMDR(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readMDR");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing MDR file...`);
+  mylog.info(`processing MDR file, preview only: ${isPreview}`);
 
-  var snapshot = { type: "MDR", error: [], scrdata: null, data: [] };
-  snapshot.scrdata = null;
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
 
   var regs = {};
   regs.filesize = data.length;
@@ -98,7 +99,7 @@ function readMDR(data) {
   }
 
   if (i < 254) {
-    snapshot.error.push({ type: "warning", message: `Number of sectors (${i}) < 254` });
+    zxObject.error.push({ type: "warning", message: `Number of sectors (${i}) < 254` });
     mylog.warn(`Number of sectors (${i}) < 254`);
   }
   const freeSpace = (254 * 512) / 1024 - Math.ceil((no_of_used_blocks * 512) / 1024);
@@ -108,13 +109,17 @@ function readMDR(data) {
 
   mylog.log(`Total used blocks: ${no_of_used_blocks} (${Math.ceil((no_of_used_blocks * 512) / 1024)}) / 254 (${(254 * 512) / 1024}) - Free: ${freeSpace}`);
 
-  snapshot.dir_scr = dir_scr;
-  snapshot.text = `${dir_scr.title}, sectors: ${no_of_used_blocks} / 254 - Free: ${freeSpace}K`;
+  zxObject.scrdata_ext = dir_scr;
+  zxObject.text = `${dir_scr.title}, sectors: ${no_of_used_blocks} / 254 - Free: ${freeSpace}K`;
   mylog.debug(dir_scr);
 
-  snapshot.data = regs;
+  if(isPreview) {
+    zxObject.data = null;
+  } else {
+    zxObject.data = regs;
+  }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readMDR = readMDR;

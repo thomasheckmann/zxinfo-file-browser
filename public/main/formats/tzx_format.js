@@ -9,7 +9,8 @@
  * }
  */
 
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 const util = require("./tape_util");
 
 function getWord(low, high) {
@@ -22,12 +23,6 @@ function getDWord(n1, n2, n3, n4) {
 
 function getNWord(low, med, high) {
   return (high << 16) + (med << 8) + low;
-}
-
-function TZXObject(major, minor) {
-  this.major = major;
-  this.minor = minor;
-  this.blocks = [];
 }
 
 /**
@@ -591,7 +586,7 @@ function processTZXData(data) {
   return tapeData;
 }
 
-function readTZX(data, isPreview) {
+function readTZX(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readTZX");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing TZX file, preview only: ${isPreview}`);
@@ -599,31 +594,30 @@ function readTZX(data, isPreview) {
   const signature = String.fromCharCode.apply(null, data.slice(0, 7));
   if (signature !== "ZXTape!") {
     mylog.warn(`TZX Signature not found, skipping...`);
-    return  { type: "?", error: [{type: "error", message: "TZX Signature not found"}], scrdata: null, data: [] };
+    return { type: "?", error: [{ type: "error", message: "TZX Signature not found" }], scrdata: null, data: [] };
   }
   const TZXMajorVersion = data[8];
   const TZXMinorVersion = data[9];
 
   mylog.debug(`TZX version: ${TZXMajorVersion}.${TZXMinorVersion}`);
 
-  var snapshot = { type: null, error: [], scrdata: null, data: [] };
-  snapshot.type = `TZX ${TZXMajorVersion}.${TZXMinorVersion}`;
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+  zxObject.version = `TZX ${TZXMajorVersion}.${TZXMinorVersion}`;
 
   var regs = {};
   regs.filesize = data.length;
 
   const tzxData = processTZXData(data);
 
-//  snapshot.hwModel;
   // create pseudo TAP structure & find hwinfo and add error messages from blocks
   var tap = tzxData.filter((d) => {
     if (d.error) {
-      snapshot.error.push(...d.error);
+      zxObject.error.push(...d.error);
     }
     if (d && d.block) {
       const block = d.block;
       if (block.error && block.error.length > 0) {
-        snapshot.error.push(...block.error);
+        zxObject.error.push(...block.error);
       }
     }
 
@@ -632,7 +626,7 @@ function readTZX(data, isPreview) {
       return d.block;
     }
     if (d && d.id === 0x33) {
-      snapshot.hwModel = d.hw[0];
+      zxObject.hwmodel = d.hw[0];
     }
   });
 
@@ -655,19 +649,19 @@ function readTZX(data, isPreview) {
     });
     if (zx81.length >= 3) {
       mylog.debug(`found 3 blocks, OK`);
-      snapshot.text = zx81programName;
-      snapshot.hwModel = "ZX81";
-      snapshot.zx81 = zx81[2].data;
+      zxObject.text = zx81programName;
+      zxObject.hwmodel = "ZX81";
+      zxObject.zx81 = zx81[2].data;
       regs.tape = tzxData;
-      snapshot.data = regs;
-      return snapshot;
+      zxObject.data = regs;
+      return zxObject;
     } else {
       mylog.warn(`not 3 blocks, probaly not ZX81...`);
     }
   }
 
   if (tap.length > 0 && tap[0].block.type !== "...data") {
-    snapshot.text = tap[0].block.type + ": " + tap[0].block.name;
+    zxObject.text = tap[0].block.type + ": " + tap[0].block.name;
   }
 
   mylog.debug(`tap structure length: ${tap.length}`);
@@ -677,39 +671,41 @@ function readTZX(data, isPreview) {
     if (element.type === "Code" && i < tap.length - 1) {
       if (element.startAddress === 16384) {
         mylog.debug(`Found code starting at 16384...(screen area)`);
-        snapshot.scrdata = tap[i + 1].block.data.subarray(0, 6912);
-        snapshot.border = 7;
+        zxObject.scrdata = tap[i + 1].block.data.subarray(0, 6912);
+        zxObject.border = 7;
         break;
       } else if (element.len === 6912) {
         mylog.debug(`Found code with length 6912...(screen length)`);
-        snapshot.scrdata = tap[i + 1].block.data;
-        snapshot.border = 7;
+        zxObject.scrdata = tap[i + 1].block.data;
+        zxObject.border = 7;
         break;
       } else if (element.len > 6912) {
         mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
-        snapshot.scrdata = tap[i + 1].block.data.subarray(0, 6912);
-        snapshot.border = 7;
+        zxObject.scrdata = tap[i + 1].block.data.subarray(0, 6912);
+        zxObject.border = 7;
         break;
       }
-    } else if (snapshot.scrdata === null && element.type === "...data") {
+    } else if (zxObject.scrdata === null && element.type === "...data") {
       // headerless data with length 6912 or bigger than 32768
       // mylog.debug(`${i} - data block: ${element.data.length}`);
       if (element.data.length > 16000 || element.data.length === 6912) {
         mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
-        snapshot.scrdata = element.data.subarray(0, 6912);
-        snapshot.border = 7;
+        zxObject.scrdata = element.data.subarray(0, 6912);
+        zxObject.border = 7;
       }
     }
   }
 
-  if(isPreview) {
-    snapshot.data = null;
+  if (isPreview) {
+    // NOT required for preview mode
+    zxObject.data = null;
+    regs.tape = null;
   } else {
-    regs.tape = tzxData;
-    snapshot.data = regs;
+    regs.tape = tap;
+    zxObject.data = regs;
   }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readTZX = readTZX;

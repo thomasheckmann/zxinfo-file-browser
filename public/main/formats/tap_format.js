@@ -10,20 +10,20 @@
  *    error,
  * }
  */
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 const util = require("./tape_util");
 
-function readTAP(data, isPreview) {
+function readTAP(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readTAP");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing TAP file, preview only: ${isPreview}`);
 
   // error: Array of warning and error messages for this file
-  var snapshot = { type: null, error: [], scrdata: null };
-  snapshot.type = "TAP";
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+
   var regs = {};
   regs.filesize = data.length;
-
 
   let tap = [];
 
@@ -34,21 +34,25 @@ function readTAP(data, isPreview) {
     if (dataBlock[0] === 0) {
       mylog.debug(`found header block at index: ${index}`);
       const block = util.createHeader(dataBlock, index);
-      if (block.error) {
-        snapshot.error.push(block.error);
+      if (block.error.length > 0) {
+        for (var i in block.error) {
+          zxObject.error.push(block.error[i]);
+        }
       }
       tap.push(block);
     } else if (dataBlock[0] === 255) {
       const block = util.createData(dataBlock, index);
       block.type = "...data";
-      if (block.error) {
-        snapshot.error.push(block.error);
+      if (block.error.length > 0) {
+        for (var i in block.error) {
+          zxObject.error.push(block.error[i]);
+        }
       }
       mylog.debug(`found data block at index: ${index}, length=${block.data.length}`);
       tap.push(block);
     } else {
       mylog.warn(`index: ${index} - Unknown block (${dataBlock[0]})`);
-      snapshot.error.push({ type: "warning", message: `index: ${index} - Unknown block type (${dataBlock[0]})` });
+      zxObject.error.push({ type: "warning", message: `index: ${index} - Unknown block type (${dataBlock[0]})` });
     }
     index += blockLength; // skip data block
   }
@@ -57,67 +61,59 @@ function readTAP(data, isPreview) {
   mylog.debug(`tap structure length: ${tap.length}`);
 
   if (tap.length === 0) {
-    snapshot.error.push({ type: "error", message: "TAP lenght 0, invalid" });
+    zxObject.error.push({ type: "error", message: "TAP lenght 0, invalid" });
   } else {
-    snapshot.text = tap[0].type + ": " + tap[0].name;
+    zxObject.text = tap[0].type + ": " + tap[0].name;
     for (let index = 0; index < tap.length; index++) {
       const element = tap[index];
       mylog.debug(`${index}: ${element.type}, ${element.flag} - ${element.name}, ${element.len}`);
       if (element.type === "Code") {
         if (element.startAddress === 16384) {
           mylog.debug(`Found code starting at 16384...(screen area), limit to size: 6912`);
-          snapshot.scrdata = tap[index + 1].data.subarray(0, 6912);
-          snapshot.border = 7;
+          zxObject.scrdata = tap[index + 1].data.subarray(0, 6912);
+          zxObject.border = 7;
           break;
         } else if (element.len === 6912) {
           mylog.debug(`Found code with length 6912...(screen length)`);
           if (tap[index + 1]) {
-            snapshot.scrdata = tap[index + 1].data;
-            snapshot.border = 7;
+            zxObject.scrdata = tap[index + 1].data;
+            zxObject.border = 7;
           } else {
-            snapshot.border = 2;
+            zxObject.border = 2;
           }
           break;
         } else if (element.len > 6912) {
           mylog.debug(`Found code with length(${element.len}) > 6912 - try using it as screen...`);
           if (tap[index + 1]) {
-            snapshot.scrdata = tap[index + 1].data.subarray(0, 6912);
-            snapshot.border = 7;
+            zxObject.scrdata = tap[index + 1].data.subarray(0, 6912);
+            zxObject.border = 7;
           } else {
-            snapshot.border = 2;
+            zxObject.border = 2;
           }
           break;
         }
-      } else if (snapshot.scrdata === null && element.type === "...data") {
+      } else if (zxObject.scrdata === null && element.type === "...data") {
         // headerless data with length 6912 or bigger than 32768
         mylog.debug(`data block: ${element.data.length}`);
         if (element.data.length > 32767 || element.data.length === 6912) {
           mylog.debug(`Headerless data with length(${element.data.length}) > 32767 - try using it as screen...`);
-          snapshot.scrdata = element.data.subarray(0, 6912);
-          snapshot.border = 7;
+          zxObject.scrdata = element.data.subarray(0, 6912);
+          zxObject.border = 7;
         }
       }
     }
-
-    regs.tape = tap;
   }
 
-  if(isPreview) {
-  // NOT required for preview mode
-  snapshot.data = null;
+  if (isPreview) {
+    // NOT required for preview mode
+    zxObject.data = null;
+    regs.tape = null;
   } else {
-    snapshot.data = regs;
+    regs.tape = tap;
+    zxObject.data = regs;
   }
 
-  const errors = snapshot.error;
-  snapshot.error = [];
-  errors.forEach((e) => {
-    if (e.length > 0) {
-      snapshot.error.push(...e);
-    }
-  });
-
-  return snapshot;
+  return zxObject;
 }
 
 // const testdata = readTAP("./testdata/ElStompo.tap");

@@ -312,9 +312,9 @@ ipcMain.handle("scan-folder", async (event, arg) => {
  * .SNA and 131103 OR 147487 bytes = SNA 128K
  * .Z80 and ...
  */
-ipcMain.handle("load-file", async (event, filename, isPreview) => {
+ipcMain.handle("load-file", (event, filename, isPreview) => {
   const mylog = logger().scope("load-file");
-  mylog.debug(`loading details for file: ${filename}, isPreview: ${isPreview}`);
+  mylog.info(`loading details for file: ${filename}, isPreview: ${isPreview}`);
   var hrstart = process.hrtime();
 
   let result; // either object or array (zip)
@@ -354,7 +354,7 @@ ipcMain.handle("load-file", async (event, filename, isPreview) => {
       zipEntries.forEach(async function (zipEntry) {
         if (!zipEntry.isDirectory) {
           try {
-            let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
+            let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData(), isPreview);
             if (zxObj !== null) {
               mylog.debug(`addind zip entry (${zipEntry.name}) to list...`);
               zipCount++;
