@@ -15,6 +15,7 @@ const pfmt = require("./p_format");
 const screenZX = require("../utilities/handleSCR");
 
 function getZXFormat(fileName, subFileName, data, isPreview) {
+  isPreview = false;
   const mylog = logger().scope("getZXFormat");
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 

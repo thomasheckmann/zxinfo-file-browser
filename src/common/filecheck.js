@@ -147,7 +147,6 @@ export function validJSSpeccyFormat(entry) {
   switch (formatType(entry.type)) {
     case "ZIP":
       return false;
-      break;
     case "SNA":
     case "Z80":
     case "SZX":
@@ -156,7 +155,6 @@ export function validJSSpeccyFormat(entry) {
     case "TZX":
       // zx81 not supported
       return entry.hwmodel !== "ZX81";
-      break;
     default:
       break;
   }

@@ -39,7 +39,7 @@ const openLink = (id) => {
 };
 
 function EntryCard(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettings);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
 

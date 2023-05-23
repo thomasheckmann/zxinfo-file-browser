@@ -101,7 +101,7 @@ export default function InfiniteEntriesList(props) {
 
     if (isVisible && props.files.length > 0 && infSettings.index === 0) {
       mylog("InfiniteEntriesList", "useEffect", `FIRST TIME fetchMoreData() - ${props.foldername}`);
-      fetchMoreData(false);
+      fetchMoreData();
       const averageCardHeight = 500;
       const maxHeight = window.innerHeight - 40; // total files bare
 

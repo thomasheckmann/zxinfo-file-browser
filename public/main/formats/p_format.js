@@ -99,7 +99,7 @@ function readZX81(data) {
   return zx81_sys_vars;
 }
 
-function readP81(data, isPreview = true) {
+function readP81(data, isPreview) {
   const mylog = logger().scope("readP81");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing P81 (ZX91) file, preview only: ${isPreview}`);

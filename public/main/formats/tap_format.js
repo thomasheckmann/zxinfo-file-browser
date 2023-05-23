@@ -13,7 +13,7 @@
 const {logger} = require("../logger.js");
 const util = require("./tape_util");
 
-function readTAP(data, isPreview = true) {
+function readTAP(data, isPreview) {
   const mylog = logger().scope("readTAP");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing TAP file, preview only: ${isPreview}`);

@@ -591,7 +591,7 @@ function processTZXData(data) {
   return tapeData;
 }
 
-function readTZX(data, isPreview = true) {
+function readTZX(data, isPreview) {
   const mylog = logger().scope("readTZX");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing TZX file, preview only: ${isPreview}`);
