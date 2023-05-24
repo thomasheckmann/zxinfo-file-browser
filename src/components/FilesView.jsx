@@ -30,7 +30,7 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
   }
 }
 
-function FilesView ({foldername, filesInFolder}) {
+function FilesView({ foldername, filesInFolder }) {
   const [appSettings] = useContext(ZXInfoSettings);
   const [files, setFiles] = useState(filesInFolder);
   const [isInitialized, setInitialized] = useState(false);
@@ -39,15 +39,7 @@ function FilesView ({foldername, filesInFolder}) {
     mylog("FilesView", "useEffect", `sorting and filtering on folder: ${foldername}`);
     mylog("FilesView", "useEffect", `${filesInFolder}`);
     setInitialized(true);
-    return;
-    // window.electronAPI.scanFolder(props.foldername).then((res) => {
-    //   // filter out files based filtering
-    //   const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
-    //   setFiles((files) => [...newList]);
-    //   setInitialized(true);
-    //   mylog("FilesView", "useEffect", `initialized done, no. of files: ${newList.length}`);
-    // });
-  }, [appSettings.sortOrderFiles, appSettings.fileFilters, appSettings.hideZip]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
+  }, [appSettings.sortOrderFiles, appSettings.fileFilters, appSettings.hideZip]);
 
   return (
     isInitialized && (
@@ -62,5 +54,5 @@ function FilesView ({foldername, filesInFolder}) {
       </Paper>
     )
   );
-};
+}
 export default FilesView;

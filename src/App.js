@@ -486,7 +486,7 @@ export default function App() {
                 <Route path="/favorites" element={<FavoritesList />}></Route>
                 <Route
                   path="/gridview"
-                  element={startFolder.folders && startFolder.folders.length > 0 && <GridView root={startFolder.root} folders={startFolder.folders} />}
+                  element={startFolder.folders && startFolder.folders.length > 0 ?( <GridView root={startFolder.root} folders={allFiles} />):(<div></div>)}
                 ></Route>
               </Routes>
             </Container>
