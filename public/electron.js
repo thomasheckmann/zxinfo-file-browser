@@ -19,7 +19,7 @@ const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
-const sizeof = require('object-sizeof')
+const sizeof = require("object-sizeof");
 
 const cmdDir = app.commandLine.getSwitchValue("dir");
 
@@ -305,6 +305,29 @@ ipcMain.handle("scan-folder", async (event, arg) => {
   return result;
 });
 
+// [("folder", ["file1", "file2"])]
+ipcMain.handle("scan-folders", (event, folders) => {
+  const mylog = logger().scope("scan-folders");
+  mylog.log(`input folder: ${folders.length}`);
+
+  folders.forEach((f) => {
+    fs.readdir(f, (err, files) => {
+      if (err) mylog.error(err);
+      else {
+        let validFiles = [];
+        files.forEach((file) => {
+          let extension = path.extname(file).toLowerCase();
+          if (supportedExts.indexOf(extension) >= 0) {
+            validFiles.push(`${f}/${file}`);
+          }
+        });
+        mylog.info(`${f} - completed, found: ${validFiles.length} file(s)`);
+        win.webContents.send("folder-completed", [f, validFiles]);
+      }
+    });
+  });
+});
+
 /**
  *  identify metadata about file
  *
@@ -319,7 +342,7 @@ ipcMain.handle("load-file", (event, filename, isPreview) => {
 
   let result; // either object or array (zip)
 
-  const filename_base = path.basename(filename);;
+  const filename_base = path.basename(filename);
   const filename_ext = path.extname(filename).toLocaleLowerCase();
 
   mylog.debug(`filename (base): ${filename_base}`);

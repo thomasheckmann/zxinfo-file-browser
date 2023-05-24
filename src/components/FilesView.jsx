@@ -30,32 +30,35 @@ function filterAndSortFiles(files, sortOptions, fileFilters) {
   }
 }
 
-const FilesView = (props) => {
+function FilesView ({foldername, filesInFolder}) {
   const [appSettings] = useContext(ZXInfoSettings);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState(filesInFolder);
   const [isInitialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    mylog("FilesView", "useEffect", `sorting and filtering...`);
-    window.electronAPI.scanFolder(props.foldername).then((res) => {
-      // filter out files based filtering
-      const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
-      setFiles((files) => [...newList]);
-      setInitialized(true);
-      mylog("FilesView", "useEffect", `initialized done, no. of files: ${newList.length}`);
-    });
+    mylog("FilesView", "useEffect", `sorting and filtering on folder: ${foldername}`);
+    mylog("FilesView", "useEffect", `${filesInFolder}`);
+    setInitialized(true);
+    return;
+    // window.electronAPI.scanFolder(props.foldername).then((res) => {
+    //   // filter out files based filtering
+    //   const newList = filterAndSortFiles(res, appSettings.sortOrderFiles, appSettings.fileFilters);
+    //   setFiles((files) => [...newList]);
+    //   setInitialized(true);
+    //   mylog("FilesView", "useEffect", `initialized done, no. of files: ${newList.length}`);
+    // });
   }, [appSettings.sortOrderFiles, appSettings.fileFilters, appSettings.hideZip]); //[props.foldername, appSettings.sortOrderFiles, appSettings.fileFilters]);
 
   return (
     isInitialized && (
-      <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }} id={props.foldername}>
+      <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }} id={foldername}>
         <Box sx={{ backgroundColor: "#e0e0e0", display: "flex", py: 3, px: 2 }}>
           <FolderTwoToneIcon />
           <Typography variant="button">
-            &nbsp;{props.foldername} - ({files.length})
+            &nbsp;{foldername} - ({files.length})
           </Typography>
         </Box>
-        <InfiniteEntriesList key={files + appSettings.hideZip} files={files} foldername={props.foldername}></InfiniteEntriesList>
+        <InfiniteEntriesList key={files + appSettings.hideZip} files={files} foldername={foldername}></InfiniteEntriesList>
       </Paper>
     )
   );

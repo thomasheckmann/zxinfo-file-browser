@@ -115,9 +115,10 @@ export default function App() {
   const [showDrawerFolderLink, setShowDrawerFolderLink] = React.useState(false);
   const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
   const [isBusyWorking, setIsBusyWorking] = React.useState(false);
+  const [allFiles, setAllFiles] = React.useState([]); // { dir: files: []}
 
   const [statusText, setStatusText] = React.useState("");
-  
+
   /**
    * xs, sm, md, lg, xl
    * @returns
@@ -243,7 +244,7 @@ export default function App() {
 
     if (!settingsLoaded) {
       async function loadSettings() {
-        mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(appSettings)}`);
+        // mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(appSettings)}`);
         const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
         const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");
         const hideZip = await window.electronAPI.getStoreValue("hide-zip");
@@ -258,7 +259,7 @@ export default function App() {
           scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
         }
         const zxdbIDs = await window.electronAPI.getZXDBs("zxdb-id-store");
-        mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(zxdbIDs)}`);
+        // mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(zxdbIDs)}`);
         var zxdbidsMap = new Map();
         if (zxdbIDs) {
           zxdbidsMap = new Map(Object.entries(JSON.parse(zxdbIDs)));
@@ -272,13 +273,27 @@ export default function App() {
           zxinfoSCR: scrMap,
           zxdbIDs: zxdbidsMap,
         });
-        mylog("App", "loadSettings", `-exit- appSettings: ${JSON.stringify(appSettings)}`);
+        // mylog("App", "loadSettings", `-exit- appSettings: ${JSON.stringify(appSettings)}`);
         setSettingsLoaded(true);
       }
 
       loadSettings();
     }
   }, []); // only run once
+
+  useEffect(() => {
+    mylog("App", "useEffect/startFolder", `-enter- number of folders = ${startFolder.folders.length}`);
+    setAllFiles([]);
+    window.electronAPI.onFolderCompleted((_event, value) => {
+      setAllFiles((allFiles) => [...allFiles, { dir: value[0], files: value[1] }]);
+      mylog("App", "onFolderCompleted", `${value[0]} - no. of files: ${value[1].length}`);
+    });
+
+    window.electronAPI.scanFolders(startFolder.folders);
+    return () => {
+      window.electronAPI.removeAllListeners("folder-completed");
+    };
+  }, [startFolder.folders]);
 
   /**
    * if open folder dialog is nedded from child, use this as callback
@@ -309,7 +324,6 @@ export default function App() {
       <ZXInfoSettings.Provider value={[appSettings, setAppSettings]}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-
           <Box position="fixed" top={0} height="60px" width="100%"></Box>
           <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={isBusyWorking}>
             <CircularProgress color="inherit" />
@@ -343,7 +357,7 @@ export default function App() {
                     <FolderOpenIcon />
                   </Tooltip>
                 </IconButton>
-                <Divider orientation="vertical" variant="middle" sx={{color: "#ff0000"}}/>
+                <Divider orientation="vertical" variant="middle" sx={{ color: "#ff0000" }} />
                 <IconButton
                   disabled={location.pathname === "/"}
                   edge="start"
@@ -463,7 +477,7 @@ export default function App() {
                   path="/"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <FolderView folders={startFolder.folders} />
+                      <FolderView folders={allFiles} />
                     ) : (
                       <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
                     )

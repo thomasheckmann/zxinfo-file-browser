@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import FilesView from "../components/FilesView";
 
-function FolderView(props) {
-  return (
+function FolderView({ folders }) {
+  useEffect(() => {
+    if(folders) console.log(`useEffect() - folders: ${folders.length}`);
+  });
+
+  return folders && folders.length > 0 && (
     <React.Fragment>
-      {props.folders.map((folder, index) => {
-        return <FilesView key={folder} foldername={folder}></FilesView>;
+      {folders.map((folder, index) => {
+        return <FilesView key={folder.dir} foldername={folder.dir} filesInFolder={folder.files}></FilesView>;
       })}
+
     </React.Fragment>
   );
 }
