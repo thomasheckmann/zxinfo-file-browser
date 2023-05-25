@@ -9,12 +9,12 @@
 import { IconButton, InputAdornment, Snackbar, TextField } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { mylog } from "../../App";
-import ZXInfoSettings from "../ZXInfoSettings";
+import {ZXInfoSettingsCtx} from "../ZXInfoSettings";
 import LaunchTwoToneIcon from "@mui/icons-material/LaunchTwoTone";
 
 export default function ZXdbID(props) {
   const [customZXDBid, setCustomZXDBid] = useState({ value: "" });
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettingsCtx);
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {

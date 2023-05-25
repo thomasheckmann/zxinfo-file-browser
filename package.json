@@ -1,6 +1,6 @@
 {
   "name": "zxinfo-file-browser",
-  "version": "1.1.6",
+  "version": "1.2.0-rc",
   "description": "ZX Spectrum & ZX81 emulator file browser powered by the web",
   "author": "thomas.kolbeck@gmail.com",
   "license": "MIT",

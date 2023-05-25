@@ -3,56 +3,31 @@ import * as React from "react";
 import InfiniteEntriesGrid from "../components/InfiniteEntriesGrid";
 import FolderTwoToneIcon from "@mui/icons-material/FolderTwoTone";
 import { useContext, useEffect, useState } from "react";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import { ZXInfoSettingsCtx } from "../common/ZXInfoSettings";
 import { mylog } from "../App";
 
-// duplicated in FilesView
-// sort on filename, but add path
-function basename(prevname) {
-  return prevname.replace(/^(.*[/\\])?/, "");
-}
-
-function filterAndSortFiles(files, sortOptions, fileFilters) {
-  mylog("GridView", "filterAndSortFiles", `sorting changed to: ${sortOptions}, filters: ${fileFilters}, no. of files: ${files.length}`);
-  const newFiles = files.filter((fileName) => {
-    mylog("GridView", "filterAndSortFiles", `${basename(fileName)}, ${fileName}`);
-    let result = fileFilters.some((extension) => {
-      const fileExt = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase() || fileName.toLowerCase();
-      return fileExt === extension;
-    });
-
-    return result;
-  });
-
-  if (sortOptions) {
-    return [
-      ...newFiles.sort((a, b) => {
-        return basename(a).toLowerCase().localeCompare(basename(b).toLowerCase());
-      }),
-    ];
-  } else {
-    return [
-      ...newFiles
-        .sort((a, b) => {
-          return basename(a).toLowerCase().localeCompare(basename(b).toLowerCase());
-        })
-        .reverse(),
-    ];
-  }
+/**
+ *
+ * @param {*} filenames - [file1, file2, file3]
+ * @param {*} sortAtoZ  - true or false
+ * @returns sorted array
+ */
+function sortFiles(filenames, sortAtoZ) {
+  return sortAtoZ ? filenames.sort() : filenames.sort().reverse();
 }
 
 function GridView({ root, folders }) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
+    mylog("GridView", "useEffect", `-enter-`);
     if (folders) {
       folders.forEach((folder, index) => {
-        console.log(`${folder.dir} - ${folder.files.length}`);
-        setFiles((files) => [...files, ...folder.files]);
+        setFiles((files) => sortFiles([...files, ...folder.files], appSettings.sortOrderFiles));
       });
     }
-  }, [folders]);
+  }, [folders, appSettings.sortOrderFiles]);
 
   return (
     <React.Fragment>
@@ -63,7 +38,7 @@ function GridView({ root, folders }) {
             &nbsp;{root} - ({files.length})
           </Typography>
         </Box>
-        <InfiniteEntriesGrid key={files + appSettings.hideZip} files={files} foldername={root}></InfiniteEntriesGrid>
+        <InfiniteEntriesGrid key={files} files={files} foldername={root}></InfiniteEntriesGrid>
       </Paper>
     </React.Fragment>
   );

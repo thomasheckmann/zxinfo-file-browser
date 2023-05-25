@@ -14,7 +14,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { useIsVisible } from "react-is-visible";
 import EntryCard from "./EntryCard";
 import { useContext } from "react";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import { ZXInfoSettingsCtx } from "../common/ZXInfoSettings";
 import { mylog } from "../App";
 
 const ItemEnd = styled(Paper)(({ theme }) => ({
@@ -26,7 +26,7 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 export default function InfiniteEntriesList(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [infSettings, setInfSettings] = useState({ items: [], hasMore: true, index: 0 });
 
   const [maxSize, setMaxSize] = useState(8); // number of entries to fetch at a time

@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import {ZXInfoSettingsCtx} from "../common/ZXInfoSettings";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 import { Container } from "@mui/system";
 
 const NO_OF_ITEMS = 9; // number of files to fetch/display - should adapt to breakpoint?
 
 function FavoritesList(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [files, setFiles] = useState([]);
 
   useEffect(() => {
