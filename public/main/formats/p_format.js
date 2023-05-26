@@ -4,6 +4,8 @@
  *
  */
 const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
+
 const Jimp = require("jimp");
 const screenZX = require("../utilities/zx81print");
 //const screenZX = require("../utilities/handleSCR");
@@ -25,7 +27,7 @@ function createPreviewSCR(data) {
 }
 
 function listBasic(image, zx81, showFullList) {
-  const mylog = logger().scope("createDIRScreen");
+  const mylog = logger().scope("listBasic");
   mylog.debug(`input: ${zx81.data.length}`);
   mylog.debug(`full list: ${showFullList}`);
 
@@ -99,10 +101,10 @@ function readZX81(data) {
   return zx81_sys_vars;
 }
 
-function readP81(data, isPreview) {
+function readP81(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readP81");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing P81 (ZX91) file, preview only: ${isPreview}`);
+  mylog.info(`processing P81 (ZX81) file, preview only: ${isPreview}`);
 
   var i = 0;
   var program_name = "";
@@ -115,54 +117,52 @@ function readP81(data, isPreview) {
   const zx81data = readZX81(data.slice(i + 1));
   mylog.debug(JSON.stringify(zx81data));
 
-  var snapshot = { type: "P81", error: [], scrdata: null, data: [] };
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+  // var snapshot = { type: "P81", error: [], scrdata: null, data: [] };
   var regs = {};
   regs.filesize = data.length;
 
-  snapshot.type = "P81";
-  snapshot.hwModel = "ZX81";
+  zxObject.hwmodel = "ZX81";
   //  snapshot.data = { ...zx81data, data: data.slice(i+1,  i+1 +zx81data.len) };
-  snapshot.text = `ZX81 Program: ${program_name}, length = ${zx81data.len}`;
-
-  mylog.debug(`readP() - OK ${snapshot.text}`);
+  zxObject.text = `Program: ${program_name}, length = ${zx81data.len}`;
+  zxObject.version = "P81";
+  zxObject.scrdata_ext = { ...zx81data, data: data.slice(i + 1, i + 1 + 768) };
 
   if (isPreview) {
-    regs.zx81data = { ...zx81data, data: data.slice(0, 768) };
-    snapshot.data = regs;
+    //regs.zx81data = { ...zx81data, data: data.slice(0, 384) };
+    zxObject.data = null;
   } else {
-    regs.zx81data = { ...zx81data, data: data.slice(i + 1, i + 1 + zx81data.len) };
-    snapshot.data = regs;
+    zxObject.data_ext = { ...zx81data, data: data.slice(i +1, zx81data.len) };
   }
 
-  return snapshot;
+  return zxObject;
 }
 
-function readP(data, isPreview = true) {
+function readP(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readP");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing P (ZX91) file, preview only: ${isPreview}`);
+  mylog.info(`processing P (ZX81) file, preview only: ${isPreview}`);
 
   const zx81data = readZX81(data);
-  mylog.debug(JSON.stringify(zx81data));
 
-  var snapshot = { type: "P", error: [], scrdata: null, data: [] };
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+
   var regs = {};
   regs.filesize = data.length;
 
-  snapshot.type = "P";
-  snapshot.hwModel = "ZX81";
-  snapshot.text = "ZX81 Program: length = " + zx81data.len;
-
-  mylog.debug(`readP() - OK ${snapshot.text}`);
+  zxObject.hwmodel = "ZX81";
+  zxObject.text = "Program: length = " + zx81data.len;
+  zxObject.version = "P";
+  zxObject.scrdata_ext = { ...zx81data, data: data.slice(0, 768) };
 
   if (isPreview) {
-    regs.zx81data = { ...zx81data, data: data.slice(0, 768) };
-    snapshot.data = regs;
+    //regs.zx81data = { ...zx81data, data: data.slice(0, 384) };
+    zxObject.data = null;
   } else {
-    regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
+    zxObject.data_ext = { ...zx81data, data: data.slice(0, zx81data.len) };
   }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readP = readP;

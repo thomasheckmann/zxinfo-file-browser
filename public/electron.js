@@ -19,7 +19,7 @@ const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
-const sizeof = require('object-sizeof')
+const sizeof = require("object-sizeof");
 
 const cmdDir = app.commandLine.getSwitchValue("dir");
 
@@ -269,40 +269,63 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 /**
  * Scan a folder for known files and return array with filenames, NOT including subfolders.
  */
-ipcMain.handle("scan-folder", async (event, arg) => {
-  const mylog = logger().scope("scan-folder");
-  mylog.log(`input folder: ${arg}`);
-  var hrstart = process.hrtime();
-  var result = [];
+// ipcMain.handle("scan-folder", async (event, arg) => {
+//   const mylog = logger().scope("scan-folder");
+//   mylog.log(`input folder: ${arg}`);
+//   var hrstart = process.hrtime();
+//   var result = [];
 
-  const dirPath = arg; // TODO: Validate input
+//   const dirPath = arg; // TODO: Validate input
 
-  let filesInDir = 0;
-  try {
-    fs.readdirSync(dirPath).forEach(function (folder) {
-      let filepath = path.join(dirPath, folder);
-      let stat = fs.statSync(filepath);
-      mylog.info(`processing: ${filepath}`);
-      //win.webContents.send('update-status-text', `processing: ${filepath}`);
-      if (!stat.isDirectory()) {
-        mylog.debug(`file, looking at extension: ${filepath}`);
-        let extension = path.extname(filepath).toLowerCase();
-        if (supportedExts.indexOf(extension) >= 0) {
-          filesInDir++;
-          mylog.debug(`file with valid extension: ${filepath}, count=${filesInDir}`);
-          result.push(filepath);
-        }
-      } else {
-        mylog.debug(`directory, ignoring: ${filepath}`);
+//   let filesInDir = 0;
+//   try {
+//     fs.readdirSync(dirPath).forEach(function (folder) {
+//       let filepath = path.join(dirPath, folder);
+//       let stat = fs.statSync(filepath);
+//       mylog.info(`processing: ${filepath}`);
+//       //win.webContents.send('update-status-text', `processing: ${filepath}`);
+//       if (!stat.isDirectory()) {
+//         mylog.debug(`file, looking at extension: ${filepath}`);
+//         let extension = path.extname(filepath).toLowerCase();
+//         if (supportedExts.indexOf(extension) >= 0) {
+//           filesInDir++;
+//           mylog.debug(`file with valid extension: ${filepath}, count=${filesInDir}`);
+//           result.push(filepath);
+//         }
+//       } else {
+//         mylog.debug(`directory, ignoring: ${filepath}`);
+//       }
+//     });
+//   } catch (error) {
+//     mylog.error(error);
+//   }
+//   mylog.debug(`Returning: total files: ${filesInDir}`);
+//   const hrend = process.hrtime(hrstart);
+//   mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
+//   return result;
+// });
+
+// [("folder", ["file1", "file2"])]
+ipcMain.handle("scan-folders", (event, folders) => {
+  const mylog = logger().scope("scan-folders");
+  mylog.log(`input folder: ${folders.length}`);
+
+  folders.forEach((f) => {
+    fs.readdir(f, (err, files) => {
+      if (err) mylog.error(err);
+      else {
+        let validFiles = [];
+        files.forEach((file) => {
+          let extension = path.extname(file).toLowerCase();
+          if (supportedExts.indexOf(extension) >= 0) {
+            validFiles.push(`${f}/${file}`);
+          }
+        });
+        mylog.info(`${f} - completed, found: ${validFiles.length} file(s)`);
+        win.webContents.send("folder-completed", [f, validFiles]);
       }
     });
-  } catch (error) {
-    mylog.error(error);
-  }
-  mylog.debug(`Returning: total files: ${filesInDir}`);
-  const hrend = process.hrtime(hrstart);
-  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
-  return result;
+  });
 });
 
 /**
@@ -312,14 +335,14 @@ ipcMain.handle("scan-folder", async (event, arg) => {
  * .SNA and 131103 OR 147487 bytes = SNA 128K
  * .Z80 and ...
  */
-ipcMain.handle("load-file", async (event, filename, isPreview) => {
+ipcMain.handle("load-file", (event, filename, isPreview) => {
   const mylog = logger().scope("load-file");
-  mylog.debug(`loading details for file: ${filename}, isPreview: ${isPreview}`);
+  mylog.info(`loading details for file: ${filename}, isPreview: ${isPreview}`);
   var hrstart = process.hrtime();
 
   let result; // either object or array (zip)
 
-  const filename_base = path.basename(filename);;
+  const filename_base = path.basename(filename);
   const filename_ext = path.extname(filename).toLocaleLowerCase();
 
   mylog.debug(`filename (base): ${filename_base}`);
@@ -354,7 +377,7 @@ ipcMain.handle("load-file", async (event, filename, isPreview) => {
       zipEntries.forEach(async function (zipEntry) {
         if (!zipEntry.isDirectory) {
           try {
-            let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData());
+            let zxObj = handleFormats.getZXFormat(filename, zipEntry.name, zipEntry.getData(), isPreview);
             if (zxObj !== null) {
               mylog.debug(`addind zip entry (${zipEntry.name}) to list...`);
               zipCount++;

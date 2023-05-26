@@ -4,12 +4,12 @@ import { useContext, useEffect, useState } from "react";
 import FavoriteOutlinedIcon from "@mui/icons-material/FavoriteOutlined";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 
-import ZXInfoSettings from "../ZXInfoSettings";
+import {ZXInfoSettingsCtx} from "../ZXInfoSettings";
 import { mylog } from "../../App";
 
 export default function Favorite(props) {
   const [isFavorite, setIsFavorite] = useState(false);
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettingsCtx);
 
   // Map (sha512 -> [array of filenames])
   const toggleFavorite = async (event) => {

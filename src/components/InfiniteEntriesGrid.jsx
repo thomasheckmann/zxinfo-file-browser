@@ -6,12 +6,11 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Container, createTheme, ImageList, LinearProgress, Paper } from "@mui/material";
+import { Container, ImageList, LinearProgress, Paper } from "@mui/material";
 import styled from "@emotion/styled";
 import InfiniteScroll from "react-infinite-scroll-component";
-// import { useIsVisible } from "react-is-visible";
 import { useContext } from "react";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import { ZXInfoSettingsCtx } from "../common/ZXInfoSettings";
 import { mylog } from "../App";
 import { Box } from "@mui/system";
 
@@ -26,7 +25,7 @@ const ItemEnd = styled(Paper)(({ theme }) => ({
 }));
 
 export default function InfiniteEntriesGrid(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [infSettings, setInfSettings] = useState({ items: [], hasMore: true, index: 0 });
 
   const [maxSize, setMaxSize] = useState(24); // number of entries to fetch at a time
@@ -96,7 +95,7 @@ export default function InfiniteEntriesGrid(props) {
   }, [props.files]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 0, mx: 0, my:2 }} id={"scrollableDiv" + props.foldername}>
+    <Container maxWidth="xl" sx={{ py: 0, mx: 0, my: 2 }} id={"scrollableDiv" + props.foldername}>
       <InfiniteScroll
         dataLength={infSettings.items.length}
         next={fetchMoreData}

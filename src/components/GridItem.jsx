@@ -8,7 +8,7 @@ import FileDetailsDialog from "../components/FileDetails";
 
 import GamepadOutlinedIcon from "@mui/icons-material/GamepadOutlined";
 
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import {ZXInfoSettingsCtx} from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 
@@ -16,7 +16,7 @@ import { zxdbFileCheck, validJSSpeccyFormat, handleUserSelectedSCR } from "../co
 import JSSpeccyDialog from "./JSSpeccyDialog";
 
 export default function GridItem(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettings);
+  const [appSettings, setAppSettings] = useContext(ZXInfoSettingsCtx);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
 

@@ -4,7 +4,8 @@
  *
  * 16 sectors per track, with 256-byte sectors
  */
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
@@ -64,17 +65,16 @@ function createDIRScreen(dirdata) {
     const item = dir_info[file];
     const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
     if (line < 21) {
-        screenZX.printAtSpectrum(image, 0, line, text, 22);
-        line += 1;
+      screenZX.printAtSpectrum(image, 0, line, text, 22);
+      line += 1;
     }
   }
 
-
   const endText = `Free sector ${disk_info.free_sectors} Title: ${disk_info.disk_label}`;
-  screenZX.printAtSpectrum(image, 0, line+1, endText, 22);
+  screenZX.printAtSpectrum(image, 0, line + 1, endText, 22);
 
   const endText2 = `${disk_info.disk_type_name} - ${dir_info.length} File(s)`;
-  screenZX.printAtSpectrum(image, 0, line+2, endText2, 999999);
+  screenZX.printAtSpectrum(image, 0, line + 2, endText2, 999999);
 
   // image.write("./file.png");
   return image.getBase64Async(Jimp.MIME_PNG);
@@ -97,7 +97,7 @@ function readDir(data, disk_info) {
       file_len: entry[11] + entry[12] * 256,
       file_len_sectors: entry[13],
     };
-    if(entry[0] !== 0x01) {
+    if (entry[0] !== 0x01) {
       directory.push(file_descriptor);
     }
   }
@@ -105,14 +105,12 @@ function readDir(data, disk_info) {
   return directory;
 }
 
-function readTRD(data) {
+function readTRD(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readTRD");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing TRD file...`);
+  mylog.info(`processing TRD file, preview only: ${isPreview}`);
 
-  var snapshot = { type: "TRD", error: [], scrdata: null, data: [] };
-  snapshot.type = "TRD";
-  snapshot.scrdata = null;
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
   var regs = {};
   regs.filesize = data.length;
 
@@ -120,12 +118,17 @@ function readTRD(data) {
 
   const dir_info = readDir(data, disk_info);
 
-  snapshot.text = disk_info.disk_label + " - " + disk_info.disk_type_name;
-  snapshot.dir_scr = { dir_info: dir_info, disk_info: disk_info };
+  zxObject.text = disk_info.disk_label + " - " + disk_info.disk_type_name;
+  zxObject.scrdata_ext = { dir_info: dir_info, disk_info: disk_info };
 
-  snapshot.data = regs;
+  if (isPreview) {
+    zxObject.data = null;
+  } else {
+    zxObject.data = regs;
+    zxObject.data_ext = zxObject.scrdata_ext;
+  }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readTRD = readTRD;

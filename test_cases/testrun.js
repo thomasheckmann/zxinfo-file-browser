@@ -3,7 +3,7 @@ const log = require("electron-log");
 const fs = require("fs");
 const path = require("path");
 
-const handleFormats = require("./main/formats/handleFormats");
+const handleFormats = require("../public/main/formats/handleFormats");
 
 var mylog = null;
 const logger = () => {

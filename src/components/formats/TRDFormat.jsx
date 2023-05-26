@@ -5,7 +5,7 @@ export default function TRDFormat(props) {
   const { item } = props;
  
   return (
-    item.diskdata.dir_info && <React.Fragment>
+    item.data_ext.dir_info && <React.Fragment>
     <Typography variant="button" display="block" gutterBottom>
     {item.text}
   </Typography>
@@ -18,7 +18,7 @@ export default function TRDFormat(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[...item.diskdata.dir_info.values()].map((entry, i) => (
+          {[...item.data_ext.dir_info.values()].map((entry, i) => (
             <TableRow key={i}>
               <TableCell component="th" scope="row">
                 <Typography variant="button" display="block" gutterBottom>

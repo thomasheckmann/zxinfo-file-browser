@@ -1,6 +1,6 @@
 {
   "name": "zxinfo-file-browser",
-  "version": "1.1.6",
+  "version": "1.2.0-rc",
   "description": "ZX Spectrum & ZX81 emulator file browser powered by the web",
   "author": "thomas.kolbeck@gmail.com",
   "license": "MIT",
@@ -62,6 +62,7 @@
     "gifwrap": "^0.10.1",
     "jimp": "^0.22.8",
     "minimist": "^1.2.8",
+    "moleculer": "^0.14.29",
     "object-sizeof": "^2.6.1",
     "path": "^0.12.7",
     "react": "^18.2.0",
@@ -72,6 +73,7 @@
     "react-scripts": "5.0.1",
     "react-scroll": "^1.8.9",
     "styled-components": "^5.3.10",
+    "threads": "^1.7.0",
     "web-vitals": "^3.3.1"
   },
   "scripts": {

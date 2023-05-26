@@ -13,7 +13,6 @@ export function zxdbFileCheck(entry, zxinfoSCR, setEntryCallback, setOriginalScr
     ['ZX81 STUFF', './images/icons/zx81stuff.png']
   ]);
 
-
   const dataURL = `https://api.zxinfo.dk/v3/filecheck/${entry.sha512}`;
   mylog("filecheck.js", "zxdbFileCheck", `OPEN, get API data for: ${entry.sha512} - endPoint: ${dataURL}`);
   axios

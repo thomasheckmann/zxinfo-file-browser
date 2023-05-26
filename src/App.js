@@ -50,23 +50,10 @@ import IntroText from "./pages/IntroText";
 
 import { Link } from "react-scroll";
 
-import ZXInfoSettings from "./common/ZXInfoSettings";
+import { ZXInfoSettingsCtx, ZXInfoSettingsObj } from "./common/ZXInfoSettings";
 import "./App.css";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "81", "zip"];
-
-export const ZXInfoSettingsObj = {
-  fileFilters: defaultFileFilters,
-
-  hideZip: false,
-  // persistent app config saved to config.json
-  sortOrderFiles: true,
-  sortOrderFolders: true,
-  favorites: new Map(),
-  zxdbIDs: new Map(),
-};
 
 export const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
@@ -115,9 +102,10 @@ export default function App() {
   const [showDrawerFolderLink, setShowDrawerFolderLink] = React.useState(false);
   const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
   const [isBusyWorking, setIsBusyWorking] = React.useState(false);
+  const [allFiles, setAllFiles] = React.useState([]); // { dir: files: []}
 
-  const [statusText, setStatusText] = React.useState("");
-  
+  //   const [statusText, setStatusText] = React.useState("");
+
   /**
    * xs, sm, md, lg, xl
    * @returns
@@ -160,21 +148,72 @@ export default function App() {
 
   const handleChangeSettingsZip = (event) => {
     setAppSettings({ ...appSettings, hideZip: event.target.checked });
-
     window.electronAPI.setStoreValue("hide-zip", event.target.checked);
   };
 
-  const handleChangeSettingsFiles = (event) => {
-    window.electronAPI.setStoreValue("sort-files", event.target.checked);
-    setAppSettings({ ...appSettings, sortOrderFiles: event.target.checked });
-  };
-
-  function sortFolders(folders, option) {
-    if (option) {
-      return folders.sort();
+  /**
+   *
+   * @param {*} folders - [{dir: "", files: []}, {dir: "", files: []}]
+   * @param {*} sortAtoZ - true or false
+   * @returns sorted array
+   */
+  function sortFolders(folders, sortAtoZ) {
+    if (sortAtoZ) {
+      return folders.sort((a, b) => {
+        if (a.dir < b.dir) {
+          return -1;
+        }
+        if (a.dir > b.dir) {
+          return 1;
+        }
+        return 0;
+      });
     } else {
-      return folders.sort().reverse();
+      return folders.sort((a, b) => {
+        if (a.dir < b.dir) {
+          return 1;
+        }
+        if (a.dir > b.dir) {
+          return -1;
+        }
+        return 0;
+      });
     }
+  }
+
+  /**
+   *
+   * @param {*} folders - [{dir: "", files: []}, {dir: "", files: []}]
+   * @param {*} sortAtoZ - true or false
+   * @returns sorted array
+   */
+  function sortFiles(folders, sortAtoZ) {
+    folders.forEach((e, i) => {
+      e.files = sortAtoZ ? e.files.sort() : e.files.sort().reverse();
+      folders[i] = e;
+    });
+    return folders;
+  }
+
+  /**
+   *
+   * @param {*} folders - [{dir: "", files: []}, {dir: "", files: []}]
+   * @param {*} filters - to include, [filter1, filter2]
+   * @returns
+   */
+  function filterFiles(folders, filters) {
+    folders.forEach((e, i) => {
+      e.files = e.files.filter((fileName) => {
+        let result = filters.some((filters) => {
+          const fileExt = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase() || fileName.toLowerCase();
+          return fileExt === filters;
+        });
+        return result;
+      });
+
+      folders[i] = e;
+    });
+    return folders;
   }
 
   const handleChangeSettingsFolders = (event) => {
@@ -184,66 +223,61 @@ export default function App() {
 
     if (event.target.checked === true) {
       mylog("App", "handleChangeSettingsFolders", `sorting folders ASC (A-Z)`);
-      setStartFolder((startFolder) => ({
-        ...startFolder,
-        folders: sortFolders(startFolder.folders, true),
-      }));
+      setAllFiles((allFiles) => sortFolders(allFiles, true));
     } else if (event.target.checked === false) {
       mylog("App", "handleChangeSettingsFolders", `sorting folders DESC (Z-A)`);
-      setStartFolder((startFolder) => ({
-        ...startFolder,
-        folders: sortFolders(startFolder.folders, false),
-      }));
+      setAllFiles((allFiles) => sortFolders(allFiles, false));
+    }
+  };
+
+  const handleChangeSettingsFiles = (event) => {
+    mylog("App", "handleChangeSettingsFiles", `sorting changed to: ${event.target.checked}`);
+    window.electronAPI.setStoreValue("sort-files", event.target.checked);
+    setAppSettings((appSettings) => ({ ...appSettings, sortOrderFiles: event.target.checked }));
+
+    if (event.target.checked === true) {
+      mylog("App", "handleChangeSettingsFiles", `sorting files ASC (A-Z)`);
+      setAllFiles((allFiles) => sortFiles(allFiles, true));
+    } else if (event.target.checked === false) {
+      mylog("App", "handleChangeSettingsFiles", `sorting files DESC (Z-A)`);
+      setAllFiles((allFiles) => sortFiles(allFiles, false));
     }
   };
 
   const handleFormatFilter = (event, newFormats) => {
-    setAppSettings({ ...appSettings, fileFilters: newFormats });
+    mylog("App", "handleFormatFilter", `filters changed to: ${newFormats}`);
+    setAppSettings((appSettings) => ({ ...appSettings, fileFilters: newFormats }));
+    setAllFiles((allFiles) => filterFiles(allFiles, newFormats));
   };
-
-  /**
-  window.electronAPI.onUpdateStatusText((_event, value) => {
-    setStatusText(value);
-  });
- */
-
-  // get start-folder from store (last used folder)
-  async function getStartFolder() {
-    const initialFolder = await window.electronAPI.getStoreValue("start-folder");
-    mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
-    if (initialFolder) {
-      setIsBusyWorking(true);
-      const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
-      if (foldersWithFiles) {
-        setStartFolder((startFolder) => ({
-          ...startFolder,
-          root: foldersWithFiles.root,
-          folders: sortFolders(foldersWithFiles.folders, appSettings.sortOrderFolders),
-          total: foldersWithFiles.total,
-          time: foldersWithFiles.time,
-        }));
-      } else {
-        // folder not found...
-        window.alert(`Folder not found:\n${initialFolder}\nPlease try select a diffent folder...`);
-      }
-    }
-    setIsBusyWorking(false);
-  }
-
-  useEffect(() => {
-    mylog("App", "useEffect", `-enter- getStartFolder. Root length=${startFolder.root.length}`);
-    if (startFolder.root.length === 0 && settingsLoaded) {
-      getStartFolder();
-      navigate("/");
-    }
-  }, [settingsLoaded]);
 
   useEffect(() => {
     mylog("App", "useEffect", `-enter- settingsLoaded? ${settingsLoaded}`);
 
+    async function getStartFolder() {
+      const initialFolder = await window.electronAPI.getStoreValue("start-folder");
+      mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
+      if (initialFolder) {
+        setIsBusyWorking(true);
+        const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
+        if (foldersWithFiles) {
+          setStartFolder((startFolder) => ({
+            ...startFolder,
+            root: foldersWithFiles.root,
+            folders: foldersWithFiles.folders, // sortFolders(foldersWithFiles.folders, appSettings.sortOrderFolders),
+            total: foldersWithFiles.total,
+            time: foldersWithFiles.time,
+          }));
+        } else {
+          // folder not found...
+          window.alert(`Folder not found:\n${initialFolder}\nPlease try select a diffent folder...`);
+        }
+      }
+      setIsBusyWorking(false);
+    }
+
     if (!settingsLoaded) {
+      mylog("App", "useEffect", `loading settings...`);
       async function loadSettings() {
-        mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(appSettings)}`);
         const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
         const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");
         const hideZip = await window.electronAPI.getStoreValue("hide-zip");
@@ -258,12 +292,11 @@ export default function App() {
           scrMap = new Map(Object.entries(JSON.parse(zxinfoSCR)));
         }
         const zxdbIDs = await window.electronAPI.getZXDBs("zxdb-id-store");
-        mylog("App", "loadSettings", `-enter- appSettings: ${JSON.stringify(zxdbIDs)}`);
         var zxdbidsMap = new Map();
         if (zxdbIDs) {
           zxdbidsMap = new Map(Object.entries(JSON.parse(zxdbIDs)));
         }
-        setAppSettings({
+        setAppSettings((appSettings) => ({
           ...appSettings,
           sortOrderFiles: sortOrdersFiles,
           sortOrderFolders: sortOrderFolders,
@@ -271,14 +304,37 @@ export default function App() {
           favorites: favMap,
           zxinfoSCR: scrMap,
           zxdbIDs: zxdbidsMap,
-        });
-        mylog("App", "loadSettings", `-exit- appSettings: ${JSON.stringify(appSettings)}`);
+        }));
+        // mylog("App", "loadSettings", `-exit- appSettings: ${JSON.stringify(appSettings)}`);
         setSettingsLoaded(true);
+        mylog("App", "useEffect", `loading settings... DONE!`);
+        getStartFolder();
+        navigate("/");
       }
 
       loadSettings();
     }
   }, []); // only run once
+
+  useEffect(() => {
+    mylog("App", "useEffect/startFolder", `-enter- number of folders = ${startFolder.folders.length}`);
+    setAllFiles([]);
+    window.electronAPI.onFolderCompleted((_event, value) => {
+      mylog("App", "onFolderCompleted", `${value[0]} - no. of files: ${value[1].length}, sortFolder: ${appSettings.sortOrderFolders}`);
+
+      // sort folders and files according to settings
+      setAllFiles((allFiles) =>
+        sortFiles(sortFolders([...allFiles, { dir: value[0], files: value[1] }], appSettings.sortOrderFolders), appSettings.sortOrderFiles)
+      );
+    });
+
+    window.electronAPI.scanFolders(startFolder.folders);
+
+    return () => {
+      mylog("App", "useEffect/startFolder", `destroy, remove all listener...`);
+      window.electronAPI.removeAllListeners("folder-completed");
+    };
+  }, [startFolder.folders]);
 
   /**
    * if open folder dialog is nedded from child, use this as callback
@@ -306,10 +362,9 @@ export default function App() {
 
   return (
     settingsLoaded && (
-      <ZXInfoSettings.Provider value={[appSettings, setAppSettings]}>
+      <ZXInfoSettingsCtx.Provider value={[appSettings, setAppSettings]}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-
           <Box position="fixed" top={0} height="60px" width="100%"></Box>
           <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={isBusyWorking}>
             <CircularProgress color="inherit" />
@@ -343,7 +398,7 @@ export default function App() {
                     <FolderOpenIcon />
                   </Tooltip>
                 </IconButton>
-                <Divider orientation="vertical" variant="middle" sx={{color: "#ff0000"}}/>
+                <Divider orientation="vertical" variant="middle" sx={{ color: "#ff0000" }} />
                 <IconButton
                   disabled={location.pathname === "/"}
                   edge="start"
@@ -399,7 +454,7 @@ export default function App() {
                   disabled={startFolder.total === 0}
                   sx={{ background: "#ffffff", mr: 10 }}
                 >
-                  {defaultFileFilters.map((ext) => (
+                  {appSettings.defaultFileFilters.map((ext) => (
                     <ToggleButton value={ext} key={ext}>
                       {ext}
                     </ToggleButton>
@@ -463,7 +518,7 @@ export default function App() {
                   path="/"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <FolderView folders={startFolder.folders} />
+                      <FolderView key={allFiles + appSettings.fileFilters + appSettings.hideZip} folders={allFiles} />
                     ) : (
                       <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
                     )
@@ -472,7 +527,17 @@ export default function App() {
                 <Route path="/favorites" element={<FavoritesList />}></Route>
                 <Route
                   path="/gridview"
-                  element={startFolder.folders && startFolder.folders.length > 0 && <GridView root={startFolder.root} folders={startFolder.folders} />}
+                  element={
+                    startFolder.folders && startFolder.folders.length > 0 ? (
+                      <GridView
+                        key={allFiles + appSettings.sortOrderFiles + appSettings.fileFilters + appSettings.hideZip}
+                        root={startFolder.root}
+                        folders={allFiles}
+                      />
+                    ) : (
+                      <div></div>
+                    )
+                  }
                 ></Route>
               </Routes>
             </Container>
@@ -483,14 +548,11 @@ export default function App() {
                     {startFolder.total} file(s) found in {startFolder.root} ({startFolder.time} sec.)
                   </Typography>
                 </Box>
-                <Box sx={{ display: "flex" }}>
-                  <Typography align="center">{statusText}</Typography>
-                </Box>
               </Container>
             </div>
           </Box>
         </ThemeProvider>
-      </ZXInfoSettings.Provider>
+      </ZXInfoSettingsCtx.Provider>
     )
   );
 }

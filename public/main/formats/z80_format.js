@@ -7,7 +7,8 @@
  *
  */
 
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 
 function readCompressed(data, length) {
   var zxram = [];
@@ -36,7 +37,6 @@ function readV1(data, compressed) {
   mylog.debug(`readV1 compressed? (${compressed})`);
 
   const mem = data.subarray(30);
-  var zxram = [];
 
   if (compressed) {
     mylog.debug(`reading compressed v1`);
@@ -45,8 +45,6 @@ function readV1(data, compressed) {
     mylog.warn(`version NOT supported yet!`);
     return null;
   }
-
-  return zxram;
 }
 
 function readV2(data, compressed) {
@@ -88,12 +86,13 @@ function readV2(data, compressed) {
   return zxram;
 }
 
-function readZ80(data) {
+function readZ80(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readZ80");
   mylog.debug(`input: ${data.length}`);
   mylog.info(`processing Z80 file...`);
 
-  var snapshot = { error: [], scrdata: null, data: [] };
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+
   var version = 1;
   var compressed = false;
 
@@ -114,8 +113,8 @@ function readZ80(data) {
   if (data[12] === 255) {
     data[12] = 1;
   }
-  snapshot.border = (data[12] >> 1) & 0b00000111;
-  regs.border = snapshot.border;
+  zxObject.border = (data[12] >> 1) & 0b00000111;
+  regs.border = zxObject.border;
   regs.SAMROM = data[12] & 0b00010000;
   if (data[12] & 0b00010000) {
     mylog.warn(`SAM ROM?`);
@@ -154,149 +153,149 @@ function readZ80(data) {
     mylog.debug(`processing Z80 v1 file...`);
   }
 
-  snapshot.type = "Z80 v" + version;
-  mylog.debug(`snapshot type: ${snapshot.type}`);
+  zxObject.version = "Z80 v" + version;
+  mylog.debug(`snapshot type: ${zxObject.type}`);
 
   const hwMode = data[34];
   if (version === 1) {
-    snapshot.hwModel = `48k`;
+    zxObject.hwmodel = `48k`;
 
     const zxram = readV1(data, compressed);
     if (zxram) {
       //snapshot.data = zxram;
-      snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
+      zxObject.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     } else {
-      snapshot.error.push({ type: "warning", message: "Cant read snapshot, maybe compressed?" });
+      zxObject.error.push({ type: "warning", message: "Cant read snapshot, maybe compressed?" });
     }
   } else if (version === 2) {
     const zxram = readV2(data, compressed);
     // snapshot.data = zxram;
-    snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
+    zxObject.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
-        snapshot.hwModel = `48k`;
+        zxObject.hwmodel = `48k`;
         break;
       case 1:
-        snapshot.hwModel = `48k+ if.1`;
+        zxObject.hwmodel = `48k+ if.1`;
         break;
       case 2:
-        snapshot.hwModel = `SamRam`;
+        zxObject.hwmodel = `SamRam`;
         break;
       case 3:
-        snapshot.hwModel = `128k`;
+        zxObject.hwmodel = `128k`;
         break;
       case 4:
-        snapshot.hwModel = `128k + if.1`;
+        zxObject.hwmodel = `128k + if.1`;
         break;
       case 5:
       case 6:
-        snapshot.hwModel = `-`;
+        zxObject.hwmodel = `-`;
         break;
       case 7:
-        snapshot.hwModel = `Spectrum +3`;
+        zxObject.hwmodel = `Spectrum +3`;
         break;
       case 8:
-        snapshot.hwModel = `Spectrum +3 (XZX-Pro)`;
+        zxObject.hwmodel = `Spectrum +3 (XZX-Pro)`;
         break;
       case 9:
-        snapshot.hwModel = `Pentagon (128K)`;
+        zxObject.hwmodel = `Pentagon (128K)`;
         break;
       case 10:
-        snapshot.hwModel = `Scorpion (256K)`;
+        zxObject.hwmodel = `Scorpion (256K)`;
         break;
       case 11:
-        snapshot.hwModel = `Didaktik-Kompakt`;
+        zxObject.hwmodel = `Didaktik-Kompakt`;
         break;
       case 12:
-        snapshot.hwModel = `Spectrum +2`;
+        zxObject.hwmodel = `Spectrum +2`;
         break;
       case 13:
-        snapshot.hwModel = `Spectrum +2A`;
+        zxObject.hwmodel = `Spectrum +2A`;
         break;
       case 14:
-        snapshot.hwModel = `TC2048`;
+        zxObject.hwmodel = `TC2048`;
         break;
       case 15:
-        snapshot.hwModel = `TC2068`;
+        zxObject.hwmodel = `TC2068`;
         break;
       case 128:
-        snapshot.hwModel = `TS2068`;
+        zxObject.hwmodel = `TS2068`;
         break;
 
       default:
-        snapshot.hwModel = null;
+        zxObject.hwmodel = null;
         mylog.error(`version: ${version}, unknown hw model: ${hwMode}`);
-        snapshot.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
+        zxObject.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
         break;
     }
   } else if (version === 3) {
     const zxram = readV2(data, compressed);
     // snapshot.data = zxram;
-    snapshot.scrdata = new Uint8Array(zxram).subarray(0, 6912);
+    zxObject.scrdata = new Uint8Array(zxram).subarray(0, 6912);
     switch (hwMode) {
       case 0:
-        snapshot.hwModel = `48k`;
+        zxObject.hwmodel = `48k`;
         break;
       case 1:
-        snapshot.hwModel = `48k+ if.1`;
+        zxObject.hwmodel = `48k+ if.1`;
         break;
       case 2:
-        snapshot.hwModel = `SamRam`;
+        zxObject.hwmodel = `SamRam`;
         break;
       case 3:
-        snapshot.hwModel = `48k + M.G.T.`;
+        zxObject.hwmodel = `48k + M.G.T.`;
         break;
       case 4:
-        snapshot.hwModel = `128k`;
+        zxObject.hwmodel = `128k`;
         break;
       case 5:
-        snapshot.hwModel = `128k + If.1`;
+        zxObject.hwmodel = `128k + If.1`;
         break;
       case 6:
-        snapshot.hwModel = `128k + M.G.T.`;
+        zxObject.hwmodel = `128k + M.G.T.`;
         break;
-        case 7:
-          snapshot.hwModel = `Spectrum +3`;
-          break;
-        case 8:
-          snapshot.hwModel = `Spectrum +3 (XZX-Pro)`;
-          break;
-        case 9:
-          snapshot.hwModel = `Pentagon (128K)`;
-          break;
-        case 10:
-          snapshot.hwModel = `Scorpion (256K)`;
-          break;
-        case 11:
-          snapshot.hwModel = `Didaktik-Kompakt`;
-          break;
-        case 12:
-          snapshot.hwModel = `Spectrum +2`;
-          break;
-        case 13:
-          snapshot.hwModel = `Spectrum +2A`;
-          break;
-        case 14:
-          snapshot.hwModel = `TC2048`;
-          break;
-        case 15:
-          snapshot.hwModel = `TC2068`;
-          break;
-        case 128:
-          snapshot.hwModel = `TS2068`;
-          break;
-        default:
-        snapshot.hwModel = null;
+      case 7:
+        zxObject.hwmodel = `Spectrum +3`;
+        break;
+      case 8:
+        zxObject.hwmodel = `Spectrum +3 (XZX-Pro)`;
+        break;
+      case 9:
+        zxObject.hwmodel = `Pentagon (128K)`;
+        break;
+      case 10:
+        zxObject.hwmodel = `Scorpion (256K)`;
+        break;
+      case 11:
+        zxObject.hwmodel = `Didaktik-Kompakt`;
+        break;
+      case 12:
+        zxObject.hwmodel = `Spectrum +2`;
+        break;
+      case 13:
+        zxObject.hwmodel = `Spectrum +2A`;
+        break;
+      case 14:
+        zxObject.hwmodel = `TC2048`;
+        break;
+      case 15:
+        zxObject.hwmodel = `TC2068`;
+        break;
+      case 128:
+        zxObject.hwmodel = `TS2068`;
+        break;
+      default:
+        zxObject.hwmodel = null;
         mylog.error(`version: ${version}, unknown hw model: ${hwMode}`);
-        snapshot.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
+        zxObject.error.push({ type: "warning", message: `unknown hw model: ${hwMode}` });
         break;
     }
   }
 
-  mylog.debug(`Version: ${version}, Hardware model: ${snapshot.hwModel}`);
+  mylog.debug(`Version: ${version}, Hardware model: ${zxObject.hwmodel}`);
   if (version === 2 || version === 3) {
     // some version 2 & 3 specific info
-    if (snapshot.hwModel.includes("128k")|| snapshot.hwModel.includes("+2")|| snapshot.hwModel.includes("+2A")|| snapshot.hwModel.includes("+3")) {
+    if (zxObject.hwmodel.includes("128k") || zxObject.hwmodel.includes("+2") || zxObject.hwmodel.includes("+2A") || zxObject.hwmodel.includes("+3")) {
       // 128k model
       regs.port_0x7ffd = data[35];
       regs.is128K = true;
@@ -318,9 +317,11 @@ function readZ80(data) {
     }
   }
 
-  snapshot.data = regs;
+  if (!isPreview) {
+    zxObject.data = regs;
+  }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readZ80 = readZ80;

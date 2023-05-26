@@ -23,7 +23,7 @@ import WarningTwoToneIcon from "@mui/icons-material/WarningTwoTone";
 import GamepadOutlinedIcon from "@mui/icons-material/GamepadOutlined";
 
 import ZXInfoSCRDialog from "./ZXInfoSCRDialog";
-import ZXInfoSettings from "../common/ZXInfoSettings";
+import {ZXInfoSettingsCtx} from "../common/ZXInfoSettings";
 import Favorite from "../common/cardactions/Favorite";
 import ZXdbID from "../common/cardactions/ZXdbID";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
@@ -39,7 +39,7 @@ const openLink = (id) => {
 };
 
 function EntryCard(props) {
-  const [appSettings] = useContext(ZXInfoSettings);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
 

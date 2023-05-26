@@ -3,7 +3,8 @@
  * - https://sinclair.wiki.zxnet.co.uk/wiki/SCL_format#Files_data
  *
  */
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 const Jimp = require("jimp");
 const screenZX = require("../utilities/handleSCR");
 
@@ -13,7 +14,7 @@ function createDIRScreen(dirdata) {
     if (err) throw err;
   });
 
-  if(dirdata === undefined) {
+  if (dirdata === undefined) {
     return image.getBase64Async(Jimp.MIME_PNG); // corrupt disk
   }
 
@@ -25,7 +26,7 @@ function createDIRScreen(dirdata) {
     const item = dir_info[file];
     const text = `${item.filename} <${item.ext}> ${item.file_len_sectors}`;
     if (line < 21) {
-      screenZX.printAtSpectrum(image, 0, line, text,22);
+      screenZX.printAtSpectrum(image, 0, line, text, 22);
       line += 1;
     }
   }
@@ -48,7 +49,7 @@ function detectSCL(data) {
 
   if (disk_info.signature !== "SINCLAIR") {
     mylog.error(`Unknown SCL format: ${disk_info.signature}`);
-    disk_info.error.push({type: "error", message:`Unknown SCL format: ${disk_info.signature}`});
+    disk_info.error.push({ type: "error", message: `Unknown SCL format: ${disk_info.signature}` });
     return disk_info;
   }
 
@@ -78,30 +79,34 @@ function readDir(data, disk_info) {
   return directory;
 }
 
-function readSCL(data) {
+function readSCL(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readSCL");
   mylog.debug(`input: ${data.length}`);
-  mylog.info(`processing SCL file...`);
+  mylog.info(`processing SCL file, preview only: ${isPreview}`);
 
-  var snapshot = { type: "SCL", error: [], scrdata: null, data: [] };
-  snapshot.scrdata = null;
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
   var regs = {};
   regs.filesize = data.length;
 
   const disk_info = detectSCL(data);
-  if(disk_info.error.length > 0) {
-    snapshot.error = disk_info.error;
-    return snapshot;
+  if (disk_info.error.length > 0) {
+    zxObject.error = disk_info.error;
+    return zxObject;
   }
 
   const dir_info = readDir(data, disk_info);
 
-  snapshot.text = `SCL - Number of files: ${disk_info.no_files}`;
-  snapshot.dir_scr = { dir_info: dir_info, disk_info: disk_info };
+  zxObject.text = `Number of files: ${disk_info.no_files}`;
+  zxObject.scrdata_ext = { dir_info: dir_info, disk_info: disk_info };
 
-  snapshot.data = regs;
+  if (isPreview) {
+    zxObject.data = null;
+  } else {
+    zxObject.data = regs;
+    zxObject.data_ext = zxObject.scrdata_ext;
+  }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readSCL = readSCL;

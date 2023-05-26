@@ -1,12 +1,11 @@
 const Jimp = require("jimp");
 
-const {logger} = require("../logger.js");
+const { logger } = require("../logger.js");
+const { ZXInfoCard } = require("../ZXInfoCard");
 const screenZX = require("../utilities/handleSCR");
 
 const CPCEMU_INFO_OFFSET = 0x100;
 const CPCEMU_TRACK_OFFSET = 0x100;
-
-const NUM_SECTOR = 9;
 
 function read_track_info(data, track, DPB, disk_info_block) {
   const mylog = logger().scope("read_track_info");
@@ -575,13 +574,13 @@ function createDIRScreen(dirdata) {
   return frame0.getBase64Async(Jimp.MIME_PNG);
 }
 
-function readDSK(data) {
+function readDSK(filename, subfilename, md5hash, data, isPreview) {
   const mylog = logger().scope("readDSK");
-  mylog.info(`Processing DSK`);
   mylog.debug(`input: ${data.length}`);
+  mylog.info(`processing DSK file, preview only: ${isPreview}`);
 
-  var snapshot = { type: "DSK", error: [], scrdata: null, data: [] };
-  snapshot.scrdata = null;
+  var zxObject = new ZXInfoCard(filename, subfilename, md5hash);
+
   var regs = {};
   regs.filesize = data.length;
 
@@ -595,17 +594,22 @@ function readDSK(data) {
   const disk = readEDSK(data, isExtended);
   if (disk.isExtended) isExtended = true;
 
-  snapshot.error = disk.error;
-  snapshot.protection = disk.protection;
-  snapshot.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
+  zxObject.error = disk.error;
+  zxObject.version = disk.protection;
+  zxObject.text = `${isExtended ? "Ext. " : ""} ${disk.cpc_format}, T:${disk.number_of_tracks}, S:${disk.number_of_sides} - ${disk.name_of_creator}`;
   mylog.debug(disk.total_size + "K total, " + disk.total_size_used + "K used, " + disk.total_size_free + "K free");
-  snapshot.dir_scr = { entries: disk.dir, disk_info: disk };
-  mylog.debug(snapshot.text);
+  zxObject.scrdata_ext = { entries: disk.dir, disk_info: disk };
+  mylog.debug(zxObject.text);
   if (disk.dir) mylog.debug([...disk.dir.keys()]);
 
-  snapshot.data = regs;
+  if (isPreview) {
+    zxObject.data = null;
+  } else {
+    zxObject.data = regs;
+    zxObject.data_ext = zxObject.scrdata_ext;
+  }
 
-  return snapshot;
+  return zxObject;
 }
 
 exports.readDSK = readDSK;

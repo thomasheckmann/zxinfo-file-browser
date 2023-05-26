@@ -5,7 +5,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openFolder: (args) => ipcRenderer.invoke("open-folder-dialog", args),
 
   // Scan folder, from render to main
-  scanFolder: (args) => ipcRenderer.invoke("scan-folder", args),
+  // - DEPRECATED: scanFolder: (args) => ipcRenderer.invoke("scan-folder", args),
+
+  // Scans a list of folders
+  scanFolders: (folders) => ipcRenderer.invoke("scan-folders", folders),
+  // Communicate back to main
+  onFolderCompleted: (callback) => ipcRenderer.on('folder-completed', callback),
+  removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 
   // Load file and return details about format, from render to main
   loadFile: (filename, isPreview) => ipcRenderer.invoke("load-file", filename, isPreview),
