@@ -6,7 +6,7 @@ export default function PFormat(props) {
   const [listningScr, setListningScr] = useState();
 
   useEffect(() => {
-    window.electronAPI.createZX81List(item.data.zx81data).then((img) => {
+    window.electronAPI.createZX81List(item.data_ext).then((img) => {
       setListningScr(img);
     });
   }, [item]);

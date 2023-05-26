@@ -125,6 +125,7 @@ function readTRD(filename, subfilename, md5hash, data, isPreview) {
     zxObject.data = null;
   } else {
     zxObject.data = regs;
+    zxObject.data_ext = zxObject.scrdata_ext;
   }
 
   return zxObject;

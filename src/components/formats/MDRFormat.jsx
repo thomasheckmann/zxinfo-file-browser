@@ -5,7 +5,7 @@ export default function MDRFormat(props) {
   const { item } = props;
 
   return (
-    item.diskdata.catalog && (
+    item.data_ext.catalog && (
       <React.Fragment>
       <Typography variant="button" display="block" gutterBottom>
       {item.text}
@@ -20,7 +20,7 @@ export default function MDRFormat(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {[...item.diskdata.catalog.values()].map((entry, i) => (
+            {[...item.data_ext.catalog.values()].map((entry, i) => (
               <TableRow key={i}>
                 <TableCell component="th" scope="row">
                   <Typography variant="button" display="block" gutterBottom>

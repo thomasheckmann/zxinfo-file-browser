@@ -132,7 +132,7 @@ function readP81(filename, subfilename, md5hash, data, isPreview) {
     //regs.zx81data = { ...zx81data, data: data.slice(0, 384) };
     zxObject.data = null;
   } else {
-    regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
+    zxObject.data_ext = { ...zx81data, data: data.slice(i +1, zx81data.len) };
   }
 
   return zxObject;
@@ -159,7 +159,7 @@ function readP(filename, subfilename, md5hash, data, isPreview) {
     //regs.zx81data = { ...zx81data, data: data.slice(0, 384) };
     zxObject.data = null;
   } else {
-    regs.zx81data = { ...zx81data, data: data.slice(0, zx81data.len) };
+    zxObject.data_ext = { ...zx81data, data: data.slice(0, zx81data.len) };
   }
 
   return zxObject;

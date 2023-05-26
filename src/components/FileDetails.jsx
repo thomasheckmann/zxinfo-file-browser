@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { mylog } from "../App";
@@ -37,6 +37,7 @@ import DownloadForOfflineTwoToneIcon from "@mui/icons-material/DownloadForOfflin
 import Favorite from "../common/cardactions/Favorite";
 import LocateFileAndFolder from "../common/cardactions/LocateFileAndFolder";
 import ZXdbID from "../common/cardactions/ZXdbID";
+import { ZXInfoSettingsCtx } from "../common/ZXInfoSettings";
 
 const Item = styled(Paper)({
   textAlign: "left",
@@ -46,9 +47,11 @@ const openLink = (id) => {
   window.electronAPI.openZXINFODetail(id).then((res) => {});
 };
 
-export default function FileDetails(props) {
+function FileDetails(props) {
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const { onClose, open, item, selectedSCR, setSelectedSCR } = props;
-  const [entry, setEntry] = useState(null);
+  const [entry, setEntry] = useState(props.item);
+  const [restCalled, setRestCalled] = useState(false);
   const [screens, setScreens] = useState([]);
 
   // Fetch SCR from ZXInfo API
@@ -57,7 +60,6 @@ export default function FileDetails(props) {
   const handleSCRDialogClose = (value) => {
     setSelectedSCR(value);
     setSCRDialogOpen(false);
-    // props.handleclose(value);
   };
 
   const handleSCRDialogOpen = () => {
@@ -84,58 +86,90 @@ export default function FileDetails(props) {
 
   useEffect(() => {
     if (!open) {
-      mylog("FileDetails", "useEffect", `NOT open, skipping for: ${item.zxdbID}`);
-    } else if (open && !entry) {
-      mylog("FileDetails", "useEffect", `OPEN, get API data for: ${item.zxdbID}`);
-      const dataURL = `https://api.zxinfo.dk/v3/games/${item.zxdbID}?mode=tiny`;
-      mylog("FileDetails", "useEffect", `calling API ${dataURL}`);
-      axios
-        .get(dataURL)
-        .then((response) => {
-          setEntry((entry) => response.data._source);
+      mylog("FileDetails", "useEffect", `NOT open - skipping for: ${item.filename}`);
+    } else if (!restCalled) {
+      mylog("FileDetails", "useEffect", `OPEN, missing ZXInfo details - get API data for: ${item.filename} - ${item.sha512}`);
+      if (item.zxdbID) {
+        const dataURL = `https://api.zxinfo.dk/v3/games/${item.zxdbID}?mode=tiny`;
+        mylog("FileDetails", "useEffect", `calling API ${dataURL}`);
+        axios
+          .get(dataURL)
+          .then((response) => {
+            // find first loading screen
+            const s = response.data._source.screens;
+            var loading = [];
+            var running = [];
+            if (s) {
+              s.forEach((element) => {
+                if (element.type === "Loading screen") {
+                  loading.push(element);
+                } else if (element.type === "Running screen") {
+                  running.push(element);
+                }
+              });
+            }
 
-          // find first loading screen
-          const s = response.data._source.screens;
-          var loading = [];
-          var running = [];
-          if (s) {
-            s.forEach((element) => {
-              if (element.type === "Loading screen") {
-                loading.push(element);
-              } else if (element.type === "Running screen") {
-                running.push(element);
+            // screens [0] = first loading, [1] = first running
+            const items = [...loading.slice(0, 1), ...running.slice(0, 1), ...loading.slice(1), ...running.slice(1)];
+            setScreens(items.filter((item) => item !== null));
+
+            // get detailed File info
+            window.electronAPI.loadFile(item.filepath, false).then((r) => {
+              if (r.length === 1) {
+                setEntry((entry) => ({ ...entry, data: r[0].data, data_ext: r[0].data_ext }));
+              } else {
+                // array of ZIP entries
+                r.forEach((zf) => {
+                  if (item.subfilename === zf.subfilename) {
+                    setEntry((entry) => ({ ...entry, data: zf.data, data_ext: zf.data_ext }));
+                  }
+                });
+              }
+              setRestCalled(true);
+            });
+          })
+          .catch((error) => {
+            setEntry({});
+          })
+          .finally();
+      } else {
+        // get detailed File info, if not found in ZXDB
+        window.electronAPI.loadFile(item.filepath, false).then((r) => {
+          if (r.length === 1) {
+            setEntry((entry) => ({ ...entry, data: r[0].data, data_ext: r[0].data_ext }));
+          } else {
+            // array of ZIP entries
+            r.forEach((zf) => {
+              if (item.subfilename === zf.subfilename) {
+                setEntry((entry) => ({ ...entry, data: zf.data, data_ext: zf.data_ext }));
               }
             });
           }
-
-          // screens [0] = first loading, [1] = first running
-          const items = [...loading.slice(0, 1), ...running.slice(0, 1), ...loading.slice(1), ...running.slice(1)];
-          setScreens(items.filter((item) => item !== null));
-        })
-        .catch((error) => {
-          setEntry({});
-        })
-        .finally(() => {});
+          setRestCalled(true);
+        });
+      }
+    } else {
+      mylog("FileDetails", "useEffect", `OPEN with ZXInfo details - ${item.zxdbID}`);
     }
-  }, [item.zxdbID]);
+  }, [open, restCalled, item, appSettings.zxinfoSCR]);
 
   if (!open) return null; // avoid rendering, if not open
 
   function getTitle() {
-    var title = item.subfilename ? `${item.subfilename} in (${item.filename})` : item.filename;
-    if (item.zxdbTitle) {
-      title = `${item.zxdbTitle}`;
+    var title = entry.subfilename ? `${entry.subfilename} in (${entry.filename})` : entry.filename;
+    if (entry.zxdbTitle) {
+      title = `${entry.zxdbTitle}`;
     }
     return title;
   }
 
   return (
-    entry && (
+    restCalled && (
       <ThemeProvider theme={theme}>
         {isSCRDialogOpen && (
           <ZXInfoSCRDialog
             open={isSCRDialogOpen}
-            zxdb={{ zxdbID: item.zxdbID, title: item.zxdbTitle }}
+            zxdb={{ zxdbID: entry.zxdbID, title: entry.zxdbTitle }}
             selectedValue={selectedSCR}
             onClose={handleSCRDialogClose}
           ></ZXInfoSCRDialog>
@@ -153,9 +187,9 @@ export default function FileDetails(props) {
           }}
         >
           <DialogTitle align="center" sx={{ color: "#ffffff", bgcolor: "#965602" }}>
-            File info for {item.filename}
+            File info for {entry.filename}
             <br />
-            <Typography variant="caption">{item.sha512}</Typography>
+            <Typography variant="caption">{entry.sha512}</Typography>
           </DialogTitle>
           <DialogContent>
             <Grid container id="common" sx={{ height: "100%" }}>
@@ -168,19 +202,19 @@ export default function FileDetails(props) {
                 >
                   <Stack direction="row" spacing={2}>
                     <Typography variant="h6">
-                      <Favorite entry={item}></Favorite>
+                      <Favorite entry={entry}></Favorite>
                       {getTitle()}
-                      <LocateFileAndFolder path={item.filepath}></LocateFileAndFolder>
+                      <LocateFileAndFolder path={entry.filepath}></LocateFileAndFolder>
                     </Typography>
                   </Stack>
                   <Stack spacing={2}>
-                    {item.zxdbID ? (
+                    {entry.zxdbID ? (
                       <Stack direction="row" spacing={1}>
                         <Item elevation={0}>
                           <Typography variant="subtitle2">
-                            Entry found in ZXDB with ID: {item.zxdbID}
+                            Entry found in ZXDB with ID: {entry.zxdbID}
                             <Tooltip title="More details at ZXInfo.dk">
-                              <IconButton aria-label="More details at ZXInfo.dk" onClick={() => openLink(item.zxdbID)}>
+                              <IconButton aria-label="More details at ZXInfo.dk" onClick={() => openLink(entry.zxdbID)}>
                                 <LaunchTwoToneIcon />
                               </IconButton>
                             </Tooltip>
@@ -189,19 +223,21 @@ export default function FileDetails(props) {
                       </Stack>
                     ) : (
                       <Stack direction="row" spacing={1}>
-                        <ZXdbID entry={item}></ZXdbID>
+                        <ZXdbID entry={entry}></ZXdbID>
                       </Stack>
                     )}
                     <Stack direction="row" spacing={1} alignItems="center">
-                      {item.sources && item.sources.map((e,i) => (
-                        <Tooltip title={e.source} key={i}>
-                        <img width="32" src={e.logo} alt={e.source}></img></Tooltip>
-                      ))}
+                      {entry.sources &&
+                        entry.sources.map((e, i) => (
+                          <Tooltip title={e.source} key={i}>
+                            <img width="32" src={e.logo} alt={e.source}></img>
+                          </Tooltip>
+                        ))}
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      {item.version && <Chip label={item.version} size="small" />}
-                      {item.hwmodel && <Chip label={item.hwmodel} size="small" />}
-                      {item.protection && <Chip label={item.protection} size="small" />}
+                      {entry.version && <Chip label={entry.version} size="small" />}
+                      {entry.hwmodel && <Chip label={entry.hwmodel} size="small" />}
+                      {entry.protection && <Chip label={entry.protection} size="small" />}
                     </Stack>
                     <Item elevation={0}>
                       <Typography variant="subtitle1">Category</Typography>
@@ -209,11 +245,11 @@ export default function FileDetails(props) {
                     </Item>
                     <Item elevation={0}>
                       <Typography variant="subtitle1">Machine</Typography>
-                      <Typography variant="subtitle2">{entry.machineType}</Typography>
+                      <Typography variant="subtitle2">{entry.machinetype}</Typography>
                     </Item>
                     <Item elevation={0}>
                       <Typography variant="subtitle1">Date</Typography>
-                      <Typography variant="subtitle2"></Typography>
+                      <Typography variant="subtitle2">{entry.originalYearOfRelease}</Typography>
                     </Item>
                     <Item elevation={0}>
                       <Typography variant="subtitle1">Original Publisher</Typography>
@@ -228,7 +264,7 @@ export default function FileDetails(props) {
                     <Item elevation={0}>
                       <Typography variant="subtitle1">
                         Preview and Screens found in ZXDB
-                        {item.zxdbID && (
+                        {entry.zxdbID && (
                           <Tooltip title="Get SCR fron ZXInfo" onClick={() => handleSCRDialogOpen(this)}>
                             <IconButton arial-label="get scr from zxinfo">
                               <DownloadForOfflineTwoToneIcon />
@@ -239,7 +275,7 @@ export default function FileDetails(props) {
                     </Item>
                     <Stack direction="row" spacing={1} sx={{ py: 0 }}>
                       <Item elevation={4} sx={{ p: 1 }}>
-                        <img src={item.orgScr} alt="Generated preview" width="220"></img>
+                        <img src={entry.orgScr} alt="Generated preview" width="220"></img>
                         <br />
                         <Typography variant="caption">Generated preview</Typography>
                       </Item>
@@ -273,17 +309,17 @@ export default function FileDetails(props) {
                   }}
                 >
                   <Typography variant="h6">
-                    Details for {item.version} - (file size: {item.data.filesize})
+                    Details for {entry.version} - (file size: {/*item.data.filesize*/})
                   </Typography>
-                  {item.type === "snafmt" && item.data.filesize && <SNAFormat item={item}></SNAFormat>}
-                  {item.type === "z80fmt" && <Z80Format item={item}></Z80Format>}
-                  {item.type === "tapfmt" && <TAPFormat item={item}></TAPFormat>}
-                  {item.type === "tzxfmt" && <TZXFormat item={item}></TZXFormat>}
-                  {item.type === "pfmt" && <PFormat item={item}></PFormat>}
-                  {item.type === "dskfmt" && <DSKFormat item={item}></DSKFormat>}
-                  {item.type === "trdfmt" && <TRDFormat item={item}></TRDFormat>}
-                  {item.type === "sclfmt" && <SCLFormat item={item}></SCLFormat>}
-                  {item.type === "mdrfmt" && <MDRFormat item={item}></MDRFormat>}
+                  {entry.type === "snafmt" && entry.data.filesize && <SNAFormat item={entry}></SNAFormat>}
+                  {entry.type === "z80fmt" && <Z80Format item={entry}></Z80Format>}
+                  {entry.type === "tapfmt" && <TAPFormat item={entry}></TAPFormat>}
+                  {entry.type === "tzxfmt" && entry.hwmodel !== "ZX81" && <TZXFormat item={entry}></TZXFormat>}
+                  {(entry.type === "pfmt" || (entry.type === "tzxfmt" && entry.hwmodel === "ZX81")) && <PFormat item={entry}></PFormat>}
+                  {entry.type === "dskfmt" && <DSKFormat item={entry}></DSKFormat>}
+                  {entry.type === "trdfmt" && <TRDFormat item={entry}></TRDFormat>}
+                  {entry.type === "sclfmt" && <SCLFormat item={entry}></SCLFormat>}
+                  {entry.type === "mdrfmt" && <MDRFormat item={entry}></MDRFormat>}
                 </Box>
               </Grid>
             </Grid>
@@ -300,3 +336,5 @@ export default function FileDetails(props) {
     )
   );
 }
+
+export default FileDetails;

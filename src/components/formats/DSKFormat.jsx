@@ -5,7 +5,7 @@ export default function DSKFormat(props) {
   const { item } = props;
 
   return (
-    item.diskdata.entries && <TableContainer component={Paper} sx={{ minWidth: 300 }}>
+    item.data_ext.entries && <TableContainer component={Paper} sx={{ minWidth: 300 }}>
       <Table aria-label="Disk content" size="small">
         <TableHead>
           <TableRow>
@@ -17,7 +17,7 @@ export default function DSKFormat(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[...item.diskdata.entries.values()].map((entry, i) => (
+          {[...item.data_ext.entries.values()].map((entry, i) => (
             <TableRow key={i}>
               <TableCell component="th" scope="row">
                 <Typography variant="button" display="block" gutterBottom>
