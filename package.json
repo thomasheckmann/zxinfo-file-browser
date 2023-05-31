@@ -63,6 +63,7 @@
     "jimp": "^0.22.8",
     "minimist": "^1.2.8",
     "moleculer": "^0.14.29",
+    "object-hash": "^3.0.0",
     "object-sizeof": "^2.6.1",
     "path": "^0.12.7",
     "react": "^18.2.0",
@@ -112,7 +113,7 @@
   "devDependencies": {
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
-    "electron": "^24.3.1",
+    "electron": "^25.0.0",
     "electron-builder": "^23.6.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-icon-builder": "^2.0.1",
