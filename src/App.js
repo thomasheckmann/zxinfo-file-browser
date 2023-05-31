@@ -254,26 +254,43 @@ export default function App() {
     mylog("App", "useEffect", `-enter- settingsLoaded? ${settingsLoaded}`);
 
     async function getStartFolder() {
-      const initialFolder = await window.electronAPI.getStoreValue("start-folder");
-      mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
-      if (initialFolder) {
-        setIsBusyWorking(true);
-        const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
-        if (foldersWithFiles) {
+      window.electronAPI.getStoreValue("start-folder").then((initialFolder) => {
+        window.electronAPI.openFolder(initialFolder).then((f) => {
+          const foldersWithFiles = JSON.parse(f);
+          console.log(foldersWithFiles);
           setStartFolder((startFolder) => ({
             ...startFolder,
             root: foldersWithFiles.root,
-            folders: foldersWithFiles.folders, // sortFolders(foldersWithFiles.folders, appSettings.sortOrderFolders),
+            folders: foldersWithFiles.folders,
             total: foldersWithFiles.total,
             time: foldersWithFiles.time,
           }));
-        } else {
-          // folder not found...
-          window.alert(`Folder not found:\n${initialFolder}\nPlease try select a diffent folder...`);
-        }
-      }
-      setIsBusyWorking(false);
+        });
+      });
     }
+
+    // async function getStartFolder() {
+    //   const initialFolder = await window.electronAPI.getStoreValue("start-folder");
+    //   mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
+    //   if (initialFolder) {
+    //     setIsBusyWorking(true);
+
+    //     const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
+    //     if (foldersWithFiles) {
+    //       setStartFolder((startFolder) => ({
+    //         ...startFolder,
+    //         root: foldersWithFiles.root,
+    //         folders: foldersWithFiles.folders, // sortFolders(foldersWithFiles.folders, appSettings.sortOrderFolders),
+    //         total: foldersWithFiles.total,
+    //         time: foldersWithFiles.time,
+    //       }));
+    //     } else {
+    //       // folder not found...
+    //       window.alert(`Folder not found:\n${initialFolder}\nPlease try select a diffent folder...`);
+    //     }
+    //   }
+    //   setIsBusyWorking(false);
+    // }
 
     if (!settingsLoaded) {
       mylog("App", "useEffect", `loading settings...`);

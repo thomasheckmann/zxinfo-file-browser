@@ -18,6 +18,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
+const { readdir } = require("fs").promises;
 const Jimp = require("jimp");
 const sizeof = require("object-sizeof");
 
@@ -171,51 +172,35 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", "
  *
  * Recursively scans a directory for known files, returns a list of directories with valid files.
  *
- * @param {*} dirPath
- * @param {*} obj
- * @returns
+ * @param {*} dirName
+ * @returns List of directories with file
  */
-function scanDirectory(dirPath, obj) {
-  const mylog = logger().scope("scanDirectory");
-  mylog.log(`scanning dir: ${dirPath}`);
+const scanDirectoriesForFiles = async (dirName, obj) => {
+  const mylog = logger().scope("scanDirectoriesForFiles");
+  mylog.log(`scanning dir: ${dirName}`);
   var hrstart = process.hrtime();
+  let files = [];
+  const items = await readdir(dirName, { withFileTypes: true });
 
-  //win.webContents.send('update-status-text', `scanning dir: ${dirPath}`);
-
-  let filesInDir = 0;
-  try {
-    fs.readdirSync(dirPath).forEach(function (file) {
-      mylog.debug(`found this, have a look: ${file}`);
-      let filepath = path.join(dirPath, file);
-      try {
-        let stat = fs.lstatSync(filepath);
-        if (stat.isDirectory()) {
-          let totalFiles = scanDirectory(filepath, obj).totalFiles;
-          if (totalFiles > 0) {
-            obj.set(filepath, totalFiles);
-          }
-        } else {
-          let extension = path.extname(filepath).toLowerCase();
-          if (supportedExts.indexOf(extension) >= 0) {
-            filesInDir++;
-            mylog.debug(`counting ${filepath}`);
-          }
-        }
-      } catch (error) {
-        mylog.error(error);
+  for (const item of items) {
+    if (item.isDirectory()) {
+      files = [...files, ...(await scanDirectoriesForFiles(`${dirName}/${item.name}`, obj)).files];
+    } else {
+      let extension = path.extname(item.name).toLowerCase();
+      if (supportedExts.indexOf(extension) >= 0) {
+        files.push(`${dirName}/${item.name}`);
       }
-    });
-  } catch (error) {
-    mylog.error(error);
+    }
+    if (files.length > 0) {
+      obj.set(dirName, files.length);
+    }
   }
 
-  if (filesInDir > 0) {
-    obj.set(dirPath, filesInDir);
-  }
   const hrend = process.hrtime(hrstart);
-  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
-  return { folders: obj, totalFiles: filesInDir };
-}
+  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000} - ${dirName} => ${files.length}`);
+
+  return { files: obj };
+};
 
 /**
  * Opens folder dialog, or preload with folder given as input.
@@ -226,28 +211,25 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
   const mylog = logger().scope("open-folder-dialog");
   mylog.info(`starting at folder: ${arg}`);
 
-  function initFolderView(startFolder) {
+  function initFolderViewNew(startFolder) {
     var startTime = performance.now();
+    return scanDirectoriesForFiles(startFolder, new Map()).then((files) => {
+      let totalFiles = 0;
+      for (let value of files.files.values()) {
+        totalFiles += value;
+      }
 
-    const foldersWithFiles = scanDirectory(startFolder, new Map());
-    const files = new Map([...foldersWithFiles.folders]);
-    var result = [...files.keys()];
+      var endTime = performance.now();
 
-    let totalFiles = 0;
-
-    files.forEach((value) => {
-      totalFiles += value;
+      mylog.debug(`time: ${(endTime - startTime) / 1000} sec.`);
+      return { root: startFolder, folders: files.files.keys(), total: totalFiles, time: ((endTime - startTime) / 1000).toFixed(2) };
     });
-
-    var endTime = performance.now();
-
-    mylog.debug(`time: ${(endTime - startTime) / 1000} sec.`);
-    return { root: startFolder, folders: result, total: totalFiles, time: ((endTime - startTime) / 1000).toFixed(2) };
   }
 
   if (arg && fs.existsSync(arg)) {
     mylog.debug(`open folder from input: ${arg}`);
-    return initFolderView(arg);
+    const res = await initFolderViewNew(arg);
+    return JSON.stringify(res);
   } else if (arg && !fs.existsSync(arg)) {
     mylog.warn(`folder does not exist... ${arg}`);
     return null;
@@ -262,48 +244,10 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
     mylog.debug(`handle('open-folder-dialog'): CANCEL`);
     return null;
   } else {
-    return initFolderView(filePaths[0]);
+    const res = await initFolderViewNew(filePaths[0]);
+    return JSON.stringify(res);
   }
 });
-
-/**
- * Scan a folder for known files and return array with filenames, NOT including subfolders.
- */
-// ipcMain.handle("scan-folder", async (event, arg) => {
-//   const mylog = logger().scope("scan-folder");
-//   mylog.log(`input folder: ${arg}`);
-//   var hrstart = process.hrtime();
-//   var result = [];
-
-//   const dirPath = arg; // TODO: Validate input
-
-//   let filesInDir = 0;
-//   try {
-//     fs.readdirSync(dirPath).forEach(function (folder) {
-//       let filepath = path.join(dirPath, folder);
-//       let stat = fs.statSync(filepath);
-//       mylog.info(`processing: ${filepath}`);
-//       //win.webContents.send('update-status-text', `processing: ${filepath}`);
-//       if (!stat.isDirectory()) {
-//         mylog.debug(`file, looking at extension: ${filepath}`);
-//         let extension = path.extname(filepath).toLowerCase();
-//         if (supportedExts.indexOf(extension) >= 0) {
-//           filesInDir++;
-//           mylog.debug(`file with valid extension: ${filepath}, count=${filesInDir}`);
-//           result.push(filepath);
-//         }
-//       } else {
-//         mylog.debug(`directory, ignoring: ${filepath}`);
-//       }
-//     });
-//   } catch (error) {
-//     mylog.error(error);
-//   }
-//   mylog.debug(`Returning: total files: ${filesInDir}`);
-//   const hrend = process.hrtime(hrstart);
-//   mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
-//   return result;
-// });
 
 // [("folder", ["file1", "file2"])]
 ipcMain.handle("scan-folders", (event, folders) => {
