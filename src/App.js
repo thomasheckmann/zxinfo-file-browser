@@ -3,7 +3,7 @@
  * Creates general layout
  *
  */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -54,6 +54,7 @@ import { ZXInfoSettingsCtx, ZXInfoSettingsObj } from "./common/ZXInfoSettings";
 import "./App.css";
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import hash from "object-hash";
 
 export const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
@@ -97,12 +98,13 @@ export default function App() {
     total: 0,
   });
 
-  const [appSettings, setAppSettings] = React.useState(ZXInfoSettingsObj);
-  const [settingsLoaded, setSettingsLoaded] = React.useState(false);
+  const [appSettings, setAppSettings] = useState(ZXInfoSettingsObj);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [showDrawerFolderLink, setShowDrawerFolderLink] = React.useState(false);
-  const [showDrawerSettings, setShowDrawerSettings] = React.useState(false);
-  const [isBusyWorking, setIsBusyWorking] = React.useState(false);
-  const [allFiles, setAllFiles] = React.useState([]); // { dir: files: []}
+  const [showDrawerSettings, setShowDrawerSettings] = useState(false);
+  const [isBusyWorking, setIsBusyWorking] = useState(false);
+  const [allFiles, setAllFiles] = useState([]);
+  const [allFilesMaster, setAllFilesMaster] = useState([]);
 
   //   const [statusText, setStatusText] = React.useState("");
 
@@ -244,10 +246,22 @@ export default function App() {
     }
   };
 
+  /**
+   * Handle change in "filtering"
+   * @param {*} event
+   * @param {*} newFormats
+   */
   const handleFormatFilter = (event, newFormats) => {
-    mylog("App", "handleFormatFilter", `filters changed to: ${newFormats}`);
+    mylog("App", "handleFormatFilter", `filters changed to: ${newFormats} - current: ${appSettings.fileFilters.length}, new: ${newFormats.length})`);
     setAppSettings((appSettings) => ({ ...appSettings, fileFilters: newFormats }));
-    setAllFiles((allFiles) => filterFiles(allFiles, newFormats));
+    if (appSettings.fileFilters.length < newFormats.length) {
+      mylog("App", "handleFormatFilter", `adding: ${newFormats.filter((d) => !appSettings.fileFilters.includes(d))} (${hash(allFiles)})`);
+      // filtering, sort folders, sort files
+      setAllFiles((allFiles) => sortFiles(sortFolders(filterFiles([...allFilesMaster], newFormats)), appSettings.sortOrderFolders), appSettings.sortOrderFiles);
+    } else {
+      mylog("App", "handleFormatFilter", `removing: ${appSettings.fileFilters.filter((d) => !newFormats.includes(d))}`);
+      setAllFiles((allFiles) => filterFiles(allFiles, newFormats));
+    }
   };
 
   useEffect(() => {
@@ -318,13 +332,21 @@ export default function App() {
 
   useEffect(() => {
     mylog("App", "useEffect/startFolder", `-enter- number of folders = ${startFolder.folders.length}`);
+
+    // reset everything
     setAllFiles([]);
+    setAllFilesMaster([]);
+
     window.electronAPI.onFolderCompleted((_event, value) => {
       mylog("App", "onFolderCompleted", `${value[0]} - no. of files: ${value[1].length}, sortFolder: ${appSettings.sortOrderFolders}`);
 
-      // sort folders and files according to settings
+      setAllFilesMaster((allFilesMaster) => [...allFilesMaster, { dir: value[0], files: value[1] }]);
+      // filtering, sort folders, sort files
       setAllFiles((allFiles) =>
-        sortFiles(sortFolders([...allFiles, { dir: value[0], files: value[1] }], appSettings.sortOrderFolders), appSettings.sortOrderFiles)
+        sortFiles(
+          sortFolders(filterFiles([...allFiles, { dir: value[0], files: value[1] }], appSettings.fileFilters), appSettings.sortOrderFolders),
+          appSettings.sortOrderFiles
+        )
       );
     });
 
@@ -334,7 +356,7 @@ export default function App() {
       mylog("App", "useEffect/startFolder", `destroy, remove all listener...`);
       window.electronAPI.removeAllListeners("folder-completed");
     };
-  }, [startFolder.folders]);
+  }, [appSettings.fileFilters, appSettings.sortOrderFiles, appSettings.sortOrderFolders, startFolder.folders]);
 
   /**
    * if open folder dialog is nedded from child, use this as callback
@@ -518,7 +540,7 @@ export default function App() {
                   path="/"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <FolderView key={allFiles + appSettings.fileFilters + appSettings.hideZip} folders={allFiles} />
+                      <FolderView key={hash(allFiles) + hash(appSettings)} folders={allFiles} />
                     ) : (
                       <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
                     )
@@ -529,11 +551,7 @@ export default function App() {
                   path="/gridview"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <GridView
-                        key={allFiles + appSettings.sortOrderFiles + appSettings.fileFilters + appSettings.hideZip}
-                        root={startFolder.root}
-                        folders={allFiles}
-                      />
+                      <GridView key={hash(allFiles) + hash(appSettings)} root={startFolder.root} folders={allFiles} />
                     ) : (
                       <div></div>
                     )

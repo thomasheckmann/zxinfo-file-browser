@@ -13,7 +13,7 @@ import { ZXInfoSettingsCtx } from "../ZXInfoSettings";
 import LaunchTwoToneIcon from "@mui/icons-material/LaunchTwoTone";
 
 export default function ZXdbID({ entry }) {
-  const [customZXDBid, setCustomZXDBid] = useState(null);
+  const [customZXDBid, setCustomZXDBid] = useState("");
   const [appSettings, setAppSettings] = useContext(ZXInfoSettingsCtx);
   const [open, setOpen] = useState(false);
 
