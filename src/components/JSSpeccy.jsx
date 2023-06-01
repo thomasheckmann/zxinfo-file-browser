@@ -44,7 +44,7 @@ export default function JSSpeccy(props) {
 
     async function launchJSSpeccy(e) {
       const tmpFile = await window.electronAPI.getFileForJSSpeccy(e);
-      mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `file to launch: ${tmpFile}`);
+      mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `${JSON.stringify(fileItem)} - file to launch: ${tmpFile}`);
 
       // Adjust JSSpeccy3 options for TAP/TZX based on found machinetype
       var machinetype = "128";
@@ -61,7 +61,12 @@ export default function JSSpeccy(props) {
           machinetype = "128";
           break;
         default:
-          mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `unhandled machinetype: ${fileItem.machinetype}, using default: 128K`);
+          mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `machinetype NOT defined, using hwmodel: ${fileItem.hwmodel}`);
+          if(fileItem.hwmodel === "128k") {
+            machinetype = "128";
+          } else {
+            machinetype = "48";
+          }
           break;
       }
 

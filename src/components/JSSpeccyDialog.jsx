@@ -48,11 +48,27 @@ export default function JSSpeccyDialog(props) {
         </DialogTitle>
         <DialogContent dividers={true} sx={{ p: 0, m: 0 }}>
           <Container style={{ display: "flex", justifyContent: "center" }}>
-            <Typography variant="subtitle2" display="block" gutterBottom>
-              {item.zxdbTitle} - ({item.machinetype})
-            </Typography>
+            {item.zxdbTitle && (
+              <Typography variant="subtitle2" display="block" gutterBottom>
+                {item.zxdbTitle} - ({item.machinetype})
+              </Typography>
+            )}
+            {!item.zxdbTitle && (
+              <Typography variant="subtitle2" display="block" gutterBottom>
+                {item.filename} - ZX-Spectrum ({item.hwmodel})
+              </Typography>
+            )}
           </Container>
-          <JSSpeccy fileItem={{ file: item.filepath, subfilename: item.subfilename, machinetype: item.machinetype, type: item.type, comments: item.comments }}></JSSpeccy>
+          <JSSpeccy
+            fileItem={{
+              file: item.filepath,
+              subfilename: item.subfilename,
+              hwmodel: item.hwmodel,
+              machinetype: item.machinetype,
+              type: item.type,
+              comments: item.comments,
+            }}
+          ></JSSpeccy>
         </DialogContent>
         <DialogActions>
           <Box textAlign="center" sx={{ p: 0 }}>
