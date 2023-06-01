@@ -47,7 +47,7 @@ export default function JSSpeccy(props) {
       mylog("JSSpeccy", "startJSSpeccy(launchJSSpeccy)", `${JSON.stringify(fileItem)} - file to launch: ${tmpFile}`);
 
       // Adjust JSSpeccy3 options for TAP/TZX based on found machinetype
-      var machinetype = "128";
+      var machinetype = "48";
       switch (fileItem.machinetype) {
         case "ZX-Spectrum 16K":
         case "ZX-Spectrum 48K":
