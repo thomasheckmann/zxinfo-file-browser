@@ -15,7 +15,6 @@
  */
 
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require("electron-devtools-installer");
 
 const isDev = require("electron-is-dev");
 const path = require("path");
