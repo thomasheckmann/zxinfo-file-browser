@@ -60,14 +60,6 @@ function createWindow() {
     mylog.debug("opening DevTools");
     mylog.debug("tmp path is:" + app.getPath("temp"));
     win.webContents.openDevTools();
-    installExtension(
-      { id: "ReactDevTools", electron: ">=1.2.1" },
-      {
-        loadExtensionOptions: { allowFileAccess: true },
-      }
-    )
-      .then((name) => console.log(`Added Extension:  ${name}`))
-      .catch((err) => console.log("An error occurred: ", err));
   }
 
   win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
