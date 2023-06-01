@@ -16,7 +16,7 @@ import { zxdbFileCheck, validJSSpeccyFormat, handleUserSelectedSCR } from "../co
 import JSSpeccyDialog from "./JSSpeccyDialog";
 
 export default function GridItem(props) {
-  const [appSettings, setAppSettings] = useContext(ZXInfoSettingsCtx);
+  const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [entry, setEntry] = useState();
   const [restCalled, setRestCalled] = useState(false);
 
@@ -59,14 +59,14 @@ export default function GridItem(props) {
   // handle user selected SCR
   useEffect(() => {
     handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR, originalScreen);
-  }, [selectedSCR]);
+  }, [appSettings, entry, originalScreen, selectedSCR]);
 
   useEffect(() => {
     // make sure we only call the API once
     if (!restCalled) {
       zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
     }
-  }, [props.entry]);
+  }, [appSettings.zxinfoSCR, props.entry, restCalled]);
 
   return (
     entry && (

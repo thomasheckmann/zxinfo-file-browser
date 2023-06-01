@@ -19,8 +19,8 @@ export default function Favorite(props) {
       newFav.set(props.entry.sha512, [props.entry.filepath]);
       setAppSettings({ ...appSettings, favorites: newFav });
       setIsFavorite(true);
-      var obj = Object.fromEntries(newFav);
-      var jsonString = JSON.stringify(obj);
+      let obj = Object.fromEntries(newFav);
+      let jsonString = JSON.stringify(obj);
       window.electronAPI.setFavorites("favorites", jsonString);
     } else {
       if (appSettings.favorites.get(props.entry.sha512)) {
@@ -44,8 +44,8 @@ export default function Favorite(props) {
         }
         setIsFavorite(true);
       }
-      var obj = Object.fromEntries(appSettings.favorites);
-      var jsonString = JSON.stringify(obj);
+      let obj = Object.fromEntries(appSettings.favorites);
+      let jsonString = JSON.stringify(obj);
       window.electronAPI.setFavorites("favorites", jsonString);
     }
   };
@@ -53,7 +53,7 @@ export default function Favorite(props) {
   useEffect(() => {
     mylog("Favorite", "useEffect", `init: ${props.entry.sha512}`);
     setIsFavorite(appSettings.favorites.get(props.entry.sha512));
-  }, [props.entry.sha512]);
+  }, [appSettings.favorites, props.entry.sha512]);
 
   return isFavorite ? (
     <Tooltip title="Remove from favorites">

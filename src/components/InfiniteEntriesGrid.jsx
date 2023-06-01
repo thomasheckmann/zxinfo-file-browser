@@ -92,7 +92,7 @@ export default function InfiniteEntriesGrid(props) {
     } else {
       mylog("InfiniteEntriesGrid", "useEffect", `SKIP - ${props.foldername} - nothing to do now`);
     }
-  }, [props.files]);
+  }, [appSettings.hideZip, infSettings.index, props.files, props.foldername]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 0, mx: 0, my: 2 }} id={"scrollableDiv" + props.foldername}>

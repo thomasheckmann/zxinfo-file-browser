@@ -15,14 +15,12 @@ function FavoritesList(props) {
     var favorites = appSettings.favorites;
 
     var items = [];
-    for (let [key, value] of favorites) {
+    for (let value of favorites.values()) {
       items.push(...value);
     }
-    let uniqueFileNames = [...new Set(items)];
-
     // remove duplicates
-    setFiles(uniqueFileNames);
-  }, [appSettings.favorites.size]);
+    setFiles([...new Set(items)]);
+  }, [appSettings.favorites]);
 
   return (
     <Paper elevation={5} sx={{ border: 1, borderColor: "#a0a0a0", height: "vh", my: 4 }}>

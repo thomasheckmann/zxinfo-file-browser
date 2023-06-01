@@ -339,8 +339,8 @@ export default function App() {
 
       loadSettings();
     }
-  }, []); // only run once
-
+  }, [navigate, settingsLoaded]);
+  
   useEffect(() => {
     mylog("App", "useEffect/startFolder", `-enter- number of folders = ${startFolder.folders.length}`);
 
