@@ -138,7 +138,7 @@ function FileDetails(props) {
           if (r.length === 1) {
             setEntry((entry) => ({ ...entry, data: r[0].data, data_ext: r[0].data_ext }));
           } else {
-            // array of ZIP entries
+            // array of ZIP entries, find correct one
             r.forEach((zf) => {
               if (item.subfilename === zf.subfilename) {
                 setEntry((entry) => ({ ...entry, data: zf.data, data_ext: zf.data_ext }));

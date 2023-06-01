@@ -4,9 +4,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Open file dialog or folder in args, from render to main
   openFolder: (args) => ipcRenderer.invoke("open-folder-dialog", args),
 
-  // Scan folder, from render to main
-  // - DEPRECATED: scanFolder: (args) => ipcRenderer.invoke("scan-folder", args),
-
   // Scans a list of folders
   scanFolders: (folders) => ipcRenderer.invoke("scan-folders", folders),
   // Communicate back to main

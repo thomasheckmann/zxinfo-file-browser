@@ -34,6 +34,9 @@ import FileDetailsDialog from "./FileDetails";
 import { zxdbFileCheck, formatType, validJSSpeccyFormat, handleUserSelectedSCR } from "../common/filecheck.js";
 import JSSpeccyDialog from "./JSSpeccyDialog";
 
+import { mylog } from "../App";
+import hash from "object-hash";
+
 const openLink = (id) => {
   window.electronAPI.openZXINFODetail(id).then((res) => {});
 };
@@ -41,6 +44,7 @@ const openLink = (id) => {
 function EntryCard(props) {
   const [appSettings] = useContext(ZXInfoSettingsCtx);
   const [entry, setEntry] = useState();
+
   const [restCalled, setRestCalled] = useState(false);
 
   // Fetch SCR from ZXInfo API
@@ -74,6 +78,8 @@ function EntryCard(props) {
   const [isFileDetailsDialogOpen, setFileDetailsDialogOpen] = useState(false);
 
   const handleFileDetailsDialogClose = (value) => {
+    mylog("EntryCard", "handleFileErrorDialogOpen", `closing details window ${value}`);
+    setEntry({...entry, value: value});
     setFileDetailsDialogOpen(false);
   };
 
@@ -103,7 +109,7 @@ function EntryCard(props) {
       zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
       setFileJSSpeccyValid(validJSSpeccyFormat(props.entry));
     }
-  }, [props.entry]);
+  }, [appSettings.zxinfoSCR, props.entry, restCalled]);
 
   return (
     entry && (
@@ -182,7 +188,7 @@ function EntryCard(props) {
                   />
                 </Tooltip>
               ) : (
-                <ZXdbID entry={entry}></ZXdbID>
+                <ZXdbID key={hash(appSettings.zxdbIDs)} entry={entry}></ZXdbID>
               )}
               <Chip sx={{ bgcolor: "#ffffff" }} />
             </Stack>

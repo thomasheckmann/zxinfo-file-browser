@@ -15,6 +15,7 @@
  */
 
 const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
+
 const isDev = require("electron-is-dev");
 const path = require("path");
 const fs = require("fs");
@@ -38,6 +39,8 @@ function createWindow() {
 
   mylog.info(`########### STARTING zxinfo-file-browser (${app.getVersion()})`);
   mylog.info(`nodeJS version: ${process.version}`);
+  mylog.info(`electron version: ${process.versions.electron}`);
+  mylog.info(`chrome version: ${process.versions.chrome}`);
   mylog.info(`mode: ${isDev ? "DEBUG mode" : "PROD mode"}`);
   mylog.info(`####################################`);
   win = new BrowserWindow({
@@ -57,6 +60,14 @@ function createWindow() {
     mylog.debug("opening DevTools");
     mylog.debug("tmp path is:" + app.getPath("temp"));
     win.webContents.openDevTools();
+    installExtension(
+      { id: "ReactDevTools", electron: ">=1.2.1" },
+      {
+        loadExtensionOptions: { allowFileAccess: true },
+      }
+    )
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err));
   }
 
   win.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
@@ -265,45 +276,6 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
     return initFolderView(filePaths[0]);
   }
 });
-
-/**
- * Scan a folder for known files and return array with filenames, NOT including subfolders.
- */
-// ipcMain.handle("scan-folder", async (event, arg) => {
-//   const mylog = logger().scope("scan-folder");
-//   mylog.log(`input folder: ${arg}`);
-//   var hrstart = process.hrtime();
-//   var result = [];
-
-//   const dirPath = arg; // TODO: Validate input
-
-//   let filesInDir = 0;
-//   try {
-//     fs.readdirSync(dirPath).forEach(function (folder) {
-//       let filepath = path.join(dirPath, folder);
-//       let stat = fs.statSync(filepath);
-//       mylog.info(`processing: ${filepath}`);
-//       //win.webContents.send('update-status-text', `processing: ${filepath}`);
-//       if (!stat.isDirectory()) {
-//         mylog.debug(`file, looking at extension: ${filepath}`);
-//         let extension = path.extname(filepath).toLowerCase();
-//         if (supportedExts.indexOf(extension) >= 0) {
-//           filesInDir++;
-//           mylog.debug(`file with valid extension: ${filepath}, count=${filesInDir}`);
-//           result.push(filepath);
-//         }
-//       } else {
-//         mylog.debug(`directory, ignoring: ${filepath}`);
-//       }
-//     });
-//   } catch (error) {
-//     mylog.error(error);
-//   }
-//   mylog.debug(`Returning: total files: ${filesInDir}`);
-//   const hrend = process.hrtime(hrstart);
-//   mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
-//   return result;
-// });
 
 // [("folder", ["file1", "file2"])]
 ipcMain.handle("scan-folders", (event, folders) => {
