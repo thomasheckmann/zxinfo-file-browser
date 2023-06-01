@@ -20,7 +20,7 @@ export default function Favorite(props) {
       setAppSettings({ ...appSettings, favorites: newFav });
       setIsFavorite(true);
       let obj = Object.fromEntries(newFav);
-      let jsonString = JSON.stringify(obj);
+      var jsonString = JSON.stringify(obj);
       window.electronAPI.setFavorites("favorites", jsonString);
     } else {
       if (appSettings.favorites.get(props.entry.sha512)) {
@@ -53,7 +53,7 @@ export default function Favorite(props) {
   useEffect(() => {
     mylog("Favorite", "useEffect", `init: ${props.entry.sha512}`);
     setIsFavorite(appSettings.favorites.get(props.entry.sha512));
-  }, [appSettings.favorites, props.entry.sha512]);
+  }, [props.entry.sha512]);
 
   return isFavorite ? (
     <Tooltip title="Remove from favorites">

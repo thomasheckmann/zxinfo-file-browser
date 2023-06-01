@@ -122,7 +122,7 @@ export default function InfiniteEntriesList(props) {
     } else {
       mylog("InfiniteEntriesList", "useEffect", `SKIP - ${props.foldername} - nothing to do now`);
     }
-  }, [props.files, isVisible]);
+  }, [isVisible]);
 
   return (
     <Container maxWidth="xl" sx={{ py: 2, mx: 0 }} id={"scrollableDiv" + props.foldername}>

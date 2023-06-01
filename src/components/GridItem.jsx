@@ -33,6 +33,9 @@ export default function GridItem(props) {
   const [selectedSCR, setSelectedSCR] = useState("");
   const [originalScreen, setOriginalScreen] = useState();
 
+    // File is valid for JSSpeccy
+    const [isFileJSSpeccyValid, setFileJSSpeccyValid] = useState(false);
+
   const handleSCRDialogClose = (value) => {
     setSelectedSCR((selectedSCR) => value);
   };
@@ -59,12 +62,14 @@ export default function GridItem(props) {
   // handle user selected SCR
   useEffect(() => {
     handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR, originalScreen);
-  }, [appSettings, entry, originalScreen, selectedSCR]);
+  }, [selectedSCR]);
 
   useEffect(() => {
     // make sure we only call the API once
+    console.log("XXXX");
     if (!restCalled) {
       zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
+      setFileJSSpeccyValid(validJSSpeccyFormat(props.entry));
     }
   }, [appSettings.zxinfoSCR, props.entry, restCalled]);
 
@@ -94,7 +99,7 @@ export default function GridItem(props) {
               </Tooltip>
             }
             actionIcon={
-              validJSSpeccyFormat(entry) && (
+              isFileJSSpeccyValid && (
                 <Tooltip title="Play in emulator" onClick={() => handleJSSpeccyDialogOpen(this)}>
                   <IconButton arial-label="play in emulator" size="small">
                     <GamepadOutlinedIcon sx={{ color: "rgba(255, 255, 255, 0.54)" }} />

@@ -339,8 +339,8 @@ export default function App() {
 
       loadSettings();
     }
-  }, [navigate, settingsLoaded]);
-  
+  }, []); // only run once
+
   useEffect(() => {
     mylog("App", "useEffect/startFolder", `-enter- number of folders = ${startFolder.folders.length}`);
 
@@ -551,7 +551,7 @@ export default function App() {
                   path="/"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <FolderView key={hash(allFiles) + hash(appSettings)} folders={allFiles} />
+                      <FolderView key={hash(allFiles)} folders={allFiles} />
                     ) : (
                       <IntroText parentCallback={handleOpenFolderFromChild}></IntroText>
                     )
@@ -562,7 +562,7 @@ export default function App() {
                   path="/gridview"
                   element={
                     startFolder.folders && startFolder.folders.length > 0 ? (
-                      <GridView key={hash(allFiles) + hash(appSettings)} root={startFolder.root} folders={allFiles} />
+                      <GridView key={hash(allFiles)} root={startFolder.root} folders={allFiles} />
                     ) : (
                       <div></div>
                     )

@@ -101,7 +101,7 @@ function EntryCard(props) {
   // handle user selected SCR
   useEffect(() => {
     handleUserSelectedSCR(entry, setEntry, appSettings, selectedSCR, originalScreen);
-  }, [appSettings, entry, originalScreen, selectedSCR]);
+  }, [selectedSCR]);
 
   useEffect(() => {
     // make sure we only call the API once
