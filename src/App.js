@@ -56,11 +56,19 @@ import "./App.css";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import hash from "object-hash";
 
+
+
+// IF isDev - don't log from render to main, keep render output in devtool
+// IF prod - log from render to main (combined log)
+// import logger from "electron-log/renderer";
+//const LOG_NAME = "App.js";
+//const log = logger.scope(LOG_NAME);
+
 export const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
 export function mylog(component, method, msg) {
   if (isDev) {
-    console.log(`[R][${component}]-${method}(): ${msg}`);
+    console.log(`[${component}]-${method}(): ${msg}`);
   }
 }
 
@@ -265,11 +273,13 @@ export default function App() {
   };
 
   useEffect(() => {
-    mylog("App", "useEffect", `-enter- settingsLoaded? ${settingsLoaded}`);
+    mylog("App", "useEffect", `-enter- settingsLoaded: ${settingsLoaded}`);
 
     async function getStartFolder() {
       const initialFolder = await window.electronAPI.getStoreValue("start-folder");
-      mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
+      mylog("App", "useEffect", `start-folder: ${initialFolder}`);
+
+      // mylog("App", "getStartFolder", `getStartFolder. 'start-folder'=${initialFolder}`);
       if (initialFolder) {
         setIsBusyWorking(true);
         const foldersWithFiles = await window.electronAPI.openFolder(initialFolder);
@@ -290,7 +300,8 @@ export default function App() {
     }
 
     if (!settingsLoaded) {
-      mylog("App", "useEffect", `loading settings...`);
+      // mylog("App", "useEffect", `loading settings...`);
+
       async function loadSettings() {
         const sortOrdersFiles = await window.electronAPI.getStoreValue("sort-files");
         const sortOrderFolders = await window.electronAPI.getStoreValue("sort-folders");

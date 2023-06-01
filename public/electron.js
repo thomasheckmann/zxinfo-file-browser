@@ -180,7 +180,7 @@ const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", "
  */
 function scanDirectory(dirPath, obj) {
   const mylog = logger().scope("scanDirectory");
-  mylog.log(`scanning dir: ${dirPath}`);
+  mylog.info(`scanning dir: ${dirPath}`);
   var hrstart = process.hrtime();
 
   //win.webContents.send('update-status-text', `scanning dir: ${dirPath}`);
@@ -216,7 +216,7 @@ function scanDirectory(dirPath, obj) {
     obj.set(dirPath, filesInDir);
   }
   const hrend = process.hrtime(hrstart);
-  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
+  mylog.info(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
   return { folders: obj, totalFiles: filesInDir };
 }
 
@@ -272,7 +272,7 @@ ipcMain.handle("open-folder-dialog", async (event, arg) => {
 // [("folder", ["file1", "file2"])]
 ipcMain.handle("scan-folders", (event, folders) => {
   const mylog = logger().scope("scan-folders");
-  mylog.log(`input folder: ${folders.length}`);
+  mylog.info(`input folder: ${folders.length}`);
 
   folders.forEach((f) => {
     fs.readdir(f, (err, files) => {
@@ -321,8 +321,8 @@ ipcMain.handle("load-file", (event, filename, isPreview) => {
   }
 
   let fileObj = handleFormats.getZXFormat(filename, null, buf, isPreview);
-  mylog.log(`INPUT : size of file   - ${sizeof(buf)} bytes, ${filename}`);
-  mylog.log(`OUTPUT: size of ZX Obj - ${sizeof(fileObj)} bytes`);
+  mylog.info(`INPUT : size of file   - ${sizeof(buf)} bytes, ${filename}`);
+  mylog.info(`OUTPUT: size of ZX Obj - ${sizeof(fileObj)} bytes`);
   mylog.debug(`hash: ${fileObj.sha512}`);
 
   if (filename_ext === ".sna" || filename_ext === ".z80") {
@@ -373,7 +373,7 @@ ipcMain.handle("load-file", (event, filename, isPreview) => {
   }
 
   const hrend = process.hrtime(hrstart);
-  mylog.log(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
+  mylog.info(`time() ms: ${hrend[0] * 1000 + hrend[1] / 1000000}`);
 
   if (fileObj.error.length > 0) {
     mylog.debug(`Problems loading file: ${JSON.stringify(fileObj.error)}`);
@@ -403,54 +403,54 @@ ipcMain.handle("locate-file-and-folder", (event, arg) => {
 
 ipcMain.handle("get-file-jsspeccy", (event, arg) => {
   const mylog = logger().scope("get-file-jsspeccy");
-  mylog.log(`prepare file: ${arg.file} - ${arg.subfilename}`);
+  mylog.info(`prepare file: ${arg.file} - ${arg.subfilename}`);
 
   var jsspeccy_filename = null;
 
   if (arg.file && !arg.subfilename) {
     // single file only
-    mylog.log(`handling single file: ${arg.file}`);
+    mylog.info(`handling single file: ${arg.file}`);
     var ext = path.parse(arg.file).ext;
 
     var destPath = null;
 
     if (isDev) {
       destPath = path.resolve(__dirname + "/tmp");
-      mylog.log(`development mode, destPath: ${destPath}`);
+      mylog.info(`development mode, destPath: ${destPath}`);
       jsspeccy_filename = "./tmp/entryfile" + ext;
     } else {
       destPath = app.getPath("temp");
-      mylog.log(`LIVE mode, destPath: ${destPath}`);
+      mylog.info(`LIVE mode, destPath: ${destPath}`);
       jsspeccy_filename = destPath + "/entryfile" + ext;
     }
     const destFile = destPath + "/entryfile" + ext;
-    mylog.log(`destination: ${jsspeccy_filename}`);
+    mylog.info(`destination: ${jsspeccy_filename}`);
     fs.copyFileSync(arg.file, destFile);
   } else if (arg.file && arg.subfilename) {
     // within ZIP
-    mylog.log(`handling file within ZIP: ${arg.file} - ${__dirname}`);
+    mylog.info(`handling file within ZIP: ${arg.file} - ${__dirname}`);
     var zip = new AdmZip(arg.file);
     ext = path.parse(arg.subfilename).ext;
     destPath = null;
     if (isDev) {
       destPath = path.resolve(__dirname + "/tmp");
-      mylog.log(`development mode, destPath: ${destPath}`);
+      mylog.info(`development mode, destPath: ${destPath}`);
       jsspeccy_filename = "./tmp/entryfile" + ext;
     } else {
       destPath = app.getPath("temp");
-      mylog.log(`LIVE mode, destPath: ${destPath}`);
+      mylog.info(`LIVE mode, destPath: ${destPath}`);
       jsspeccy_filename = destPath + "/entryfile" + ext;
     }
 
-    mylog.log(`extracting ${arg.subfilename} to '${destPath}/'`);
+    mylog.info(`extracting ${arg.subfilename} to '${destPath}/'`);
     zip.extractEntryTo(arg.subfilename, destPath, false, true, "entryfile" + ext);
     // This extract method ignores the outFileName, so perform a rename
-    mylog.log(`renaming file to entry.<ext>`);
+    mylog.info(`renaming file to entry.<ext>`);
     fs.renameSync(`${destPath}/${arg.subfilename}`, `${destPath}/${"entryfile" + ext}`);
   } else {
     mylog.warn(`nothing to load...`);
   }
 
-  mylog.log(`returning filename: ${jsspeccy_filename}`);
+  mylog.info(`returning filename: ${jsspeccy_filename}`);
   return jsspeccy_filename;
 });
