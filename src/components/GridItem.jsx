@@ -66,7 +66,6 @@ export default function GridItem(props) {
 
   useEffect(() => {
     // make sure we only call the API once
-    console.log("XXXX");
     if (!restCalled) {
       zxdbFileCheck(props.entry, appSettings.zxinfoSCR, setEntry, setOriginalScreen, setRestCalled);
       setFileJSSpeccyValid(validJSSpeccyFormat(props.entry));

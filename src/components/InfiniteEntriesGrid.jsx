@@ -72,7 +72,7 @@ export default function InfiniteEntriesGrid(props) {
     if (props.files.length > 0 && infSettings.index === 0) {
       mylog("InfiniteEntriesGrid", "useEffect", `FIRST TIME fetchMoreData() - ${props.foldername}`);
       fetchMoreData();
-      const averageCardHeight = 170;
+      const averageCardHeight = 140;
       const maxHeight = window.innerHeight - 40; // total files bare
 
       // avarage rows availble in space
@@ -81,7 +81,7 @@ export default function InfiniteEntriesGrid(props) {
 
       // adjust height, if less than one row
       if (props.files.length < getRowSize()) {
-        setVisibleHeight(maxHeight + 70);
+        setVisibleHeight(maxHeight + 100);
       }
     } else if (props.files.length > 0 && infSettings.index > 0 && props.foldername) {
       mylog("InfiniteEntriesGrid", "useEffect", `folder section back in viewport - ${props.foldername}`);
@@ -100,6 +100,7 @@ export default function InfiniteEntriesGrid(props) {
         dataLength={infSettings.items.length}
         next={fetchMoreData}
         hasMore={infSettings.hasMore}
+        height={visibleHeight}
         loader={
           <Box>
             <LinearProgress color="success" />
