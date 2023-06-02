@@ -78,7 +78,28 @@ export default function InfiniteEntriesList(props) {
           }
         });
       } else {
-        mylog("InfiniteEntriesList", "fetchMoreData", `File NOT found: ${props.files[newIndex]}`);
+        // NOT found, only used if used in FavoritesList - lookup hash from favorites
+        var favorites = appSettings.favorites;
+        const filePathToLookup = props.files[newIndex];
+        let hash = null;
+        mylog("InfiniteEntriesList", "fetchMoreData", `scanning for file: ${filePathToLookup}`);
+        for (let [key, value] of favorites.entries()) {
+          mylog("InfiniteEntriesList", "fetchMoreData", `scanning ${key}, ${value} (${filePathToLookup})`);
+          if(value == filePathToLookup) {
+            mylog("InfiniteEntriesList", "fetchMoreData", `FOUND match: ${value}`);
+            hash = key;
+          }
+        }
+    
+        const notFound = {
+          filepath: props.files[newIndex],
+          filename: props.files[newIndex].split("/").reverse()[0],
+          sha512: hash,
+          scr: "./images/no_image.png",
+          text: "File NOT found",
+        };
+        itemsToAdd.push(notFound);
+        // mylog("InfiniteEntriesList", "fetchMoreData", `File NOT found: ${props.files[newIndex]}`);
       }
     }
     if (newIndex >= props.files.length) {

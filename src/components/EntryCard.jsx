@@ -161,7 +161,7 @@ function EntryCard(props) {
               </Tooltip>
             }
           />
-          <CardActionArea onClick={() => handleFileDetailsDialogOpen(this)}>
+          <CardActionArea onClick={() => entry.type && handleFileDetailsDialogOpen(this)}>
             <Tooltip title="See file details">
               <CardMedia component="img" image={entry.scr} alt={entry.filename} />
             </Tooltip>

@@ -1,3 +1,18 @@
+/**
+ * FavoritesList - view to show all your favorites.
+ * 
+ * Favorites are saved to file: favorites.json in the following format:
+ * 
+ * {
+ *    favorites: {
+ *      "sha512_1": [filepath1, filepath2, ...],
+ *      "sha512_2": [filepath3, ...],
+        ...
+*    }
+ * }
+ */
+
+
 import React, { useContext, useEffect, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import InfiniteEntriesList from "../components/InfiniteEntriesList";
