@@ -261,6 +261,265 @@ const cmap_zx81 = [
   " COPY ",
 ];
 
+const cmap_lambda = [
+  " ",
+  "{1}",
+  "{2}",
+  "{3}",
+  "{4}",
+  "{5}",
+  "{6}",
+  "{7}",
+  "{8}", // CAR
+  "{9}", // TRIANGLE 1
+  "{10}", // TRIANGLE 2
+  '"',
+  "£", // ALIEN
+  "$",
+  ":", // BUTTERFLY
+  "?", // GHOST
+  "(",
+  ")",
+  ">",
+  "<",
+  "=",
+  "+",
+  "-",
+  "*",
+  "/",
+  ";",
+  ",",
+  ".",
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "O",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "U",
+  "V",
+  "W",
+  "X",
+  "Y",
+  "Z",
+  " THEN", // RND
+  " TO ", // INKEY$
+  "STEP ", // PI
+  "RND",
+  "INKEY$",
+  "PI",
+  "INK",
+  "PAPER",
+  "BORDER",
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  "#",
+  "|1|",
+  "|2|",
+  "|3|",
+  "|4|",
+  "|5|",
+  "|6|",
+  "|7|",
+  "|8|",
+  "|9|",
+  "|10|",
+  '"',
+  "£",
+  "$",
+  ":",
+  "?",
+  "(",
+  ")",
+  ">",
+  "<",
+  "=",
+  "+",
+  "-",
+  "*",
+  "/",
+  ";",
+  ",",
+  ".",
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z",
+  "CODE ", // ""
+  "VAL ", // AT
+  "LEN ", // TAB
+  "SIN",
+  "COS ", // CODE
+  "TAN ", // VAL
+  "ASN ", // LEN
+  "ACS ", // SIN
+  "ATN ", // COS
+  "LOG ", // TAN
+  "EXP ", // ASN
+  "INT ",  // ACS
+  "SQR ",  // ATN
+  "SGN ", // LN
+  "ABS ",  // EXP
+  "PEEK ",  // INT
+  "USR ",  // SQR
+  "STR$ ",  // SGN
+  "CHR$ ",//ABS
+  "NOT ", // PEEK
+  "AT ",// USR
+  "TAB ",// STR$
+  "**",// CHR$
+  " OR ",// NOT
+  " AND ", // **
+  "<=", // OR
+  ">=",// AND
+  "<>",// <=
+  " TEMPO ",// >=
+  " MUSIC ",// <>
+  " SOUND ",// THEN
+  " BEEP ",// TO
+  " NOBEEP ",// STEP
+  " LPRINT ",
+  " LLIST ",
+  " STOP ",
+  " SLOW ",
+  " FAST ",
+  " NEW ",
+  " SCROLL ",
+  " CONT ",
+  " DIM ",
+  " REM ",
+  " FOR ",
+  " GOTO ",
+  " GOSUB ",
+  " INPUT ",
+  " LOAD ",
+  " LIST ",
+  " LET ",
+  " PAUSE ",
+  " NEXT ",
+  " POKE ",
+  " PRINT ",
+  " PLOT ",
+  " RUN ",
+  " SAVE ",
+  " RAND ",
+  " IF ",
+  " CLS ",
+  " UNPLOT ",
+  " CLEAR ",
+  " RETURN ",
+  " COPY ",
+];
+
 // maps ASCII to ZX81
 const ascii_zx81 = new Map([
   [" ", 0x00],
@@ -319,7 +578,7 @@ const ascii_zx81 = new Map([
   ["Z", 0x3f],
 ]);
 
-function printZX81(image, x, y, text, showFullList, inREMline) {
+function printZX81(image, x, y, text, showFullList, inREMline, versn) {
   const mylog = log.scope("printZX81");
 
   // convert to "printable", bit 7 = 1, inverse -
@@ -334,14 +593,17 @@ function printZX81(image, x, y, text, showFullList, inREMline) {
       // inverse video; corresponding to code points 128–191
       zx81string += String.fromCharCode(charVal - 64);
     } else {
-      // lookup
+      // lookup 'keyword'
       var mapped = cmap_zx81[charVal];
+      if (versn === 255) {
+        mapped = cmap_lambda[charVal];
+      }
       if (mapped) {
         if ((i === 5 || inREMline) && mapped[0] === " ") {
           mapped = mapped.slice(1);
         } else if (inREMline && charVal === 192) {
           mapped = '""';
-        } else if (inREMline && (charVal === 216 || charVal === 221)) {
+        } else if (inREMline && (charVal === 216 || charVal === 221)) {
           // add trailing space to ** and <>
           mapped += " ";
         }
@@ -354,7 +616,7 @@ function printZX81(image, x, y, text, showFullList, inREMline) {
       }
     }
   }
-  return screenZX.printAtZX81(image, x, y, zx81string, showFullList ? 999999 : 22);
+  return screenZX.printAtZX81(image, x, y, zx81string, showFullList ? 999999 : 22, versn);
 }
 
 exports.printZX81 = printZX81;
