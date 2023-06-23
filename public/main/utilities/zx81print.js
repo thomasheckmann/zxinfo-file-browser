@@ -331,10 +331,10 @@ const cmap_lambda = [
   "STEP ", // PI
   "RND",
   "INKEY$",
-  "PI",
-  "INK",
-  "PAPER",
-  "BORDER",
+  "PI ",
+  "INK ",
+  "PAPER ",
+  "BORDER ",
   null,
   null,
   null,
@@ -457,7 +457,7 @@ const cmap_lambda = [
   "CODE ", // ""
   "VAL ", // AT
   "LEN ", // TAB
-  "SIN",
+  "SIN ",
   "COS ", // CODE
   "TAN ", // VAL
   "ASN ", // LEN
@@ -465,28 +465,28 @@ const cmap_lambda = [
   "ATN ", // COS
   "LOG ", // TAN
   "EXP ", // ASN
-  "INT ",  // ACS
-  "SQR ",  // ATN
+  "INT ", // ACS
+  "SQR ", // ATN
   "SGN ", // LN
-  "ABS ",  // EXP
-  "PEEK ",  // INT
-  "USR ",  // SQR
-  "STR$ ",  // SGN
-  "CHR$ ",//ABS
+  "ABS ", // EXP
+  "PEEK ", // INT
+  "USR ", // SQR
+  "STR$ ", // SGN
+  "CHR$ ", //ABS
   "NOT ", // PEEK
-  "AT ",// USR
-  "TAB ",// STR$
-  "**",// CHR$
-  " OR ",// NOT
+  "AT ", // USR
+  "TAB ", // STR$
+  "** ", // CHR$
+  " OR ", // NOT
   " AND ", // **
   "<=", // OR
-  ">=",// AND
-  "<>",// <=
-  " TEMPO ",// >=
-  " MUSIC ",// <>
-  " SOUND ",// THEN
-  " BEEP ",// TO
-  " NOBEEP ",// STEP
+  ">=", // AND
+  "<>", // <=
+  " TEMPO ", // >=
+  " MUSIC ", // <>
+  " SOUND ", // THEN
+  " BEEP ", // TO
+  " NOBEEP ", // STEP
   " LPRINT ",
   " LLIST ",
   " STOP ",
@@ -612,7 +612,11 @@ function printZX81(image, x, y, text, showFullList, inREMline, versn) {
           zx81string += String.fromCharCode(ascii_zx81.get(mapped[ii]));
         }
       } else {
-        zx81string += String.fromCharCode(15); // ?  question mark
+        if (versn === 255) {
+          zx81string += String.fromCharCode(27); // .  dot
+        } else {
+          zx81string += String.fromCharCode(15); // ?  question mark
+        }
       }
     }
   }
