@@ -3,7 +3,6 @@ const path = require("path");
 const AdmZip = require("adm-zip");
 
 const log = require("electron-log");
-const mylog = log.scope("()");
 
 function getAllFiles(dirPath, arrayOfFiles, ext) {
   arrayOfFiles = arrayOfFiles || [];
@@ -23,6 +22,7 @@ function getAllFiles(dirPath, arrayOfFiles, ext) {
 }
 
 function processZip(zipFile, readFunc, ext) {
+  const mylog = log.scope("processZip");
   let filesAnalyzed = 0;
   var zipCount = 0;
 
@@ -34,13 +34,12 @@ function processZip(zipFile, readFunc, ext) {
       if (!zipEntry.isDirectory && zipEntry.name.toLowerCase().endsWith(ext.toLowerCase())) {
         mylog.info(`[ZipEntry] ${zipEntry.name} in ${zipFile}`);
         try {
-            const fileData = readFunc(zipEntry.getData());
-            if (fileData) {
-              zipCount++;
-            }
-    
+          const fileData = readFunc(zipEntry.getData());
+          if (fileData) {
+            zipCount++;
+          }
         } catch (error) {
-            mylog.error(`ERROR extracting: ${zipEntry.name} in ${zipFile}, skipping... ${error}`);
+          mylog.error(`ERROR extracting: ${zipEntry.name} in ${zipFile}, skipping... ${error}`);
         }
       }
     });
@@ -53,7 +52,8 @@ function processZip(zipFile, readFunc, ext) {
   return zipCount;
 }
 
-function testRun(readFunc, folder, ext) {
+function testRun(readFunc, previewFunc, folder, ext) {
+  const mylog = log.scope("testRun");
   const result = getAllFiles(folder, [], ext);
   let filesAnalyzed = 0;
   result.map((file) => {
@@ -63,9 +63,25 @@ function testRun(readFunc, folder, ext) {
       filesAnalyzed = filesAnalyzed + filesInZip;
     } else {
       const data = fs.readFileSync(`${file}`);
-      const fileData = readFunc(data);
+      const fileData = readFunc(file, "", "x", data, false);
       if (fileData) {
         filesAnalyzed = filesAnalyzed + 1;
+
+        if (fileData.scrdata_ext) {
+          mylog.info("generating preview");
+          previewFunc(fileData.data_ext).then((res) => {
+            if (res.buffer) {
+            } else {
+              let base64Image = res.split(";base64,").pop();
+
+              fs.writeFile("image.png", base64Image, { encoding: "base64" }, function (err) {
+                mylog.info("image file created");
+              });
+              // From ZX81 preview/list - always base64 encoded
+              //ZXFileInfo.scr = res;
+            }
+          });
+        }
       }
     }
   });

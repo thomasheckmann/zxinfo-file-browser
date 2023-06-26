@@ -85,7 +85,7 @@ export default function InfiniteEntriesList(props) {
         mylog("InfiniteEntriesList", "fetchMoreData", `scanning for file: ${filePathToLookup}`);
         for (let [key, value] of favorites.entries()) {
           mylog("InfiniteEntriesList", "fetchMoreData", `scanning ${key}, ${value} (${filePathToLookup})`);
-          if(value == filePathToLookup) {
+          if(value === filePathToLookup) {
             mylog("InfiniteEntriesList", "fetchMoreData", `FOUND match: ${value}`);
             hash = key;
           }
