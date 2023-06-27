@@ -61,6 +61,11 @@ function listBasic(image, zx81, showFullList) {
     const lineNo = mem[memPtr] * 256 + mem[memPtr + 1];
     memPtr += 2;
 
+    mylog.info(`found lineno: ${lineNo}`);
+    if(lineNo > 9999) {
+      keepGoing = false;
+      break;
+    }
     // create lineno
     var lineNoTXT = ("    " + lineNo).slice(-4) + " ";
     var lineData = ""; // String using ZX81 chars (0 = space)
@@ -78,14 +83,14 @@ function listBasic(image, zx81, showFullList) {
     if (inREMline) {
       mylog.debug(`${lineNoTXT} is REM statement...`);
     }
-    while (mem[memPtr + lineLen] !== 0x76) {
+    while (mem[memPtr + lineLen] !== 0x76 && lineLen < 512) {
       const val = mem[memPtr + lineLen];
       lineData += String.fromCharCode(val);
       lineLen++;
     }
     memPtr += lineLen + 1;
 
-    mylog.debug(`${lineNo} - len: ${lineLen}, adr: ${memPtr} (e_line: ${zx81.vars}) [${lineNoTXT}]`);
+    mylog.info(`${lineNo} - len: ${lineLen}, adr: ${memPtr+0x4000} (vars: ${zx81.vars}) [${lineNoTXT}]`);
 
     if ((!showFullList && y < 22) || showFullList) {
       y = screenZX.printZX80(image, x, y, lineData, showFullList, inREMline) + 1;
