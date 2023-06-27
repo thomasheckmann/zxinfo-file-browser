@@ -239,7 +239,7 @@ const cmap_zx80 = [
   "DIM ",
   "SAVE ",
   "FOR ",
-  "GOTO ",
+  "GO TO ",
   "POKE ",
   "INPUT ",
   "RANDOMISE ",
