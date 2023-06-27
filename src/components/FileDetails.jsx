@@ -25,6 +25,7 @@ import Z80Format from "./formats/Z80Format";
 import TAPFormat from "./formats/TAPFormat";
 import TZXFormat from "./formats/TZXFormat";
 import PFormat from "./formats/PFormat";
+import OFormat from "./formats/OFormat";
 import DSKFormat from "./formats/DSKFormat";
 import TRDFormat from "./formats/TRDFormat";
 import SCLFormat from "./formats/SCLFormat";
@@ -316,6 +317,7 @@ function FileDetails(props) {
                   {entry.type === "tapfmt" && <TAPFormat item={entry}></TAPFormat>}
                   {entry.type === "tzxfmt" && entry.hwmodel !== "ZX81" && <TZXFormat item={entry}></TZXFormat>}
                   {(entry.type === "pfmt" || (entry.type === "tzxfmt" && entry.hwmodel === "ZX81")) && <PFormat item={entry}></PFormat>}
+                  {entry.type === "ofmt" && <OFormat item={entry}></OFormat>}
                   {entry.type === "dskfmt" && <DSKFormat item={entry}></DSKFormat>}
                   {entry.type === "trdfmt" && <TRDFormat item={entry}></TRDFormat>}
                   {entry.type === "sclfmt" && <SCLFormat item={entry}></SCLFormat>}

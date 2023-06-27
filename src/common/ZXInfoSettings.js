@@ -4,7 +4,7 @@
  */
 import { createContext } from "react";
 
-const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "p81", "81", "zip"];
+const defaultFileFilters = ["sna", "z80", "slt", "dsk", "trd", "scl", "mdr", "tap", "tzx", "p", "o", "p81", "81", "zip"];
 const ZXInfoSettings = createContext();
 
 const ConfigObj = {

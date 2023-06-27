@@ -77,8 +77,6 @@ function testRun(readFunc, previewFunc, folder, ext) {
               fs.writeFile("image.png", base64Image, { encoding: "base64" }, function (err) {
                 mylog.info("image file created");
               });
-              // From ZX81 preview/list - always base64 encoded
-              //ZXFileInfo.scr = res;
             }
           });
         }

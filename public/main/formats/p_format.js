@@ -2,13 +2,15 @@
  * .P data loaded at 0x4009 = 16393
  * 0x4014 - 16404
  *
+ * First byte
+ * 0 = ZX81
+ * 0xff = Lambda 8300
  */
 const { logger } = require("../logger.js");
 const { ZXInfoCard } = require("../ZXInfoCard");
 
 const Jimp = require("jimp");
 const screenZX = require("../utilities/zx81print");
-//const screenZX = require("../utilities/handleSCR");
 
 const charset = ' ??????????"`$:?()><=+-*/;,.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -101,6 +103,7 @@ function listBasic(image, zx81, showFullList) {
     if (zx81.versn === 255) {
       // Lambda 8300: The BASIC program is terminated by an FFh byte (ZX81 has no such end byte).
       keepGoing = mem[cnt - 16509 + 116] !== 255;
+      // or end of file....
       if(mem[cnt - 16509 + 116] === undefined ) keepGoing = false;
     } else {
       keepGoing = cnt < zx81.d_file - 1;
@@ -122,7 +125,7 @@ function readZX81(data) {
   mylog.debug(`input: ${data.length}`);
 
   const zx81_sys_vars = {
-    versn: data[0], // 0 for ZX81 basic, 1 or 255
+    versn: data[0], // 0 for ZX81 basic, 1 or 255 for Lambda 8300
     e_ppc: data[1] + data[2] * 256,
     d_file: data[0] === 0 ? data[3] + data[4] * 256 : 0x407d, // D_FILE is hardcoded at 407Dh, D_FILE is always expanded (full 1+33*24 bytes). BASIC program is located after D_FILE (ie. always at 4396h since D_FILE has fixed size)
     vars: data[7] + data[8] * 256,

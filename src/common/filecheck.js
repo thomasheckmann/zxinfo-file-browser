@@ -133,7 +133,9 @@ export function formatType(t) {
       return "MDR";
     case "pfmt":
       return "P";
-    case "zip":
+      case "ofmt":
+        return "O";
+      case "zip":
       return "ZIP";
     default:
       return t;
