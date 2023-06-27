@@ -61,7 +61,7 @@ function listBasic(image, zx81, showFullList) {
     const lineNo = mem[memPtr] * 256 + mem[memPtr + 1];
     memPtr += 2;
 
-    mylog.info(`found lineno: ${lineNo}`);
+    mylog.debug(`found lineno: ${lineNo}`);
     if(lineNo > 9999) {
       keepGoing = false;
       break;
@@ -90,7 +90,7 @@ function listBasic(image, zx81, showFullList) {
     }
     memPtr += lineLen + 1;
 
-    mylog.info(`${lineNo} - len: ${lineLen}, adr: ${memPtr+0x4000} (vars: ${zx81.vars}) [${lineNoTXT}]`);
+    mylog.debug(`${lineNo} - len: ${lineLen}, adr: ${memPtr+0x4000} (vars: ${zx81.vars}) [${lineNoTXT}]`);
 
     if ((!showFullList && y < 22) || showFullList) {
       y = screenZX.printZX80(image, x, y, lineData, showFullList, inREMline) + 1;
