@@ -11,6 +11,7 @@ const trdfmt = require("./trd_format");
 const sclfmt = require("./scl_format");
 const mdrfmt = require("./mdr_format");
 const pfmt = require("./p_format");
+const ofmt = require("./o_format");
 
 const screenZX = require("../utilities/handleSCR");
 const { ZXInfoCard } = require("../ZXInfoCard");
@@ -20,7 +21,7 @@ function getZXFormat(fileName, subFileName, data, isPreview) {
   mylog.debug(`${fileName}, ${subFileName}, size = ${data.length}`);
 
   // test if file within zip is supported
-  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".zip"];
+  const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".o", ".zip"];
   if (subFileName && subFileName.length > 0) {
     let fileExt = path.extname(subFileName).toLowerCase();
     if (supportedExts.indexOf(fileExt) < 0) return null;
@@ -70,6 +71,7 @@ function getZXFormat(fileName, subFileName, data, isPreview) {
     ["scl", { f: sclfmt.readSCL, fscr: sclfmt.createDIRScreen, t: "sclfmt" }],
     ["mdr", { f: mdrfmt.readMDR, fscr: mdrfmt.createDIRScreen, t: "mdrfmt" }],
     ["p", { f: pfmt.readP, fscr: pfmt.createPreviewSCR, t: "pfmt" }],
+    ["o", { f: ofmt.readO, fscr: ofmt.createPreviewSCR, t: "ofmt" }],
     ["p81", { f: pfmt.readP81, fscr: pfmt.createPreviewSCR, t: "pfmt" }],
     ["81", { f: pfmt.readP, fscr: pfmt.createPreviewSCR, t: "pfmt" }],
   ]);
@@ -83,6 +85,7 @@ function getZXFormat(fileName, subFileName, data, isPreview) {
     fileext === "81" ||
     fileext === "p81" ||
     fileext === "p" ||
+    fileext === "o" ||
     fileext === "sna" ||
     fileext === "z80" ||
     fileext === "tap" ||

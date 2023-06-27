@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   convertSCR: (img) => ipcRenderer.invoke("convertSCR", img),
 
   createZX81List: (data) => ipcRenderer.invoke("create-zx81-basic-list", data),
+  createZX80List: (data) => ipcRenderer.invoke("create-zx80-basic-list", data),
 
   // Open external browser with details, from render to main
   openZXINFODetail: (args) => ipcRenderer.invoke("open-zxinfo-detail", args),

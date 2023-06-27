@@ -26,6 +26,7 @@ const cmdDir = app.commandLine.getSwitchValue("dir");
 
 const handleFormats = require("./main/formats/handleFormats");
 const pfmt = require("./main/formats/p_format");
+const ofmt = require("./main/formats/o_format");
 
 const AdmZip = require("adm-zip");
 
@@ -167,8 +168,20 @@ ipcMain.handle("create-zx81-basic-list", async (event, data) => {
   }
 });
 
+ipcMain.handle("create-zx80-basic-list", async (event, data) => {
+  const mylog = logger().scope("create-zx80-basic-list");
+  mylog.debug(`data.length = ${data.length}`);
+
+  const res = await ofmt.createBASICListAsScr(data);
+  if (res.buffer) {
+    return "data:image/gif;base64," + res.buffer.toString("base64");
+  } else {
+    return res;
+  }
+});
+
 // supportedExts must be synced with startFolder.fileFilters in App.js
-const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".zip"];
+const supportedExts = [".sna", ".z80", ".slt", ".dsk", ".trd", ".scl", ".mdr", ".tap", ".tzx", ".p", ".p81", ".81", ".o", ".zip"];
 
 /**
  *
@@ -329,7 +342,7 @@ ipcMain.handle("load-file", (event, filename, isPreview) => {
   } else if (filename_ext === ".tap" || filename_ext === ".tzx") {
   } else if (filename_ext === ".dsk" || filename_ext === ".trd" || filename_ext === ".scl") {
   } else if (filename_ext === ".mdr") {
-  } else if (filename_ext === ".p" || filename_ext === ".p81" || filename_ext === ".81") {
+  } else if (filename_ext === ".p" || filename_ext === ".p81" || filename_ext === ".81" || filename_ext === ".o") {
   } else if (filename_ext === ".zip") {
     result = [fileObj];
     var zipCount = 0;
