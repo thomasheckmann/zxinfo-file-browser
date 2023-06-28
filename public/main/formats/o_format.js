@@ -3,7 +3,12 @@
  *
  * https://problemkaputt.de/zxdocs.htm#zx80zx81cassettefileimages
  *
- *
+ * ROM disassembly
+ * https://k1.spdns.de/Vintage/Sinclair/80/Sinclair%20ZX80/ROMs/zx80%20rom%20source.txt
+ * 
+ * Online Emulator
+ * https://weggetjes.nl/jszeddy/jszeddy.html
+ * 
  */
 const { logger } = require("../logger.js");
 const { ZXInfoCard } = require("../ZXInfoCard");
