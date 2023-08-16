@@ -164,6 +164,11 @@ function readP81(filename, subfilename, md5hash, data, isPreview) {
   zxObject.version = "P81";
   zxObject.scrdata_ext = { ...zx81data, data: data.slice(i + 1, i + 1 + 768) };
 
+  if(zx81data.versn === 255) {
+    zxObject.hwmodel = "Lambda 8300";
+    zxObject.scrdata_ext = { ...zx81data, data: data.slice(0, 792+768) };
+  }
+
   if (isPreview) {
     //regs.zx81data = { ...zx81data, data: data.slice(0, 384) };
     zxObject.data = null;
