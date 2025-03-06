@@ -1,5 +1,12 @@
 # FAQ - frequently asked questions
 
+## The App will not open, Could not verify
+Try Disable Gatekeeper (does not work on newer OS)
+```
+cd <location of zxinfo-file-browser.app>
+sudo spctl --master-disable
+```
+
 ## My Mac reports the app as damaged?
 Try 
 
